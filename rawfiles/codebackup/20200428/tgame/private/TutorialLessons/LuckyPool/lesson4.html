@@ -1,0 +1,203 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5>
+    <p>So far we have been telling your robot which ball/pocket to aim for. In this tutorial, we change your robot to choose which ball and which pocket to target next.</p>
+    <p>This is a very common optimization problem for robots, where you need to search through a list of choices and select one based on some notion of <b>goodness</b>.</p>
+    <p>Specifically, for this tutorial, we need to <b>search through all combination of balls and pockets, and pick one combination based on how likely the shot will be successful</b>.</p>
+</element>
+
+<element elementid="105" elementType="Info">
+    <h5 class="elementheader">Refactor the Shot Command Calculation</h5>
+    <p>
+        Before adding new logic, it is time for us to <b>refactor</b> (i.e. rewrite) our existing code to calculate shot command as a separate function <b>getCallShotCommand</b>. This way, we can reuse it in many different places going forward.
+    </p>
+    <p>
+        Can you give it a try first before continuing? The new function will be named <b>getCallShotCommand</b>. It should take 2 parameters, <b>pocketID</b> and <b>ballID</b>, and it should return a shot command object. Your existing function <b>this.getCallShot</b> will call this new function.
+    </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedFirstHitBall3">
+    <h5 class="elementheader">Refactor the Shot Command Calculation</h5>
+    <p>
+        OK, here is my version of the new function. Note that we are specifying the targetBallID and targetPocketID as part of the shot command now.
+    </p>
+    <p>
+        <pre class="brush: js">
+var getCallShotCommand = function(pocketID, ballID) {
+    var targetBallPos = world.Balls[ballID].clone(); 
+    var pocketPos = world.Pockets[pocketID].clone();
+    var ballD = world.BallDiameter;  
+    var dirBallToPocket = pocketPos.subtract(targetBallPos); 
+    var dirAimToBall = dirBallToPocket.normalize().scale(ballD); 
+    var aimPos = targetBallPos.subtract(dirAimToBall); 
+    return { 
+        aimx: aimPos.x, aimy: aimPos.y, strength: 800, 
+        targetBallID: ballID, targetPocketID: pocketID
+    }; 
+};
+
+this.getCallShot = function() {
+    var pocketID = 0;
+    var ballID = 3;
+    // TODO: call getCallShotCommand and return the command 
+};
+        </pre>
+    </p>
+    <p><b>Challenge:</b> please complete the function <b>this.getCallShot</b> to get the shot command for ball 3 and pocket 0 by calling <b>getCallShotCommand</b>. Test run your robot to see if it can pocket the red ball to the top left pocket successfully.
+    </p>
+    <code>
+this.getCallShot = function() {
+    var pocketID = 0;
+    var ballID = 3;
+    return getCallShotCommand(pocketID, ballID);
+};        
+    </code>
+</element>
+    
+
+<element elementid="120" elementType="Coding" condition="TestFinishedFirstHitBall3">
+    <h5 class="elementheader">Loop through all pockets</h5>
+    <p>
+        In this step, let's change your robot to search through all 6 pockets, and compare the probability of hitting ball 3 into each of them.
+    </p>
+    <img href="/images/hitbuttonwithprobability.png" />
+    <p>
+        In Trajectory Pool games, the forecast lines are just baseline projections. They almost never realized exactly when you actually shoot the ball, because we add a random noise into your shot's aiming direction. The stronger your shot strength, the larger the size of the noise, just like in real world pool games. </p>
+    <p>        
+        We show the success probability for a shot on the "Hit" button when you play the game manually, and that probability is also available to your robot when it calls <b>calculateProbability</b> with the intended shot command.
+    </p>
+    <p>
+        Again, to help you get started, here is some example code to loop through all 6 pockets:
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getCallShot = function() {
+    var ballID = 3;
+    var maxProb = -1;
+    var bestShotCommand = {};
+    for (var pocketID=0; pocketID&lt;6; pocketID++) {
+        var cmd = getCallShotCommand(pocketID, ballID);
+        var probability = calculateProbability(cmd);                        
+    }
+    return bestShotCommand; 
+};
+        </pre>
+    </p>
+    <p><b>Challenge:</b> modify your robot's <b>this.getCallShot</b> function following the example above, then fill in the missing lines so that your robot compares the probability of pocketing the black ball into each of the 6 pockets and returns the best shot command.</p>
+    <p>
+        If you are unfamiliar with how to do the search, text me <b>tell me about grid search</b>.
+    </p>
+    <code isHidden="true">
+this.getCallShot = function() {
+    var ballID = 3;
+    var maxProb = -1;
+    var bestShotCommand = {};
+    for (var pocketID=0; pocketID&lt;6; pocketID++) {
+        var cmd = getCallShotCommand(pocketID, ballID);
+        var probability = calculateProbability(cmd);                        
+        // check if probability is highest so far using an if test
+        if (probability > maxProb) {
+            // update maxProb to keep track of highest probability
+            maxProb = probability;
+            // update bestShotCommand to point to the new shot command 
+            bestShotCommand = cmd;
+        }
+    }
+    return bestShotCommand; 
+};
+    </code>
+</element>
+
+<!-- <element elementid="121"  elementType="Hint">
+    <h5 class="elementheader">Hint</h5> 
+    <p>
+        To find the shot command for the maximum probability, you need to add 2 new variables to keep track of the maximum probability up to now (maxProb), and the corresponding shot command (maxShotCommand). Below is an example:
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getCallShot = function() { // REPLACEFUNC
+    var maxProb = -1;
+    var maxShotCommand = {};
+    var ballID = 3;
+    for (var pocketID=0; pocketID&lt;6; pocketID++) {
+        var cmd = getCallShotCommand(pocketID, ballID);
+        var probability = calculateProbability(cmd);                        
+        if (probability &gt; maxProb) {
+            maxProb = probability;
+            maxShotCommand = cmd;
+        }
+    }
+    return maxShotCommand;
+}; // REPLACEFUNC
+        </pre>
+    </p>
+</element> -->
+    
+<element elementid="130" elementType="Coding" condition="TestFinishedFirstHitBall6">
+    <h5 class="elementheader">Loop through all balls</h5>     
+    <p>
+        One last enhancement to your getCallShot function is to select the best ball to shoot next. This can be done by searching through all balls that your robot can legally shoot (ask me about "call shot" if that's not clear).
+    </p>
+    <p>
+        This can be done by adding another loop outside your current for-loop to go through all legal target balls of yours. Here you need to define a new variable "var legalBallIDs = world.CandidateBallList[myID];", so that <b>legalBallIDs</b> will be an array containing the id of balls that you can legally shoot.
+    </p>
+    <p><b>Challenge:</b> please add another for loop through the legalBallIDs array so that your robot picks the easiest ball to shoot, which should be the top right red ball (id = 6). 
+    </p>
+    <code isHidden="true">
+this.getCallShot = function() {
+    var maxProb = -1;
+    var bestShotCommand = {};
+    var legalBallIDs = world.CandidateBallList[myID];
+    // add a for loop to go through all legal balls
+    for (var j=0; j &lt; legalBallIDs.length; j++){
+        var ballID = legalBallIDs[j];
+        for (var pocketID=0; pocketID &lt; 6; pocketID++) {
+            var cmd = getCallShotCommand(pocketID, ballID);
+            var probability = calculateProbability(cmd);                        
+            if (probability &gt; maxProb) {
+                maxProb = probability;
+                bestShotCommand = cmd;
+            }
+        }
+    }
+    return bestShotCommand;
+};
+    </code>
+</element>
+
+<!-- <element elementid="150"  elementType="Hint">
+    <h5 class="elementheader">Hint</h5> 
+    <p>
+        The 2 loops should look like this:
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getCallShot = function() { // REPLACEFUNC
+    var maxProb = -1;
+    var shotCmd = {};
+    var ballIDs = world.CandidateBallList[myID];
+    for (var j=0; j &lt; ballIDs.length; j++){
+        var ballID = ballIDs[j];
+        for (var pocketID=0; pocketID &lt; 6; pocketID++) {
+            var cmd = getCallShotCommand(pocketID, ballID);
+            var probability = calculateProbability(cmd);                        
+            if (probability &gt; maxProb) {
+                maxProb = probability;
+                shotCmd = cmd;
+            }
+        }
+    }
+    return shotCmd;
+}; // REPLACEFUNC
+        </pre>
+    </p>
+</element> -->
+
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing all starter tutorials! Please go back to the <a href=`/tutorialLinks`>tutorial list</a> and release a first version of your robot code so it can play against other human or robot players. </p>
+    <p>
+        <b>Extra Credit:</b> instead of hardcoding the shot strengh at 800, try to add a third layer of loop that searches through a list of typical strength levels to use, such as "var strengthList = [400, 600, 800, 1000]". This can make a big difference sometimes, as smaller strength produces more accurate shots.
+    </p>
+</element>

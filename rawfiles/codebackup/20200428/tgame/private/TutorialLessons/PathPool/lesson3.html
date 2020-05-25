@@ -1,0 +1,391 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5>
+    <p>
+      In this tutorial, we'll introduce a powerful tool for your robot to shoot at any ball towards any pocket, and also how to search for the best ball/pocket to target next.
+    </p>
+    <p>Shall we start?</p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+    <h5 class="elementheader">[Challenge] Aiming Position Calculation</h5>     
+    <p>Your first task is to shoot the red ball 3 into the pocket 0 as illustrated below. To do that, you need to aim the cue ball at an imagined <b>aim position</b>, which will kick the target ball towards the target pocket from behind it.</p>
+    <p>
+      <img src="/images/examplegetaimposition.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+    </p>
+    <p>
+      To calculate this aim position, you need to draw an line from the target pocket back to the target ball, and then extend its length further by the ball diameter. But don't worry! This has been done for your robot, and you only need to call the helper function like this: 
+    </p>
+    <p>
+        <b>aimPosition = getAimPosition(ballPosition, pocketPosition)</b>
+    </p>
+    <p>
+      <b>Challenge</b>: please try to enhance the <b>getCallShot</b> function below to shoot ball 3 into pocket 0 using the <b>getAimPosition</b> function. Recall that you can use <b>world.Balls[id]</b> and <b>world.Pockets[id]</b> to get position info.
+    </p>
+    <code isHidden="false">
+function getCallShot() {
+  //TODO: calculate aim position
+  //h0::call getAimPosition with ball and pocket position;use world.Balls[3] and world.Pockets[0]
+  ::const aimPosition = getAimPosition();
+  ::const aimPosition = getAimPosition(world.Balls[3], world.Pockets[0]);
+  ::const aimPosition = getAimPosition(world.Pockets[0], world.Balls[3]);
+  const aimPosition = ? ;
+  //ENDTODO
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 1000 };
+}
+
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element>
+
+
+
+<element elementid="115" elementType="Coding" condition="TestPPPocketBall_3_In_1">
+    <h5 class="elementheader">[Challenge] Comparing Success Probabilities</h5>
+    <p>
+      You might have noticed that we could also shoot ball 3 into pocket 1 at center top. So let's change your robot to <b>compare the success probabilities</b> between these 2 choices.</p>
+    <p>        
+      You can get the success probability of a shot in 2 steps: 
+    </p>
+    <p>
+      <ol>
+        <li>
+          defined a shot command like this:
+          <pre class="brush: js">
+const cmd = {aimx: 0, aimy: 0, strength: 1000, targetBallID: 0, targetPocketID: 1};
+          </pre>
+        </li>
+        <li>
+          calculate probability by calling calculateProbability
+          <pre class="brush: js">
+const prob = await calculateProbability(cmd)
+          </pre>
+        </li>
+      </ol>
+    </p>
+
+        
+    <p class="important">
+        Here the keyword <b>await</b> is needed since we want to wait for the game engine to calculate the probability for us before continuing. We also need to label the getCallShot function as <b>async</b>.
+    </p>
+    <p>
+        <img src="/images/compareball3pocket0or1.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+    <p><b>Challenge:</b> replace your old <b>getCallShot</b> function with the baseline below, and then implement it so that your robot choose between pocket 0 and 1 by comparing the probability of pocketing the <b>ball 3</b> into pocket 0 or 1.</p>
+    <!-- <p>
+        <b>hint</b>: more help is available at your request, such as <b>tell me about grid search</b> or <b>What on earth is async and await?</b>.
+    </p> -->
+    <code isHidden="false">
+// note that getCallShot is labeled as "async"
+async function getCallShot() {
+  // get aim position for shooting ball 3 into pocket 0
+  const aimPos_3_0 = getAimPosition(world.Balls[3], world.Pockets[0], targetBallID: 3, targetPocketID: 0);
+  // get shot command for shooting ball 3 into pocket 0
+  const shotCmd_3_0 = {aimx: aimPos_3_0.x, aimy: aimPos_3_0.y, strength: 1200};
+  // get probability for shooting ball 3 into pocket 0
+  const prob_3_0 = await calculateProbability(shotCmd_3_0);
+
+  //TODO: calculate probability of shooting ball 3 into pocket 1
+  //h0::call getAimPosition
+  ::const aimPos_3_1 = getAimPosition(world.Balls[3], world.Pockets[1]);
+  ::const aimPos_3_1 = getAimPosition(world.Pockets[1], world.Balls[3]);
+  ::const aimPos_3_1 = getAimPosition();
+  const aimPos_3_1 = ?;
+  //h1::create shot command
+  ::const shotCmd_3_1 = {aimx: aimPos_3_0.x, aimy: aimPos_3_0.y, strength: 1200, targetBallID: 3, targetPocketID: 1};
+  ::const shotCmd_3_1 = {aimx: aimPos_3_1.x, aimy: aimPos_3_1.y, strength: 1200, targetBallID: 3, targetPocketID: 1};
+  ::const shotCmd_3_1 = {aimx: aimPos_3_1.y, aimy: aimPos_3_1.x, strength: 1200, targetBallID: 3, targetPocketID: 1};
+  const shotCmd_3_1 = {aimx: ?, aimy: ?, strength: 1200};
+  //h2::call await calculateProbability
+  ::const prob_3_1 = calculateProbability();
+  ::const prob_3_1 = await calculateProbability(shotCmd_3_1);
+  ::const prob_3_1 = calculateProbability(shotCmd_3_1);
+  const prob_3_1 = ?;
+  //ENDTODO
+
+  // return the command with higher probability
+  if (prob_3_0 >= prob_3_1) {
+    return shotCmd_3_0;
+  } else {
+    return shotCmd_3_1;
+  }
+}
+    </code>
+</element>
+
+
+
+<!-- 
+
+
+Now your robot can hit a blackball straight down, let's enhance it to hit the ball into any pocket from anywhere. 
+To do that, we need to give your robot a new tool to use: <b>2-dimension (2D) Vectors</b>. So far we have been telling your robot which ball/pocket to aim for. In this tutorial, we change your robot to choose which ball and which pocket to target next.</p>
+<p>This is a very common <b>optimization</b> problem for robots, where you need to search through a list of choices and select one based on some notion of <b>goodness</b>.</p>
+
+
+<element elementid="105" elementType="Info">
+    <h5 class="elementheader">[Info] Refactor the Shot Command Calculation</h5>
+    <p>
+        Before adding new logic, it is time for us to <b>refactor</b> (i.e. rewrite) our existing code to calculate shot command as a separate function <b>getCallShotCommand</b>. This way, we can reuse it in many different places going forward.
+    </p>
+    <p>
+        Can you give it a try first? The new function should be named <b>getCallShotCommand</b>. It should take 2 parameters, <b>pocketID</b> and <b>ballID</b>, and it should return a shot command object.
+    </p>
+    <p>When you are done (or if you are really stuck), just tell me to continue.</p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+    <h5 class="elementheader">[Challenge] Call the Refactored Function</h5>
+    <p>
+        OK, here is my version of the new function. Note that we are specifying the targetBallID and targetPocketID as part of the shot command now. I'll explain why soon.
+    </p>
+    <p><b>Challenge:</b> please complete the function <b>getCallShot</b> to get the shot command for ball 3 and pocket 0 by calling <b>getCallShotCommand</b>. Test run your robot to see if it can pocket the red ball (id = 3) to the top left pocket (id = 0) successfully.
+    </p>
+    <code isHidden="false">
+function getCallShotCommand(pocketID, ballID) {
+  const targetBallPos = world.Balls[ballID].clone(); 
+  const pocketPos = world.Pockets[pocketID].clone();
+  const ballD = world.BallDiameter;  
+  const dirBallToPocket = pocketPos.subtract(targetBallPos); 
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD); 
+  const aimPos = targetBallPos.subtract(dirAimToBall); 
+  return { 
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1200, 
+    targetBallID: ballID, targetPocketID: pocketID
+  }; 
+}
+
+function getCallShot() {
+  const pocketID = 0;
+  const ballID = 3;
+  //TODO: return the shot command for pocketID and ballID 
+  //h0::call return getCallShotCommand() directly
+  ::return getCallShotCommand(pocketID, ballID);
+  ::return getCallShotCommand(ballID, pocketID);
+  ::return getCallShotCommand();
+  return ?;
+  //ENDTODO
+}
+  </code>
+</element> -->
+    
+
+<element elementid="120" elementType="Coding" condition="TestPPPocketBall_2_In_5">
+    <h5 class="elementheader">[Challenge] Choosing from Among Pockets</h5>
+    <p>
+      Now you know how to compare between pockets, let's change your robot to <b>choose</b> amoung all 6 pockets. This can be done by creating a <b>for-loop</b> that steps through each of the 6 pockets, and keeping track of the pocket with the highest sucess probability.
+    </p>
+    <p class="jshelp">
+      <b>Javascript Help:</b> ask me about "for loop" if you are not familiar with it.
+    </p>
+    <p><b>Challenge:</b> change your <b>getCallShot</b> function to below, then change it to compare the probability of pocketing the <b>ball 2</b> into each of the 6 pockets. If your code is correct, it should choose to hit ball 2 towards <b>pocket 5</b> at bottom left.</p>
+    <!-- <p>
+        <b>hint</b>: more help is available at your request, such as <b>tell me about grid search</b> or <b>What on earth is async and await?</b>.
+    </p> -->
+    <code isHidden="false">
+// note that getCallShot is marked as async  
+async function getCallShot() {
+  // only look at ball 2 for now
+  const ballID = 2;
+  //place holder for best shot command
+  let bestShotCommand = null;
+
+  //define a variabl to keep track of highest probability
+  let maxProb = -1;
+
+  //TODO: conduct a grid search for best target pocket
+  //h0::use a for-loop on pocketID from 0 to 5
+  ::for (let pocketID=0; pocketID&lt;6; pocketID++) {
+  ::for (let pocketID=0; pocketID&gt;6; pocketID++) {
+  ::for (let pocketID=0; pocketID&lt;=6; pocketID++) {
+  for ( ? ) {
+    //h1::get aim position for pocketID
+    ::const aimPos = getAimPosition(world.Balls[ballID], world.Pockets[pocketID]);
+    ::const aimPos = getAimPosition(world.Pockets[pocketID], world.Balls[ballID]);
+    ::const aimPos = getAimPosition(pocketID);
+    const aimPos = ?;
+
+    //h2::create shot command using aimPos
+    ::const shotCmd = {aimx: aimPos.x, aimy: aimPos.y, strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+    ::const shotCmd = {aimx: aimPos.y, aimy: aimPos.x, strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+    const shotCmd = { aimx: ? , aimy: ? , strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+  
+    //h3::set probability using calculateProbability::pass in shotCmd as the parameter
+    ::const prob = await calculateProbability(shotCmd);
+    ::const prob = calculateProbability(shotCmd);
+    ::const prob = await calculateProbability();
+    const prob = ? ;
+
+    //h4::check if probability is highest so far::compare prob against maxProb
+    ::if (prob > maxProb) {
+    ::if (prob &lt; maxProb) {
+    ::if (prob == maxProb) {
+    ::if (prob = maxProb) {
+    if ( ? ) {
+      //update maxProb to keep track of highest probability
+      maxProb = prob;
+      //save the command as bestShotCommand
+      bestShotCommand = shotCmd;
+    }
+  }
+  //ENDTODO
+
+  // return the best shot with highest probability
+  return bestShotCommand; 
+}
+    </code>
+</element>
+
+    
+<element elementid="130" elementType="Coding" condition="TestPPPocketBall_6_In_2">
+    <h5 class="elementheader">[Challenge] Choosing the best ball</h5>     
+    <p>
+        One last enhancement to your getCallShot function is to search through all balls that your robot can legally shoot (ask me about "call shot" if that's not clear).
+    </p>
+    <p>
+        Here I have added a new variable for you: "const legalBallIDs = world.CandidateBallList[myID];". <b>myID</b> is predefined as your robot's ID, so now <b>legalBallIDs</b> will be an array containing the id of balls that you can legally shoot.
+    </p>
+    <!-- <p>
+        <img src="/images/select6_to_2pocket.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p> -->
+    
+    <p><b>Challenge:</b> using the code below as a starting point, add another <b>for-loop</b> through the legalBallIDs so that your robot picks the best ball to shoot, which should be to ball 6. 
+    </p>
+    <code isHidden="false">
+async function getCallShot() { 
+  // get array of legal ball IDs 
+  const legalBallIDs = world.CandidateBallList[myID];
+
+  //place holder for best shot command 
+  let bestShotCommand = null; 
+
+  let maxProb = -1; 
+  
+  //TODO: add a for-loop for all legal ball IDs
+  //h0::the min index is 0, and max index is legalBallIDs.length-1
+  ::for (let i=0; i &lt; legalBallIDs.length; i++ ) { 
+  ::for (let i=0; i &lt; legalBallIDs; i++ ) { 
+  ::for (let i=0; i &lt;= legalBallIDs.length; i++ ) { 
+  for ( ? ; ?; ? ) { 
+    //h1::define ballID as i-th item in legalBallIDs
+    ::const ballID = legalBallIDs(i);
+    ::const ballID = legalBallIDs.i;
+    ::const ballID = legalBallIDs[i];
+    const ballID = ?;
+    //ENDTODO
+    
+    for (let pocketID=0; pocketID &lt; 6; pocketID++ ) { 
+      const aimPos = getAimPosition(world.Balls[ballID], world.Pockets[pocketID]);
+      const shotCmd = {aimx: aimPos.x, aimy: aimPos.y, strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+      const prob = await calculateProbability(shotCmd);
+      if ( prob > maxProb ) { 
+        maxProb = prob; 
+        bestShotCommand = shotCmd;
+      } 
+    } 
+  }
+
+  // return the best shot with highest probability 
+  return bestShotCommand;  
+}
+    </code>
+</element>
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Good job! You have mastered using for-loops to search for an optimal solution, which will be very useful when you try to improve your bot over time.</p>
+    <p>
+        <b>Extra Credit:</b> instead of hardcoding the shot strengh at 1200, try to add a third layer of for-loop that searches through a list of typical strength levels to use, such as "const strengthList = [800, 1200, 1600]". This can make a big difference sometimes, as smaller strength produces more accurate shots, but stronger shots may be necessary when you are hitting a target ball from an angle.
+    </p>
+</element>
+
+
+<!-- 
+
+
+challenge 2: compare
+
+// note that getCallShot is marked as "async" 
+async function getCallShot() { 
+  
+  const aimPos3_0 = getAimPosition(world.Balls[3], world.Pockets[0]); 
+  const shotCmd_3_0 = {aimx: aimPos3_0.x, aimy: aimPos3_0.y, strength: 1200, targetBallID: 3, targetPocketID: 0}; 
+  const prob_3_0 = await calculateProbability(shotCmd_3_0); 
+  
+  //TODO: calculate probability of shooting ball 3 into pocket 1 
+  const aimPos3_1 = getAimPosition(world.Balls[3], world.Pockets[1]); 
+  const shotCmd_3_1 = {aimx: aimPos3_1.x, aimy: aimPos3_1.y, strength: 1200, targetBallID: 3, targetPocketID: 1}; 
+  const prob_3_1 = await calculateProbability(shotCmd_3_1); 
+  
+  // return the command with higher probability 
+  if (prob_3_0 >= prob_3_1) { 
+    return shotCmd_3_0; 
+  } else { 
+    return shotCmd_3_1; 
+  } 
+}
+
+
+function getBreakShot() {
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 }; 
+}
+
+
+challenge 3: 
+
+async function getCallShot() { 
+  // only look at ball 2 for now 
+  const ballID = 2; 
+  //place holder for best shot command 
+  let bestShotCommand = null; 
+  
+  //TODO: conduct a grid search for best target pocket 
+  let maxProb = -1; 
+  for (let pocketID=0; pocketID < 6; pocketID++ ) { 
+    const aimPos = getAimPosition(world.Balls[ballID], world.Pockets[pocketID]);
+    const shotCmd = {aimx: aimPos.x, aimy: aimPos.y, strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+    const prob = await calculateProbability(shotCmd);
+    if ( prob > maxProb ) { 
+      maxProb = prob; 
+      bestShotCommand = shotCmd;
+    } 
+  } 
+  
+  // return the best shot with highest probability 
+  return bestShotCommand;  
+}
+
+challenge 4:
+
+// note that getCallShot is marked as async       
+async function getCallShot() { 
+  // get array of legal ball IDs 
+  const legalBallIDs = world.CandidateBallList[myID];
+  //place holder for best shot command 
+  let bestShotCommand = null; 
+  
+  //TODO: conduct a grid search for best target pocket 
+  let maxProb = -1; 
+  for (let i=0; i < legalBallIDs.length; i++ ) { 
+    const ballID = legalBallIDs[i];
+    for (let pocketID=0; pocketID < 6; pocketID++ ) { 
+      const aimPos = getAimPosition(world.Balls[ballID], world.Pockets[pocketID]);
+      const shotCmd = {aimx: aimPos.x, aimy: aimPos.y, strength: 1200, targetBallID: ballID, targetPocketID: pocketID};
+      console.log("calculating prob b " + ballID + " p " + pocketID);
+      const prob = await calculateProbability(shotCmd);
+      if ( prob > maxProb ) { 
+        maxProb = prob; 
+        bestShotCommand = shotCmd;
+      } 
+    } 
+  }  
+  // return the best shot with highest probability 
+  return bestShotCommand;  
+}
+
+function getBreakShot() { 
+  return { strength: 3000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 }; 
+}
+
+ -->

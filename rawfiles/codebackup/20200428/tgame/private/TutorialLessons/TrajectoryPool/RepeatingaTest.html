@@ -1,0 +1,465 @@
+<element elementid="100" elementType="Info">
+  <p>
+    In the next few tutorials, we'll be getting into the field of <b class="reallyhighlight">machine learning</b>, which means <b>training your robot to learn from data</b>.
+  </p>    
+  <p>
+    <b>Collecting training data</b> is the first step for any machine learning projects. So in this lesson, let me show you how to generate data by running tests repeatedly.
+  </p> 
+</element>
+
+<element elementid="104" elementType="Info">
+    <p>
+      When you get to break a game, it is very desirable to pocket a colored ball so that you can continue to make call shots and build an advantage early in the game.  
+    </p>
+    <p>
+      You have probably done some tests manually on your own to see if your robot's break shot is any good: you take a break shot, look at the result, and then take another one. When you have done enough tests, you summarize the results.
+    </p>
+    <p>
+      <img src="/images/repeatedtests.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+    </p>
+    <p>
+      We can actually <b>automate this process</b> fairly easily with the help of test scripts.
+    </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedAnyResult">
+    <p>
+      I have provided a baseline test script for you in the <b>Test Script</b> tab to demonstrate how to run one test shot and save its result. 
+    </p>
+    <p>
+      Recall that when you call <b>await calculateEndState(cmd)</b>, it returns an estimate of the <b>end state</b> of all balls. 
+    </p>
+    <!-- <p>
+      All the code should be fairly straightforward from the comments, except for the line calling "await calculateEndState". In this function, you pass in a shot command to the game engine, and ask for an <b>End State</b>, which contains information on the whereabout of every ball when all balls have stopped moving. For ball with id <b>ballID</b>, you can find out that ball's state using <b>endStates[ballID]</b>, which contains the following properties:
+      <ul>
+        <li>
+          <b>inPocketID:</b> the id of the pocket or "null" if the ball is not in any pocket.
+        </li>
+        <li>
+          <b>x and y:</b> coordinate of the ball if it is not in any pocket
+        </li>
+      </ul>
+    </p>
+    <p>
+      When you call <b>calculateEndState</b>, the game engine would add a random shock to your shot just like in a real game, and then simulate the full process of ball movements. However, the game engine <b>does not bother to show any animation on screen</b>, so it runs through this process much faster. As we might need to run a lot of tests, it's essential that each test runs as fast as possible.
+    </p> -->
+    <p>
+      <b>Challenge:</b> please read the test script and make sure you understand it. Then <b class="reallyhighlight">change the command being tested to your own break shot</b>, and click <b>TEST</b> to see it in action. The <b>console.log</b> command prints out its parameter in the <b>developer console</b>. If you are using <b>Chrome</b> on a <b>Windows</b> or <b>Linux</b> machine, you can simply press <b>F12</b> to open the console. Otherwise, please checkout this reference page: <a href="http://wickedlysmart.com/hfjsconsole/" target="_blank">using the browser console</a>. For example, on Chrome it should look like this:
+    </p>
+    <p>
+      <img src="/images/consoleoutput.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+    </p>
+</element>
+
+
+<element elementid="112" elementType="Coding" condition="TestFinishedCalcStateCountRandom_10">
+  <p>
+    The first improvement we can make to the test script is to use a for-loop to run more tests repeatedly. 
+  </p>
+  <p>
+    <b>Challenge:</b> please add a for-loop to <b>run the shot test exactly 10 times</b> using the test script below as a baseline. Note that you need to <b>pass a second parameter of 'true'</b> to the calculateEndState function (as shown below) so that the game engine would <b>add a random shock to your shot</b>, as in a real game. This way, when you call calculateEndState repeatedly, you will get different answers each time. 
+  </p>
+  <code isHidden="false">
+ResetTable(false);
+const cmd = {cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85};
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+//TODO: add a for-loop to run the test 10 times
+//h0::use a for loop with an index variable i
+::for (let i=0; i&lt;10; i++) {
+::for (const i=0; i&lt;=10; i++) {
+::for (let i=0; i&lt;10; i--) {      
+for ( ? ; ? ; ?) {
+  //h1::pass true to calculateEndState so that randomness is added to shot
+  ::let endState = await calculateEndState(cmd, false);
+  ::let endState = await calculateEndState(cmd, true);
+  let endState = await calculateEndState(cmd, ?);
+  //ENDTODO
+  console.log(JSON.stringify(endState));
+}
+
+ReportEndOfTest();
+  </code>
+</element>
+
+<!-- 
+// move all balls to starting position
+ResetTable(false);
+// define the break shot command to be evaluated
+const cmd = {cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85};
+// place cue ball on table according to command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+for (let i=0; i<10; i++) {
+  // simulate a shot with no random noise added
+  let endState = await calculateEndState(cmd, true);
+  // format the endState object as a string and print it out
+  console.log(JSON.stringify(endState));
+}
+// report the end of test
+ReportEndOfTest();
+ -->
+
+
+<element elementid="114" elementType="Coding" condition="TestFinishedCalcStateCountRandom_10">
+  <p>
+    The next improvement we are making is to <b>summarize the results</b>. After you run tons of tests, you won't have time to go through the test result on the console one by one. It is much easier if we calculate some <b>statistics (like count, average, sum, etc.)</b> about all the runs as a summary. 
+  </p>
+  <p>
+    For example, assuming we really want to have at least one colored ball pocketed in the break shot, we can <b>label a run as a 'good run'</b> if at least one colored ball has been pocketed, and count how many good runs we see.
+  </p>
+  <p>
+    <b>Challenge:</b> please modify your test script to the baseline script below, then complete it to <b>add a counter for how many good runs are there</b>. Note that you can access a ball's end state using its ID. For example, <b>endStates[0]</b> is the end state for the cue ball, and <b>endStates[0].inPocketID</b> is null if ball 0 is not in any pocket.
+  </p>
+  <code isHidden="false">
+ResetTable(false);
+const cmd = {cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85};
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+// counter for total number of good runs
+let goodRunCount = 0;
+for (let i=0; i&lt;10; i++) {      
+  const endStates = await calculateEndState(cmd, true);
+
+  //TODO: count number of good runs
+
+  //h0::iterate through all ball IDs except 0 and 1::ballID should range from 2 to endState.length-1
+  ::for (let ballID= 0 ; ballID &lt; endState.length; ballID++) {
+  ::for (let ballID= 2 ; ballID &lt; endState.length - 1; ballID++) {
+  ::for (let ballID= 2 ; ballID &lt; endState.length; ballID++) {
+  for (let ballID= ? ; ballID &lt; ?; ballID++) {
+    //h1::check if ball with ballID is in pocket::check if endStates[ballID].inPocketID is not null
+    ::if (endStates[ballID].inPocketID != null) {
+    ::if (endStates[ballID].inPocketID == null) {
+    if ( ? ) {
+      // add to counter for good runs
+      goodRunCount ++;
+      //h2::already a good run, so break out of loop
+      ::break;
+      ::continue;
+      ::return;
+      ?;
+    }
+  }
+  //ENDTODO
+}
+// only need to print out summary
+console.log("In summary, there are " + goodRunCount + " good runs and " + (10 - goodRunCount) + " bad runs.");
+
+ReportEndOfTest();
+  </code>
+</element>
+
+<!-- 
+
+ResetTable(false); 
+const cmd = {cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85}; 
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally); 
+  
+// counter for total number of good runs 
+let goodRunCount = 0; 
+for (let i=0; i<10; i++) {       
+  const endStates = await calculateEndState(cmd, true); 
+  
+  //TODO: count number of good runs 
+  
+  //by default this is not a good run 
+  let isGoodRun = false; 
+  for (let ballID= 2 ; ballID < endState.length; ballID++) { 
+    if ( endStates[ballID].inPocketID != null ) { 
+      // label it as a good run 
+      isGoodRun = true; 
+      // already a good run, so break out 
+      break; 
+    } 
+  } 
+  if (isGoodRun) 
+    goodRunCount ++; 
+} 
+// only need to print out summary 
+console.log("In summary, there are " + goodRunCount + " good runs and " + (10 - goodRunCount) + " bad runs."); 
+  
+ReportEndOfTest(); -->
+
+
+<element elementid="116" elementType="Coding" condition="TestFinishedCalcStateCountRandom_30">
+  <p>
+    Now that you can repeat a test on one shot command, let's add the ability to <b>run through several different break shots</b> and compare their statistics.
+  </p>
+  <p>
+    As shown in the baseline test script below, a few changes are needed:
+    <ul>
+      <li>
+        We need to define an array of break shot commands, and use a for-loop to iterate through them one by one 
+      </li>
+      <li>
+        We need to store the statistics for each shot command.
+      </li>
+    </ul>
+  </p>
+  <p>
+    <b>Challenge:</b> please modify your test script according to the code below (or copy it over), then complete the script to compare 3 break shot commands using an outer for-loop to test run each command 10 times.
+  </p>
+  <code isHidden="false">
+
+//define a new array to hold multiple commands
+const shotCmds = [];
+// change to 3 commands that you want to compare:
+shotCmds.push({cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80});
+shotCmds.push({cueballx: -500, cuebally: 100, aimx: 0, aimy: 50, strength: 80});
+shotCmds.push({cueballx: -500, cuebally: 200, aimx: 0, aimy: 100, strength: 80});
+
+ResetTable(false);
+
+//TODO: compare these 3 shot commands
+
+// define an array to hold result statistics
+const goodRunCountList = [];
+//h0::use a for-loop to walk through each command in shotCmds::cmdInd ranges from 0 to shotCmds.length-1
+::for (let cmdInd=0; cmdInd &lt; shotCmds.length; cmdInd ++) {
+::for (let cmdInd=1; cmdInd &lt;=shotCmds.length; cmdInd ++) {
+::for (let cmdInd=0; cmdInd &lt;=shotCmds.length; cmdInd ++) {
+for (let cmdInd=?; ? ; ?) {
+  const cmd = shotCmds[cmdInd];
+  PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+  let goodRunCount = 0;
+  for (let i=0; i &lt; 10; i++) {
+    const endStates = await calculateEndState(cmd, true);
+    for (let ballID=2; ballID &lt; endState.length; ballID++) {
+      if (endStates[ballID].inPocketID != null) {
+        goodRunCount ++;
+        break;
+      }
+    }
+  }
+  // save result into array
+  //h1::append goodRunCount to the end of goodRunCountList::use the 'push' method
+  ::goodRunCountList.add(goodRunCount);
+  ::goodRunCountList.push(goodRunCount);
+  ::goodRunCountList.append(goodRunCount);
+  goodRunCountList.?;
+}
+
+//ENDTODO
+// print out statistics for all 3 shots
+console.log("All good run count: " + JSON.stringify(goodRunCountList));
+
+ReportEndOfTest();
+  </code>
+</element>
+
+<!-- 
+
+  //define a new array to hold multiple commands 
+const shotCmds = []; 
+// change to 3 commands that you want to compare: 
+shotCmds.push({cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80}); 
+shotCmds.push({cueballx: -500, cuebally: 100, aimx: 0, aimy: 50, strength: 80}); 
+shotCmds.push({cueballx: -500, cuebally: 200, aimx: 0, aimy: 100, strength: 80}); 
+  
+ResetTable(false); 
+  
+//TODO: compare these 3 shot commands 
+  
+// define an array to hold result statistics 
+const goodRunCountList = []; 
+for (let cmdInd=0; cmdInd < shotCmds.length; cmdInd ++ ) { 
+  const cmd = shotCmds[cmdInd]; 
+  PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally); 
+  let goodRunCount = 0; 
+  for (let i=0; i < 10; i++) { 
+    const endStates = await calculateEndState(cmd, true); 
+    let isGoodRun = false; 
+    for (let ballID=2; ballID < endState.length; ballID++) { 
+      if (endStates[ballID].inPocketID != null) { 
+        isGoodRun = true; 
+        break; 
+      } 
+    } 
+    if (isGoodRun)  
+      goodRunCount ++; 
+  } 
+  // save result into array 
+  goodRunCountList.push(goodRunCount);
+} 
+  
+// print out statistics for all 3 shots 
+console.log("All good run count: " + JSON.stringify(goodRunCountList)); 
+  
+ReportEndOfTest(); 
+-->
+
+
+
+<element elementid="118" elementType="Coding" condition="TestFinishedPlottedBasicColumnChart">
+    <p>
+      Last but not least, let's try to improve the <b>presentation</b> of your test results. Why is that important? It often happens in our lives that after you have done all the hard work of crunching the numbers, your audience is not so impressed when your report is not presented in an <b>elegant and easy-to-understand</b> format. Fortunately, <b>that's one of the easiest things to fix once you realize it</b>, and let's do it now.
+    </p>
+    <p>
+      <img src="/images/breakshotresultchart.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+    
+    <p>
+      Instead of simply printing the statistics on the console, let's plot our results in a beautiful column chart like the one above. Specifically, you need to make 3 sets of changes:
+      <ul>
+        <li>
+          <p>Store the label and statistics in a result object that looks like this:</p>
+          <p>
+            <pre class="brush: js">
+const allResults = {
+  Labels: ['Command0', 'Command1', 'Command2'], 
+  GoodRun: [2, 0, 3],
+  OKRun: [8, 10, 7]
+};                
+            </pre>
+        </p>
+
+          <p>
+            The attribute 'Labels' will contain an array of data labels, and all the other attributes contain the actual statistics numbers. For example, the allResults object above represent the outcome of 3 runs on 3 commands each: command 0 resulted in 2 good runs out of all 10, command 1 did not produce any good run, and command 2 generated 3 good runs.
+          </p>
+        </li>
+        <li>
+          Use <b>SubmitData(table_name, resultobject)</b> to save the result object into a table. 
+        </li>
+        <li>
+          Use <b>await PlotData(table_name, chart_type, label_name)</b> to read the result object from the table and plot it using the specified chart type. The label_name specifies which attribute of the result object will be used as data label, and all the other attributes in the result object will be plotted as statistics.
+        </li>
+      </ul>
+    </p>
+    <p>
+      <b>Challenge:</b> please modify your test script according to the code below, and then complete the missing parts. Click <b>TEST</b> to run the test and check out the new column chart!
+    </p>
+    <code isHidden="false">
+
+const shotCmds = [];
+//specify 3 break shot commands of your own choice
+shotCmds.push({cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85});
+shotCmds.push({cueballx: -500, cuebally: 100, aimx: 0, aimy: 50, strength: 85});
+shotCmds.push({cueballx: -500, cuebally: 200, aimx: 0, aimy: 100, strength: 85});
+
+ResetTable(false);
+
+// array to hold label and data
+const labelList = [];
+const goodRunCountList = [];
+const OKRunCountList = [];
+
+const totalRuns = 10;
+
+for (let cmdInd=0; cmdInd &lt; shotCmds.length; cmdInd ++) {
+  const cmd = shotCmds[cmdInd];
+  PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+  await UpdateWorld();
+  let goodRunCount = 0;
+  for (let i=0; i &lt; totalRuns; i++) {
+    const endStates = await calculateEndState(cmd, true);
+    const allBallIDs = Object.keys(endState);
+    for (let ballID = 2; ballID &lt; allBallIDs.length; ballID++) {
+      if (endStates[ballID].inPocketID != null) {
+        goodRunCount ++;
+        break;
+      }
+    }
+  }
+  // store label and data
+  labelList.push("Command" + cmdInd);
+  goodRunCountList.push(goodRunCount);
+  OKRunCountList.push(totalRuns - goodRunCount);
+}
+
+console.log("total good run count " + JSON.stringify(goodRunCountList));
+
+// store label and data in an object
+const allResults = {
+  'Labels': labelList,
+  'GoodRun': goodRunCountList,
+  'OKRun': OKRunCountList
+};
+
+//TODO: submit and then plot data
+
+// save all results in a table named 'BreakShotResult'
+//h0::first parameter is table name::second parameter is the object containing all results
+::await SubmitData('BreakShotResult', allResults);
+::await SubmitData('BreakShotResult', allResults);
+await SubmitData(? , ?);
+
+// plot data in table 'BreakShotResult' as a basic column chart, using 'Command' as label
+//h1::first parameter is the table name::second parameter is chart type of 'BasicColumn'::third parameter is 'Labels'
+::await PlotData('BreakShotResult', 'BasicColumn', 'Labels'); 
+::await PlotData('BreakShotResult', 'BasicColumn', 'Commands');
+::await PlotData('BreakShotResult', 'BasicColumn', Labels);
+await PlotData(?, ?, ?);
+//ENDTODO
+
+ReportEndOfTest();
+    </code>
+  </element>
+<!-- 
+  const shotCmds = []; 
+  //specify 3 break shot commands of your own choice 
+  shotCmds.push({cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 85}); 
+  shotCmds.push({cueballx: -500, cuebally: 100, aimx: 0, aimy: 50, strength: 85}); 
+  shotCmds.push({cueballx: -500, cuebally: 200, aimx: 0, aimy: 100, strength: 85}); 
+    
+  ResetTable(false); 
+    
+  //TODO: compare 3 shot commands 
+    
+  // array to hold label and data 
+  const labelList = []; 
+  const goodRunCountList = []; 
+  const OKRunCountList = []; 
+    
+  const totalRuns = 10; 
+    
+  for (let cmdInd=0; cmdInd < shotCmds.length; cmdInd ++) { 
+    const cmd = shotCmds[cmdInd]; 
+    PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally); 
+    await UpdateWorld(); 
+    let goodRunCount = 0; 
+    for (let i=0; i < totalRuns; i++) { 
+      const endStates = await calculateEndState(cmd, true); 
+      const allBallIDs = Object.keys(endState); 
+      let isGoodRun = false; 
+      for (let ballID = 2; ballID < allBallIDs.length; ballID++) { 
+        if (endStates[ballID].inPocketID != null) { 
+          isGoodRun = true; 
+          break; 
+        } 
+      } 
+      if (isGoodRun) 
+        goodRunCount ++; 
+    } 
+    // store label and data 
+    labelList.push("Command" + cmdInd); 
+    goodRunCountList.push(goodRunCount); 
+    OKRunCountList.push(totalRuns - goodRunCount); 
+  } 
+    
+  console.log("total good run count " + JSON.stringify(goodRunCountList)); 
+    
+  // store label and data in an object 
+  const allResults = { 
+    'Labels': labelList, 
+    'GoodRun': goodRunCountList, 
+    'OKRun': OKRunCountList 
+  }; 
+    
+  // save all results in a table named 'BreakShotResult' 
+  await SubmitData('BreakShotResult', allResults); 
+  // plot data in table 'BreakShotResult' as a basic column chart, using 'Command' as label 
+  await PlotData('BreakShotResult', 'BasicColumn', 'Labels'); 
+    
+  ReportEndOfTest();   -->
+  
+<element elementid="200" elementType="Conclusion">
+  <p>Good work today! </p>
+  <p><b>Summary:</b> you have learned how to <b>run quick tests using calculateEndState repeatedly</b>, and also <b>how to present your results using a beautiful column chart</b>.</p>
+  <p>
+      <b>Exercise:</b> besides 'Good' and 'OK' runs, can you try to add a third category of 'Bad' runs? That would be runs in which the cue ball or black ball is pocketed. You can add this as a new attribute 'BadRun' of the allResults object, very similar to the 'GoodRun' attribute.
+  </p>
+  <p>
+    <b>Exercise 2:</b> try to repeat the test in more runs (say 300 iterations) to get more stable statistics.
+  </p>
+</element>
+

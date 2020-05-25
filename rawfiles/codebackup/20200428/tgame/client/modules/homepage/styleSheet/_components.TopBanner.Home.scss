@@ -1,0 +1,141 @@
+.tg-top-banner {
+  background-image: url('/images/decision-tree2-p-500.png');
+  background-position: 50% 50%;
+  background-color: $tg-col-light-grey;
+  background-size: cover;
+  &__container{
+    color: $tg-col-light;
+    padding: 45px 0px;
+    @include flexbox();
+    justify-content: center;
+    &__type{
+      // flex: 0 0 calc(100% - 480px);
+      flex: 1;
+      text-align: center;
+    }
+    &__signup{
+      flex: 0 0 400px;
+      .form__title{
+        display: inline-block;
+        width: 100%;
+      }
+      .tg-page__header{
+        display: none;
+      }
+      .form--signup{
+        margin-top: 0px;
+        margin-bottom: 0px;
+      }
+    }
+  }
+  .hero-heading{
+    margin-top: 0px;
+    margin-bottom: 15px;
+    font-family: $tg-ff-body;
+    color: $tg-col-basic-ivory;;
+    font-size: $tg-fs-heading1;
+    text-shadow: 0 1px 9px $tg-col-basic-black, 0 5px 14px $tg-col-basic-black;
+    &--underline{
+      width: 100%;
+      height: 3px;
+      margin-bottom: 20px;
+      background-color: $tg-col-basic-ivory;;
+      box-shadow: 0 3px 6px 0 $tg-col-basic-black;
+    }
+  }
+  .hero-text{
+    color: $tg-col-basic-ivory;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 700;
+    text-shadow: 0 1px 9px $tg-col-basic-black, 0 5px 14px $tg-col-basic-black;
+  }
+}
+.hero-link{
+  @include flexbox();
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+  justify-content: center;
+  margin: 0 auto;
+  &__block{
+    flex: 0 0 49%;
+    @include flexbox();
+    justify-content: center;
+    -webkit-transition: all 500ms ease;
+    transition: all 500ms ease;
+    &:hover{
+      -webkit-transform: scale(1.13);
+      -ms-transform: scale(1.13);
+      transform: scale(1.13);
+    }
+    &__items{
+      padding: 15px 10px;
+      border: 1px solid $tg-col-basic-aqua;
+      background-color: $tg-col-basic-dark-blue;
+      box-shadow: 0 6px 21px 4px $tg-col-basic-black;
+      color: $tg-col-basic-white;
+      cursor: pointer;
+      max-width: 188px;
+      font-family: $tg-ff-body;
+      font-size: $tg-fs-heading4;
+      text-align: center;
+      text-decoration: none;
+      span{
+        font-size: 50px;
+        color: $tg-col-light;
+      }
+      .heading{
+        color: $tg-col-light;
+        font-size: $tg-fs-heading4;
+        margin: 10px 0px;
+        text-align: center;
+      }
+      .text{
+        font-size: $tg-fs-comment;
+        line-height: 17px;
+        font-weight: 300;
+      }
+    }
+  }
+}
+@media (max-width: 960px) {
+  .tg-top-banner{
+    &__container{
+      &__type{
+        // flex: 0 0 calc(100% - 400px)
+      }
+    }
+  }
+}
+@media (max-width: 880px) {
+  .tg-top-banner{
+    &__container{
+
+    }
+  }
+}
+@media(max-width: 768px){
+  .tg-top-banner{
+    &__container{
+    }
+  }
+}
+@media (max-width: 640px) {
+  .tg-top-banner{
+    .hero-text{
+      margin-bottom: 30px;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .hero-link{
+    flex-direction: column;
+    &__block{
+      flex: 0 0 50%;
+      margin-bottom: 20px;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+}

@@ -1,0 +1,321 @@
+<element elementid="100" elementType="Info">
+  <p>
+    To understand for-loops, let's consider a simple task of <b>listing all the even numbers from 0 to 6</b>. The approach is fairly straight-forward: you start with 0 and add 2 each time, until you reach 6. 
+  </p>
+  <p>
+    Now let's write a for-loop to do this. As shown below, <b>a for-loop is composed of three key components: initialization, test condition and change step</b>, followed by the block of code statements to be executed repeatedly. Each repeated run of the code is called an <b>iteration</b>.
+    <ul>
+      <li>
+        <b>initialization</b> defines a new <b>index varaible</b> using the keyword <b>let</b> (executed before the first iteration starts);
+      </li>
+      <li>
+        <b>test condition</b> is a comparison statement checked before each iteration, and no further iterations will be executed after the condition becomes false;
+      </li>
+      <li>
+        <b>change step</b> changes the index variable (increase it or decrease it), executed at the end of each iteration;
+      </li>
+    </ul>
+  </p>
+  <p>
+    <img src="/images/forloopformat2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    As illustrated below, <b>we first initialize the index variable <b class="variablenamebold">i</b> to 0</b>. (Note that you can use any variable for the index: "k" or "j" for example). Next, we <b>check the test condition "<span class="variablenamebold">i &lt;= 6</span>"</b>. Since the test condition is true (i is 0, so it is indeed less than or equal to 6), <b>we execute the current iteration</b>, which prints "i is 0" in the console. </p>
+    <p> The <b>the index variable <span class="variablenamebold">i</span> is then increased by 2 with "i = i + 2"</b>. Note that when we write "i = i + 2", we first calculate the value of "i+2" to get the value of 2, then assign that value to the variable on the left of the equation, which is <b>i</b> itself. Now we <b>check the test condition, "<span class="variablenamebold">i &lt;= 6</span>" again</b>. Since the test is still passing (i.e. the condition still evaluates to true), we stay in the loop and "i is 2" is printed. 
+    </p>
+    <p>
+      On the third and fourth iterations, "i is 4" and then "i is 6" are printed. <b>i</b> is then increased to 8. Now <b>our test condition, "<span class="variablenamebold">i &lt;= 6</span>", is no longer true, so we immediately exit the for-loop</b>.
+  </p>
+  <p>
+    <img src="/images/forloopanimation.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+
+  <p AScratchExample>If you know Scratch, a for-loop can be implemented using four blocks: the "set i to 0" block, the "repeat until" block, the "equal to" operator block, and the "change i by step" block: </p>
+  <p AScratchExample>
+    <img src="/images/scratch_forloop.png" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+  </p>
+</element>
+
+
+<element elementid="113" elementType="Info">
+  <p>
+    Whenever we need to create a new for-loop, it's critical to think about <b>the index variable's life cycle</b>: what's its initial value and end value, and how to update its value in each iteration.
+  </p>
+  <p>
+    For example, if we want to iterate through all pockets, then the index variable can be the pocketID, and its value should go from 0 to 5, incremented by 1 in each iteration.
+<!-- 
+
+    Before we write a loop, we first think about how many rounds the code block inside the for-loop will run. For example, if the mission is to run through all pockets from pocket 0 to pocket 5, in total the code statements inside "{}"  must run 6 times. -->
+  </p>
+  <!-- <p>
+    Then, we need an index variable (i.e. <span class="variablename">pocketID</span> in this example) to control when the loop starts, and most importantly, when it stops (since we cannot let it run forever). So, the first part of the <span class="keyword">for</span> command (<span class="variablename">let pocketID = 0</span>>) is how we’d like to start. The second part (<span class="variablename">pocketID &lt;= 5</span>) is used to decide when to stop. That means the code will repeat again and again until the second part is no long true.
+  </p> -->
+  <p>
+    <!-- The third part of the <span class="keyword">for</span> command is also very important. Here we change the index variable (<span class="variablename">pocketID</span>) such that it is different in each iteration.  -->
+    There are three ways to update the index variable in the third part of the for-loop. You can choose anyone of them but you cannot mix them together.
+  </p>
+  <p>
+    <ul>
+      <li class="variablename">pocketID = pocketID + 1;</li>
+      <li class="variablename">pocketID += 1;</li>
+      <li class="variablename">pocketID ++;</li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="115" elementType="Quiz" answerKey="D" answerReason="We need to initialize the variable k to 12, decrease it by 3 each step, and check if k >= 3."> 
+  <p>
+    <b>Quiz:</b> To print out all multiples of 3, from 12 down to 3, which of the following for-loop is correct? 
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> for (let k = 12; k = k - 3; k >= 3) { console.log(k); }
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> for (let k = 12; k > 3; k = k - 3) { console.log(k); }
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> for (let k = 12; k >= 3; k = k + 3) { console.log(k); }
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> for (let k = 12; k >= 3; k = k - 3) { console.log(k); }
+      </li>
+    </ul>
+  </p>
+</element>
+
+
+<element elementid="116" elementType="Info">
+  <p>
+    <b>To exit a for-loop before it ends (when the test condition becomes false), use the keyword <span class="keyword">break</span></b>, and the code below the for-loop block will then be executed.
+  </p>
+  <p>
+    <b>If you need to skip the remaining code in the current iteration and jump to the next iteration</b>, use the keyword "<b class="keyword">continue</b>".
+  </p>
+  <p>
+    For example, in the for-loop below, when i becomes 2, <b>continue</b> is called, which triggers the program to go to the next iteration (with i increased to 3) right away, thus skipping the print line. Also, when i becomes 4, <b>break</b> is called, which triggers the program to exit the loop immediately, so we don't see "i is 4" or "i is 5" being printed at all.
+  </p>
+  <pre class="brush: js">
+for (let i = 0; i &lt; 6; i ++) {
+  if (i == 2) {
+    continue; // skip the statements below when i is 2
+  }
+  if (i == 4) {
+    break; // exit the loop immediately when i is 4
+  }
+  console.log("i is " + i);
+}
+console.log("we are outside loop");
+
+// will print the following:
+// i is 0
+// i is 1
+// i is 3
+// we are outside loop
+
+  </pre>  
+</element>
+
+<element elementid="118" elementType="Quiz" answerKey="B" answerReason="The third part of for command should be 'i = i + 1', so that i's value can be increased after each iteration."> 
+  <p>
+    <b>Quiz:</b> Out of the four statements, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+let count = 0;
+for (let i = 0; i &lt; 3; i + 1) {
+  count = count + 1;
+}
+console.log("count is " + count);
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> code will print 'count is 4'
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> code inside for-loop will run forever
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> code inside for-loop will not run at all
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> code has some syntax errors and will not run at all
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="120" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="C" answerReason="The initial value of i is 10, which is greater than 3, so the loop will stop before its first iteration."> 
+  <p>Great! Here is another question.</p>
+  <p>
+    <b>Quiz:</b> Out of the four choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+let count = 0;
+for (let i = 10; i &lt; 3; i + 1) {
+  count = count + 1;
+}
+console.log("count is " + count);
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> code will print 'count is 4'
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> code inside for-loop will run forever
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> code inside for-loop will not run at all
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> code has some syntax errors and will not run at all
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="122" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="B" answerReason="i will always be greater than 3, so the loop will run forever."> 
+  <p>Okay. One more for fun. </p>
+  <p>
+    <b>Quiz:</b> Out of the four choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+let count = 0;
+for (let i = 10; i > 3; i = i + 1) {
+  count = count + 1;
+}
+console.log("count is " + count);
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> code will print 'count is 33'
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> code inside for-loop will run forever
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> code inside for-loop will not run at all
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> code has some syntax errors and will not run at all
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="125" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="C" answerReason="'let' is missing in line 2; '{' is missing in line 2; ';' is expected at the end of line 5."> 
+  <p>Cool. Another one. </p>
+  <p>
+    <b>Quiz:</b> How many syntax errors in the code below?
+  </p>
+  <pre class="brush: js">
+let count = 0;
+for (i = 0; i &lt; 3; i = i + 1) 
+  count = count + 1;
+}
+console.log("count is " + count)
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> 1
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> 2
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> 3
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> 4
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="128" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="A" answerReason=""> 
+  <p>Cool. Another one. </p>
+  <p>
+    <b>Quiz:</b> How many '}' are missing in the code below?
+  </p>
+  <pre class="brush: js">
+for (let i = 0; i &lt; 3; i = i + 1) {
+  if (i == 0) {
+    continue;
+  } else {
+    if (i > 2) {
+      for (let j = 10; j > 0; j -= 1) {
+        if (i + j &lt; 12) {
+          for (let k = i + j; k &lt; 12; k += 1) {
+            console.log("i is " + i + "; j is " + j + "; k is " + k);
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> 5
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> 6
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> 7
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> 8
+      </li>
+    </ul>
+  </p>
+</element>
+
+<!--element elementid="130" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="B" answerReason=""> 
+  <p>Cool. Another one. </p>
+  <p>
+    <b>Quiz:</b> how many 'a' will be printed out from the code below?
+  </p>
+  <pre class="brush: js">
+for (let i = 0; i &lt; 3; i = i + 1) {
+  if (i == 0) {
+    continue;
+  } else {
+    if (i > 1) {
+      for (let j = 10; j > 0; j -= 5) {
+        if (i + j &lt; 12) {
+          for (let k = i + j; k &lt; 12; k += 1) {
+            console.log("a");
+          }
+        }
+      }
+    }
+  }
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> 0
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> 5
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> 10
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> 1
+      </li>
+    </ul>
+  </p>
+</element-->
+
+<element elementid="200" elementType="SkillLearned" skill="ForLoop">
+  <p>
+    Now let's go back to the game bot code.
+  </p>
+</element>

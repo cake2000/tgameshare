@@ -1,0 +1,109 @@
+<element elementid="100" elementType="Info">
+  <p>
+    In JavaScript, <b>variables are containers for storing data values</b>, such as numbers, strings, or objects. All variables are identified with unique names, which contain letters, digits, underscores and dollar signs, and a valid name must begin with a letter. <b>You have to declare a variable before using it, and the variable names are also case-sensitive.</b>
+  </p>
+  <p AScratchExample>In Scratch, you can define a variable using <img src='/images/scratch_variable.png' style='width: auto; height: 25px; vertical-align: bottom;'/>.
+  </p>
+  <p>
+     There are two ways to declare a new variable in JavaScript: "<span class="variablename">const aimPoint</span>" or "<span class="variablename">let aimPoint</span>". The key difference is that <span class="keyword">const</span> variables can't be reassigned to some other value, but variables defined with <span class="keyword">let</span> don't have that restriction. For example:
+  </p>
+  <pre class="brush: js">
+let a = 3; // define a new variable using 'let'
+a = 4; // updating a's value is fine
+
+const b = 3; // define a new variable using 'const'
+b = 4; // error! can't change a constant's value
+  </pre>
+  </p>
+</element>
+
+<element elementid="105" elementType="Info">
+  <p>
+    After the declaration, we use the equal sign ( = ) to assign a value to the variable. There are also other operators that can be used to assign values, as shown in the table below. Note that we'll be using "++" a lot in future tutorials.
+  </p>
+  <p>
+    <img src="/images/operators.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="110" elementType="Quiz" answerKey="A" answerReason="A is not correct, since we need to use the keywords 'const' or 'let' to define a new variable.">
+  <p>
+    <b>Quiz</b>: Out of the four choices below, which one is NOT a correct variable definition?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush: js">
+int a = 5;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>
+        <pre class="brush: js">
+const a = 5;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>
+        <pre class="brush: js">
+let a = 5;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush: js">
+let a = {x: 5, y: 9};
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+  
+<element elementid="115" elementType="Quiz" answerKey="B" answerReason="">
+  <p>
+    Note that you can not reassign a "const" object to some other object, but you can still add or change that object's properties. For example, if we define "const A = {x: 3}", then we can not reassign <b>A</b> like this "A = {y: 4}", but we can change A like this "A.y = 4".
+  </p>
+  <p>
+    <b>Quiz</b>: Out of the four choices below, which one has no errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush: js">
+const aVariable = 3;
+aVariable = 6;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>
+        <pre class="brush: js">
+const anObject = { x: 1, y: 0 };
+anObject.z = -1;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>
+        <pre class="brush: js">
+let aVariable = 3;
+const another = 6;
+another = aVariable;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush: js">
+const anObject = { x = 1, y = 0 };
+anObject.x = 0;
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="SkillLearned" skill="Variable">
+  <p>
+    Now let's go back to the game bot code.
+  </p>
+</element>

@@ -1,0 +1,204 @@
+.form{
+  &--editbasic{
+    position: absolute;
+    max-width: 350px;
+    width: 100%;
+    top: 0;
+    left: 325px;
+  }
+  &--editPayMent{
+    position: absolute;
+    max-width: 350px;
+    width: 100%;
+    top: 0px;
+    left: 325px;
+  }
+  &__group{
+    .btn {
+      &-cancel{
+        width: 100%;
+        background-color: #ff5259;
+        background: linear-gradient(175deg, #ff5259 0%, #ff5259 35%, #ff5259 100%);
+        border-radius: 0;
+        height: 60px;
+        font-size: 18px;
+        &:hover{
+          background: linear-gradient(175deg, #d6474d 0%, #d64b50 35%, #fb3139 100%);
+        }
+      }
+    }
+    &__hint {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      color: $tg-col-basic-dark-grey;
+      font-size: $tg-fs-body;
+    }
+    &__hint_white {
+      position: absolute;
+      top: 12px;
+      right: 7px;
+      color: $tg-col-basic-ivory;
+      font-size: $tg-fs-body;
+    }
+    &__radio {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      label {
+        color: #0a2635 !important;
+        font-weight: normal;
+        margin-right: 10px;
+      }
+      .teacher-label{
+        color: $tg-col-basic-dark-blue !important;
+      }
+    }
+    &__title{
+      margin-bottom: 7px;
+      display: inline-block;
+      width: 100%;
+      line-height: 21px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #0a2635;       
+    }
+    &__desc{
+      margin-bottom: 7px;
+      display: inline-block;
+      width: 100%;
+      line-height: 21px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #0a2635;       
+    }
+    &__text{
+      // height: 15px;
+      max-width: 480px;
+      width: calc(100% - 26px);
+      padding: 6px 12px;
+      line-height: 1.42857143;
+      color: $tg-col-basic-dark-grey;
+      font-size: $tg-fs-comment;
+      vertical-align: middle;
+      background-color: $tg-col-basic-ivory;
+      border: 1px solid $tg-col-basic-dark-grey;
+      &__account{
+        margin-bottom: 5px;
+      }
+    }
+    &__textarea{
+      height: 60px;
+      resize: none;
+      max-width: 480px;
+      width: calc(100% - 26px);
+      padding: 8px 12px;
+      line-height: 1.42857143;
+      color: $tg-col-33;
+      font-size: $tg-fs-comment;
+      font-weight: normal;
+      vertical-align: middle;
+      background-color: $tg-col-light;
+      border: 1px solid $tg-col-basic-dark-grey;
+    }
+    &__text__sub{
+      max-width: calc(480px - 120px);
+      width: calc(100% - 26px);
+      padding: 6px 12px;
+      line-height: 1.42857143;
+      color: $tg-col-basic-dark-grey;
+      font-size: $tg-fs-comment;
+      vertical-align: middle;
+      background-color: $tg-col-basic-ivory;
+      border: 1px solid $tg-col-basic-dark-grey;
+    }
+    &__button{
+      .btn{
+        padding: 8px 10px;
+        margin-right: 10px;
+        text-transform: none;
+      }
+      .btn-default{
+        border: 1px solid #97d8dd;
+        color: #236bc2;
+        background-color: #fefefe;
+      }
+    }
+    &--action{
+      .btn{
+        padding: 8px 10px;
+        margin: 0;
+      }
+      .btn-transparent{
+        margin-left: 15px;
+      }
+    }
+    &__picture{
+      margin: 0;
+      display: flex !important;
+      align-items: center;
+      position: relative;
+      label{
+        margin: 0;
+      }
+      .btn{
+        padding: 7px 0px;
+        font-size: 12px;
+        font-weight: normal;
+        width: 120px;
+        text-align: center;
+        margin-left: 5px;
+        line-height: 1.42857143;
+      }
+      input[type=file]{
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+      }
+      input[type=file] + label{
+        width: 100%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+      }
+      input[type=file] + label span{
+        max-width: calc(480px - 120px);
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 40px;
+        padding: 0px 15px;
+        margin-bottom: 0px;
+        color: #333333;
+        background: #fff;
+        vertical-align: middle;
+        border: 1px solid #9b9b9b;
+      }
+    }
+    &__notification{
+      padding: 30px 20px;
+      font-size: 16px;
+      line-height: 1.42857143;
+    }
+  }
+}
+@media (max-width:768px) {
+  .form{
+    &--editbasic{
+      left: auto;
+      right: 0px;
+    }
+  }
+}
+@media (max-width:480px) {
+  .form{
+    &--editbasic{
+      max-width: 100%;
+      background-color: $tg-col-basic-navy;
+    }
+  }
+}

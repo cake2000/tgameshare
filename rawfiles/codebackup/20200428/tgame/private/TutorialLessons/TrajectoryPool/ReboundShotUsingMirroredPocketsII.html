@@ -1,0 +1,571 @@
+<element elementid="100" elementType="Info">
+    <p>
+        Welcome back! In last tutorial, we've learned two kinds of reflections and the coordinate calculations of reflected points. In this lesson, we are going to leverage the knowledge we've learned and include rebounds in <b>getCallShot</b> function. Your robot will be able to strike rebound shots after this lesson.   
+    </p>    
+</element>
+
+<element elementid="146" elementType="Info">
+    <p>
+        Let's continue from where we stopped in last tutorial. First, we will call the new <b>getReflectedPos</b> function in <b>calculateShotCommand</b> to get pocket's reflected position. We need to add a third parameter <b>refType</b> with default value of REFLECTION.NO_REFLECTION. Please change your code as below.
+    </p>
+    <pre class="brush: js">
+function calculateShotCommand(ballID, pocketID, refType=REFLECTION.NO_REFLECTION) {
+    let ballPos = Balls[ballID];
+    let pocketPos = getReflectedPos(pocketID, refType);
+    let aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+    </pre>
+</element>
+
+<element elementid="148" elementType="Coding" condition="TestFinishedAnyResult">
+    <p>
+        Next, we'll include rebounds in <b>getCallShot</b> function. For now, we only implement horizontal reflections and leave vertical ones for Exercise. 
+    </p>
+    <p>
+        <b>Challenge</b>: Please change your code to check the probabilities of horizontal rebounds. Test your code and make sure there is no error. 
+    </p>
+    <code isHidden="false">
+    // Rebounds
+    //TODO: to check the probabilities of horizontal rebounds. 
+    //h0::loop through all legal balls
+    ::for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ )
+    ::for (let k = 0 ; k &lt;= legalBallIDs.length ; k ++ )
+    for ( ? ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]); 
+        if (isBlocked) continue; 
+        //h1::loop through all pockets
+        ::for (let pocketID = 0; pocketID &lt; 5 ; pocketID ++)
+        ::for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++)
+        for ( ? ) {  
+            // horizontal reflections
+            //h2::call calculateShotCommand to get shot command for horizontal reflection::pass in REFLECTION.HORIZONTAL_REFLECTION as the third parameter 
+            const cmd = ? ;
+            const prob = await getProbForCmd(cmd);
+            if (prob > 0) {
+                const probWithCmd = await refineCommand(cmd);
+                if ( probWithCmd.prob > highestProb ) {
+                    bestCommand = probWithCmd.cmd ; 
+                    highestProb = probWithCmd.prob ;
+                }
+            }
+        }
+    }
+    //ENDTODO
+    </code>
+    <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+    
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+            
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            const cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            const prob = await getProbForCmd(cmd); 
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                } 
+            } 
+        } 
+    }     
+    
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);  
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}      
+    </cleancode>                        
+</element>
+
+<element elementid="150" elementType="Info">
+    <p>
+        Now, you might be wondering why it looks like the new code doesn't work. If you print out the probability of the rebound, you will find it is still zero. Then, why?   
+    </p>
+    <p>
+        Here is the reason. When the target ball hits the cushion, it is spinning. And <b>after the ball rebounds back, it will spin away a little bit</b>. So if we want to pocket the target ball, we should not aim to the exact position of reflected pocket. Then, where? Let's manually adjust the aim position and see how it works.  
+    </p>    
+</element>
+
+<element elementid="152" elementType="Info">
+    <p>
+        You will see from the picture below, the target point is higher than the reflected pocket. How can we find that position? One of methods is called <b>Grid Search</b>, which <b>divides the search domain into a grid of equal steps and checks each data point step by step</b>. In our problem, the search domain can be defined as [0 * CushionWidth, 10 * CushionWidth] from reflected position, and search step as half a CushionWidth.   
+    </p>
+    <p>
+        <img src="/images/gridsearch.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p> 
+</element>
+
+<element elementid="160" elementType="Coding" condition="TestPPPocketBall_2_In_4">
+    <p>
+        <b>Challenge:</b> Please implement <b>Grid Search</b> to find an aim position with non-zero probability. Since the best probability is about <b>40%</b> in the current setup, you might need to <b>test more than five times to pocket ball 2</b>. 
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+    ...
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) {
+        ...
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) { 
+            // horizontal reflections      
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            //TODO: find an aim position with non-zero probability
+            //h0::set step size based on direction, and it could be negative::step's sign should be the same with the sign of reflected pocket's y coordinate 
+            ::const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            ::const step = pocketPos.y &lt; 0 ? CushionWidth/2 : -CushionWidth/2;
+            const step = ? ;
+            const limit = 10;
+            let prob = 0;
+            for (let i = 0; i &lt;= limit; i++) {
+                //h1::set virtual pocket's position::move forward for one step
+                ::pocketPos.y += step;
+                ::pocketPos.y -= step;
+                ::pocketPos.x -= step;
+                pocketPos.y ? ;
+                const aimPos = getAimPosition(Balls[ballID], pocketPos);
+                cmd.aimx = aimPos.x;
+                cmd.aimy = aimPos.y;
+                //h2::calculate probability::use getProbForCmd instead of calculateProbability to leverage our cache
+                ::prob = getProbForCmd(cmd);
+                ::prob = await getProbForCmd(cmd);
+                prob = ? ;
+                if (prob > 0) break;
+            }
+            if (prob > 0) {
+                const probWithCmd = await refineCommand(cmd);
+                if ( probWithCmd.prob > highestProb ) {
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }  
+        }
+    }    
+    ...
+}
+    </code>
+    <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+    
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+        
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            const limit = 10;
+            let prob = 0; 
+            for (let i = 0; i &lt;= limit; i++) { 
+                pocketPos.y += step; 
+                const aimPos = getAimPosition(Balls[ballID], pocketPos); 
+                cmd.aimx = aimPos.x; 
+                cmd.aimy = aimPos.y; 
+                prob = await getProbForCmd(cmd) ; 
+                if (prob > 0) break; 
+            }
+            console.log("pocketID = " + pocketID + " prob = " + prob);
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                }   
+            } 
+        }
+    }     
+    
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);  
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}      
+    </cleancode>                                    
+</element>
+
+<element elementid="200" elementType="Conclusion">
+    <p>Congratulations! It is a remarkable accomplishment finishing this tutorial!</p>
+    <p><b>Summary:</b> Now, your robot has a very cool skill: to pocket balls through rebounds. In today's lesson, we discussed <b>Grid Search</b> and implemented it in our code. </p>
+    <p>
+        <b>Exercise:</b> Change the <b>search domain</b> and <b>step size</b> in the implementation of Grid Search, and see how it effects the search results.
+    </p>
+    <p>
+        <b>Open Challenge:</b> Could you implement vertical reflections in <b>getCallShot</b>? 
+    </p>
+</element>
+
+    

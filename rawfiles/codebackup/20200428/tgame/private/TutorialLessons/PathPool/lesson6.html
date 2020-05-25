@@ -1,0 +1,346 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>
+      Sometimes there is no way to directly shoot a ball into any pocket, but there is a shot if you bounce the target ball off a rail first. In this tutorial, let's add rebound shots to your robot's toolbox. Ready to get started?
+    </p>
+</element>
+
+<element elementid="110" elementType="Quiz" answerKey="B">
+    <h5 class="elementheader">Problem Analysis</h5>
+    <p>
+        When you try to solve a new problem, it is often easier if you can <b>simplify it to a problem you have already solved</b>. In the case of making a rebound shot, which problem can we reduce it to? Please answer with one letter: <b>A</b>, <b>B</b> or <b>C</b>.</p>
+    <p>
+      <ul>
+        <li>
+          <b>A</b>. making a break shot.
+        </li>
+        <li>
+          <b>B</b>. taking a direct call shot.
+        </li>
+        <li>
+          <b>C</b>. calculating cue ball placement
+        </li>
+      </ul>
+    </p>
+</element>
+    
+<element elementid="120" elementType="Quiz" answerKey="C">
+    <h5 class="elementheader">Mirroring the target pocket</h5>
+    <p>
+        So how do we simplify the rebound shot to a direct shot? Imagine there is no rail, then the ball would continue to move in a straight line. So all that we need to do is to <b>mirror</b> the target pocket to the opposite side of the rail, and then calculate the shot command using the mirrored pocket position. 
+    </p>
+    <p>
+        <img src="/images/reboundoverview.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+    </p>
+    <p>As illustrated above, if we want to mirror pocket 4 (bottom center) against the top rail, the mirrored pocket should have the same x coordinate as pocket 4. But how to calculate the mirrored pocket's y coordinate? First, we need to know the y coordinate of the horizontal mirror line itself.</p>
+    <p>
+        <img src="/images/rebounddetails.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+    
+    <p>  As illustrated above, the ball starts to rebound <b>when it touches the cushion bar</b>. Can you figure out which choice below is the right way to calculate the y coordinate of the mirror line? Essentially it is the center position of a ball when it touches the cushion bar. For a reminder, the table center is <b>(0,0)</b>, the table height is <b>world.TableHeight</b>, the ball diameter is <b>world.BallDiameter</b>, and the cushion bar width is <b>world.CushionWidth</b>? 
+    <p>
+        Please answer with one letter: <b>A</b>, <b>B</b>, <b>C</b>, or <b>D</b>.</p>
+        <ul>
+          <li>
+            <b>A</b>. topMirrorY = 0 - world.TableHeight/2 + world.BallDiameter/2
+          </li>
+          <li>
+            <b>B</b>. topMirrorY = 0 - world.TableHeight/2 + world.CushionWidth
+          </li>
+          <li>
+            <b>C</b>. topMirrorY = 0 - world.TableHeight/2 + world.CushionWidth + world.BallDiameter/2 
+          </li>
+          <li>
+            <b>D</b>. topMirrorY = world.TableHeight/2 + world.CushionWidth - world.BallDiameter/2 
+          </li>
+      </ul>
+    </p>
+</element>
+
+
+
+<element elementid="125" elementType="Quiz" answerKey="B">
+    <h5 class="elementheader">Mirrored pocket's y coordinate</h5>
+    <p>
+        <img src="/images/reboundoverview.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+    </p>
+    <p>
+        Now we have the y coordinate of the mirror line <b>topMirrorY</b>, how do we calculate the y coordinate of the mirrored pocket? From the picture above, we know that the distance from pocket 4 to the mirror line is the same as the distance from the mirror of pocket 4 to the mirror line. Using that information, which of the following choices would give you the correct calculation? 
+    </p>
+    <p>
+        Please answer with one letter: <b>A</b>, <b>B</b>, <b>C</b>, or <b>D</b>.</p>
+        <ul>
+          <li>
+            <b>A</b>. newY = topMirrorY - world.Pockets[4].y;
+          </li>
+          <li>
+            <b>B</b>. newY = topMirrorY - (world.Pockets[4].y - topMirrorY);
+          </li>
+          <li>
+            <b>C</b>. newY = topMirrorY - (topMirrorY - world.Pockets[4].y);
+          </li>
+          <li>
+            <b>D</b>. newY = world.Pockets[4].y - topMirrorY;
+          </li>
+      </ul>
+    </p>
+</element>
+
+
+<element elementid="130" elementType="Coding" condition="TestFinishedBallReboundCushion_2">
+    <h5 class="elementheader">Implementing the rebound shot against top rail</h5>     
+    <p>
+      That is correct. Essentially we are taking the mirror line's y coordinate, and subtract the distance between the mirror line and pocket 4. Now that the math is clear on how to calculate the mirrored target pocket coordinates, let's add the rebound shot logic to your robot. Specifically, the following changes are needed:
+      <ul>
+        <li>
+          Enhance the getCallShotCommand utility function to also take a mirrorY parameter, so that it can calculate the shot command using the mirrored pocket coordinate.
+        </li>
+        <li>
+          Add a new for-loop to try rebound shots after testing for good direct shot probabilities.
+        </li>
+      </ul>
+    </p>
+    <code isHidden="false">
+
+// Note: new parameter mirrorY is added      
+function getCallShotCommand(pocketID, ballID, mirrorY) {  
+  const targetBallPos = world.Balls[ballID];   
+  const pocketPos = world.Pockets[pocketID].clone();  
+  if (mirrorY) {
+    //TODO: modify pocketPos to its mirror position
+    //h0:: mirrorY minus pocket distance to mirror line
+    ::pocketPos.y = mirrorY - (mirrorY - pocketPos.y);
+    ::pocketPos.y = mirrorY - (pocketPos.y - mirrorY);
+    ::pocketPos.y = mirrorY + (pocketPos.y - mirrorY);
+    pocketPos.y = ?;
+    //ENDTODO
+  }
+  const ballD = world.BallDiameter;    
+  const dirBallToPocket = pocketPos.subtract(targetBallPos);   
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD);   
+  let aimPos = targetBallPos.subtract(dirAimToBall);   
+  const cueballPos = world.Balls[0]; 
+  if (aimPos.distance(cueballPos) &lt;= 0.01) {
+    aimPos = targetBallPos;
+  }
+  
+  return {   
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1000,   
+    targetBallID: ballID, targetPocketID: pocketID  
+  };   
+}
+
+async function getCallShot() { 
+  const legalBallIDs = world.CandidateBallList[myID];  
+    
+  let bestShotCommand = null; 
+  let maxProb = -1; 
+    
+  for (let j=0; j &lt; legalBallIDs.length; j++) { 
+    const ballID = legalBallIDs[j]; 
+
+    //TODO: try rebound shot first 
+    //h1::using formula discussed earlier
+    ::const topMirrorY = 0 - world.TableHeight/2 + world.CushionWidth + world.BallDiameter/2;
+    ::const topMirrorY = 0 - world.TableHeight/2 - world.CushionWidth + world.BallDiameter/2;
+    ::const topMirrorY = 0 - world.TableHeight/2 + world.CushionWidth - world.BallDiameter/2;
+    const topMirrorY = ?;
+    //h2::get command for rebound shot for pocket 4
+    ::let cmd = getCallShotCommand(pocketID, ballID, topMirrorY); 
+    ::let cmd = getCallShotCommand(pocketID, ballID); 
+    ::let cmd = getCallShotCommand(topMirrorY, pocketID, ballID); 
+    let cmd = getCallShotCommand(?); 
+    //ENDTODO
+    
+    const probability = await calculateProbability(cmd);      
+    if (probability > maxProb) { 
+      maxProb = probability; bestShotCommand = cmd; 
+    } 
+
+    // modified old code to rename variables
+    for (let pocketID=0; pocketID &lt; 6; pocketID ++) { 
+      let cmd2 = getCallShotCommand(pocketID, ballID); 
+      const probability2 = await calculateProbability(cmd2); 
+      console.log("* * prob for ball " + ballID + " pocket " + pocketID + " is " + probability2); 
+      if (probability2 > maxProb) { 
+        maxProb = probability2; bestShotCommand = cmd2; 
+      } 
+    }
+  } 
+  return bestShotCommand; 
+} 
+    </code>
+</element>
+    
+<element elementid="140" elementType="Coding" condition="TestFinishedBallPocketed_2_4">
+  <h5 class="elementheader">Adjusting the rebound shot</h5>     
+  <p>
+    Unfortunately, as you have found out, mirroring the pocket does not give us a perfect shot. The ball's moving direction will skew from a perfect rebound due to its rotation and table friction. Fortunately, we have the tool of calculating probability of a shot, so we can <b>adjust the shot to search for a working shot</b>.
+  </p>
+  <p>
+      <img src="/images/reboundwithshifts.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+  </p>
+  <p>
+    There can be many ways to do the search, and one of them is illustrated above. We can try to shift the mirrored pocket's y coordinate further away from the mirror line to cancel out the skew introduced by the rebound. For this test, please try 10 different steps of shifts between 0 and world.TableHeight / 4. Specifically, please implement these 2 changes:
+    <ul>
+      <li>
+        Enhance the getCallShotCommand utility function to also take a shift parameter, so that it can calculate the shot command using the mirrored pocket coordinate and shift it.
+      </li>
+      <li>
+        Add a new for-loop to try different shift values when testing for rebound shots.
+      </li>
+    </ul>
+  </p>
+  <code isHidden="false">
+// Note: new parameter shift is added      
+function getCallShotCommand(pocketID, ballID, mirrorY, shift) {  
+  const targetBallPos = world.Balls[ballID];   
+  const pocketPos = world.Pockets[pocketID].clone();  
+  if (mirrorY) {
+    //TODO: shift mirrored pocket further away using shift
+    //h0::adjust mirrored pocket by shift
+    ::pocketPos.y = 2 * mirrorY - pocketPos.y - shift;
+    ::pocketPos.y = 2 * mirrorY - pocketPos.y + shift;
+    ::pocketPos.y = 2 * mirrorY + pocketPos.y - shift;
+    pocketPos.y = ?;
+    //ENDTODO
+  }
+  const ballD = world.BallDiameter;    
+  const dirBallToPocket = pocketPos.subtract(targetBallPos);   
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD);   
+  let aimPos = targetBallPos.subtract(dirAimToBall);   
+  const cueballPos = world.Balls[0]; 
+  if (aimPos.distance(cueballPos) &lt;= 0.01) {
+    aimPos = targetBallPos;
+  }
+  
+  return {   
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1000,   
+    targetBallID: ballID, targetPocketID: pocketID  
+  };   
+}
+
+async function getCallShot() { 
+  const legalBallIDs = world.CandidateBallList[myID];  
+    
+  let bestShotCommand = null; 
+  let maxProb = -1; 
+    
+  for (let j=0; j &lt; legalBallIDs.length; j++) { 
+    const ballID = legalBallIDs[j]; 
+
+    const topMirrorY = 0 - world.TableHeight/2 + world.CushionWidth + world.BallDiameter/2;
+
+    //TODO: try different shift values for all bottom pockets
+    //h1::add for-loop for pocketID from 3 to 5
+    ::for (let pocketID=3; pocketID &lt; 6; pocketID ++) {
+    ::for (let pocketID=3; pocketID &lt;= 6; pocketID ++) {
+    ::for (let pocketID=3; pocketID &lt; 6; pocketID --) {
+    for (let pocketID=?;?;?) { 
+      //h2::add for-loop for shift from 0 to world.TableHeight / 4
+      ::for (let yshift = 0; yshift &lt;= world.TableHeight / 4; yshift += world.TableHeight/10) {
+      ::for (let yshift = 0; yshift &lt;= world.TableHeight / 4; yshift -= world.TableHeight/10) {
+      ::for (let yshift = 0; yshift &lt;= world.TableHeight / 4; yshift += world.TableHeight) {
+      for (let yshift = ?; ? ; ? ) {
+        //h3::get shot command with mirror line and shift
+        ::let cmd = getCallShotCommand(pocketID, ballID, topMirrorY); 
+        ::let cmd = getCallShotCommand(pocketID, ballID, yshift, topMirrorY); 
+        ::let cmd = getCallShotCommand(pocketID, ballID, topMirrorY, yshift); 
+        let cmd = getCallShotCommand(?); 
+        //ENDTODO
+        const probability = await calculateProbability(cmd);      
+        console.log("prob for rebound shot: ball " + ballID + " pocket 4 is " + probability); 
+        if (probability > maxProb) {
+          maxProb = probability; bestShotCommand = cmd; 
+        } 
+      }
+    }
+
+    // original code to test for direct shot 
+    for (let pocketID=0; pocketID &lt; 6; pocketID ++) { 
+      let cmd = getCallShotCommand(pocketID, ballID); 
+      const probability = await calculateProbability(cmd); 
+      console.log("* * prob for ball " + ballID + " pocket " + pocketID + " is " + probability); 
+      if (probability > maxProb) { 
+        maxProb = probability; bestShotCommand = cmd; 
+      } 
+    }
+  } 
+  return bestShotCommand; 
+}       
+  </code>
+</element>
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations! Now your robot can do some cool rebound shots when no one is expecting it!</p>
+    <p>
+        <b>Extra Credit:</b> try to add similar logic to test for rebound shots against the bottom cushion bars, or even better the left and right cushion bars. Note that you can change the test setup code to rearrange the balls to other positions.
+    </p>
+</element>
+
+
+<!-- 
+
+  // Note: new parameter mirrorY is added       
+function getCallShotCommand(pocketID, ballID, mirrorY, shift) {   
+  const targetBallPos = world.Balls[ballID];    
+  const pocketPos = world.Pockets[pocketID].clone();   
+  if (mirrorY) { 
+    //TODO: modify pocketPos to its mirror position 
+    pocketPos.y = mirrorY*2 - pocketPos.y - shift; 
+  } 
+  
+  const ballD = world.BallDiameter;     
+  const dirBallToPocket = pocketPos.subtract(targetBallPos);    
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD);    
+  let aimPos = targetBallPos.subtract(dirAimToBall);    
+  const cueballPos = world.Balls[0];  
+  if (aimPos.distance(cueballPos) <= 0.01) { 
+    aimPos = targetBallPos; 
+  } 
+  
+    
+  return {    
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1000,    
+    targetBallID: ballID, targetPocketID: pocketID   
+  };    
+} 
+  
+async function getCallShot() {  
+  const legalBallIDs = world.CandidateBallList[myID];   
+      
+  let bestShotCommand = null;  
+  let maxProb = -1;  
+      
+  for (let j=0; j < legalBallIDs.length; j++) {  
+    const ballID = legalBallIDs[j];  
+  
+    //TODO: try rebound shot first  
+    const topMirrorY = 0 - world.TableHeight/2 - world.CushionWidth + world.BallDiameter/2;
+	for (let pocketID=3;pocketID<6;pocketID++) {  
+      for (let yshift = 0; yshift <= world.TableHeight/4 ; yshift += world.TableHeight/40 ) { 
+        let cmd = getCallShotCommand(pocketID, ballID, topMirrorY, yshift);  
+        const probability = await calculateProbability(cmd);       
+        console.log("prob for rebound shot: ball " + ballID + " pocket 4 is " + probability);  
+        if (probability > maxProb) { 
+          maxProb = probability; bestShotCommand = cmd;  
+        }  
+      } 
+    } 
+    
+    // modified old code to rename variables 
+    for (let pocketID=0; pocketID < 6; pocketID ++) {  
+      let cmd2 = getCallShotCommand(pocketID, ballID);  
+      const probability2 = await calculateProbability(cmd2);  
+      console.log("* * prob for ball " + ballID + " pocket " + pocketID + " is " + probability2);  
+      if (probability2 > maxProb) {  
+        maxProb = probability2; bestShotCommand = cmd2;  
+      }  
+    } 
+  }  
+  return bestShotCommand;  
+}
+
+ -->
+

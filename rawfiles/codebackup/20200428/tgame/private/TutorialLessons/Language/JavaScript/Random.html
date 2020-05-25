@@ -1,0 +1,45 @@
+<element elementid="100" elementType="InfoForNew">
+  <p>
+    Whenever we need randomization, we "call" the function, <b class="variablename">Math.random</b>, like this: "<span class="variablename">number = Math.random()</span>". To <b>"call" a function is to execute the code contained in the function. The call to the function includes a list of parameters wrapped by a pair of "()" after the function name. If the parameter list is empty, as in the case for the function <span class="variablenamebold">Math.random</span>, you need only append "()". </b> 
+  </p>
+  <p>
+    The number returned by <span class="variablename">Math.random</span> can be any number between 0 and 1, such as 0.251. Each time you call <span class="variablename">Math.random</span>, it will return a new random number. This is like a magician pulling numbers out of a magic bag. No one knows exactly which number he'll pull out next, except that it won't be less than 0 or more than 1.
+  </p>
+  <p>
+    <img src="/images/magicrandomnumber.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Quiz" answerKey="D" answerReason="'1600 * Math.random()'' gives us a random number between 0 and 1600, then subtracting 800 gives us a random number between -800 and 800. ">  
+  <p>
+    Random numbers are very interesting. For example, when we execute '<span class="variablename">Math.random()</span>', we get a random number between 0 and 1; when we execute '<span class="variablename">2 * Math.random()</span>', we get a random number between 0 and 2, essentially <b>doubling its range of possible values</b>; and if we execute '<span class="variablename">2 * Math.random() + 3</span>', we <b>shift the range of values (in the positive direction along the number axis) by 3</b>, generating a random number between 3 and 5.  
+  </p>
+  <p>
+    <img src="/images/randomnumberrange.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p AScratchExample>
+    If you know Scratch, there is a similar block<img src='/images/pickrandom0to10.png' style='width: auto; height: 25px; vertical-align: bottom;'/> that allows you to pick a random number between two numbers, so "pick random 0 to 10" is similar to "<span class="variablename">Math.random() * 10</span>", except that "<span class="variablename">Math.random</span>" can give you any decimal number between 0 and 10, not just one of the 11 whole numbers. 
+  </p>  
+  <p>
+    Now if we need a <b>random number between -800 and 800</b>, which code would be correct? 
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 800 * Math.random() - 800
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 1600 * Math.random() - 1600
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 800 * Math.random() - 1600
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 1600 * Math.random() - 800
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="SkillLearned" skill="Random">
+  <p>Good job! Let's see how we can use randomness in our code. </p>
+</element>
+      

@@ -1,0 +1,262 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, 
+    aimy: 0, 
+    strength: 80
+  }; 
+}            
+
+function getCallShot() {
+  return { 
+    aimx: getRandomNumber(-800, 800),
+    aimy: getRandomNumber(-400, 400),
+    strength: 50
+  }; 
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In this tutorial, we'll begin a series of improvements to your robot. For a simple start, let's teach your robot how to hit one ball into a pocket.
+  </p>
+  <p>
+    Remember, if you get stuck during this lesson, even after reviewing all the hints, don't hesitate to check out <a href="https://forum.tgame.ai/t/down-goes-the-black-ball/22" target="_blank">the discussion</a> in our forum. Feel free to ask questions there, as others may have the same question.
+  </p>
+</element>
+
+<!-- <element elementid="110"  elementType="Coding" condition="TestFinishedAnyResultAimXYStrength">
+    <h5 class="elementheader">[Challenge] Making a call shot</h5> 
+    <p>First let's add a new function <b>getCallShot</b>, which specifies the aiming point and how much strength to use in a call shot, similar to your <b>getBreakShot</b> function.</p>
+    <p>When you are done, hit the <b>TEST</b> button to have your robot take its first call shot, and it doesn't need to hit any ball yet.</p>
+    <code isHidden="false">
+function getCallShot() {
+  //TODO: return any shot command
+  //h0::return an object similar to getBreakShot with aimx/aimy/strength
+  ::return { aimx: 0, aimy: 0, strength: 600 };
+  ::{ aimx: 0, aimy: 0, strength: 600 };
+  ::return { aimx, aimy, strength };
+  return { aimx: 0, aimy: 0, strength: 600 };
+}                       
+function getBreakShot() {
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element> -->
+
+<!-- <element elementid="113"  elementType="Info"> -->
+<!-- <element elementid="115"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch">
+  <p>First, your robot needs a new function <b>getCallShot</b> to specify the <b>aiming point</b> and how much strength to use in a call shot. I have added a basic implementation for you already.</p>
+  <pre class="brush: js">
+function getCallShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 30
+  }; 
+}    
+  </pre>
+  <p>Now let's play a simple game. I am placing the black ball on the table at a <b>random point</b> between the table center and the bottom center pocket (as indicated by the blue dotted line in the picture below). In other words, its x is always 0, but its y can be any value between 50 and 450. </p>
+  <p>
+    <img src="/images/randomPlaceBlackBall.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p><b>Challenge:</b> can you <b>change the values of aimx and aimy</b> of your call shot command so that the cue ball can hit the black ball? You might need to test it a few times since each time the black ball will be placed at a new random location.</p>
+  <code isHidden="true">
+function getCallShot() {
+  //TODO: return a shot command to hit the black ball
+  //h0::aimx can be 0 since black ball's x is always 0::you will have to try different values for aimy, like 200, 300, 400...
+  return { aimx:?, aimy:?, strength: 30 };
+  //ENDTODO
+}           
+  </code>
+  <cleancode>
+function getCallShot() {
+  return { 
+    // may not work every time!
+    aimx: 0, aimy: 200, strength: 30 
+  }; 
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}          
+  </cleancode>
+</element> -->
+
+<element elementid="101" elementType="Info">
+  <p>
+    To make this lesson more interesting, each time you click the test button, I am replacing the black ball on the table at a new <b>random point</b> between the table center and pocket 4 (on the blue dotted-line in the picture below). In other words, the black ball's x-coordinate is always 0, but its y-coordinate is calculated like this: <span class="variablename">y = 50 + 350 * Math.random()</span>. 
+  </p>
+  <p>
+    <img src="/images/randomPlaceBlackBall.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    To shoot at the black ball, your robot first needs to know the coordinates of it. This information can be retrieved using a pre-defined object: <b class="variablenamebold">Balls</b>. It is an <b>array</b> containing position information for all balls. 
+  </p>
+</element>
+
+<element elementid="112" elementType="Language" languageSkills="JavaScript:Array|Python:Array">
+</element>
+
+<element elementid="114" elementType="Info">
+  <p>
+    The pre-defined object <span class="variablename">Balls</span> is an array of ball position objects. To get the position of the cue ball, you can use "<span class="variablename">Balls[0]</span>". Similarly, the black ball is the second object in the array, with an index of 1. You can get the black ball's position using "<span class="variablename">Balls[1]</span>", and the x and y coordinate of the black ball are given by <b class="variablenamebold">Balls[1].x</b> and <b class="variablenamebold">Balls[1].y</b>.
+  </p>
+  <p>
+    <img src="/images/ballsarray.png" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+  </p>
+</element>
+
+
+<element elementid="115" elementType="Quiz" answerKey="C" answerReason="Since the array index begins at 0, the third object has an index of 2, and we can read out its y property using Balls[2].y.">
+  <p>
+    <b>Quiz</b>: Out of the four choices below, which one is the y coordinate of the third ball on the list?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> Balls[2]
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> Balls[3]
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> Balls[2].y
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> Balls[3].y
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="116"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch">
+  <p>
+    To change your robot to always hit the black ball, we need to <b>set the aimx/aimy to be the same as the black ball's x/y coordinates</b> in the getCallShot function. I'm showing you how to modify aimx to be the black ball's x-coordinate below:
+  </p>
+
+  <p>
+    <img src="/images/addBlackX.gif" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+  <p>
+    <b>Challenge:</b> can you change the <b class="variablenamebold">aimy</b> in the <span class="variablename">getCallShot</span> function following my example? 
+  </p>
+  <p>
+    Click <img src='/images/icon-hint.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/> if you need a hint.
+  </p>
+  <code isHidden="false">
+//TODO: always aim at the black ball's position
+function getCallShot() {
+  return { 
+    aimx: Balls[1].x, 
+    //h0::set aimy to be black ball's y-coordinate::set aimy to Balls[1].y
+    aimy: ?, 
+    strength: 30
+  };
+}           
+//ENDTODO
+  </code>
+  <cleancode>
+function getCallShot() {
+  return {
+    aimx: Balls[1].x,
+    aimy: Balls[1].y,
+    strength: 30
+  };
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}   
+  </cleancode>
+</element>
+
+
+<element elementid="126" elementType="Info">
+  <p>
+    If you haven't played real pool games before, you might be wondering how to estimate the moving direction of a target ball after the cue ball hit it. For now, you can simply assume that <b>the target ball would move along the same direction as the line connecting the 2 balls' centers when they collide</b>, as shown below.
+  </p>
+  <p>
+    <img src="/images/wherewouldballmove.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+  
+
+<element elementid="130"  elementType="Coding" condition="TestFinishedBlackBallPocketed">
+  <p>Now let's try to <b>knock the black ball down into the bottom center pocket</b>, as shown below.</p>
+  <p>Since the black ball is right above the pocket 4, the cue ball must be <b>on the same vertical line as the black ball</b> when these 2 balls collide. The distance between the centers of the two balls at the time of contact is exactly the sum of their radii, which equals the ball diameter. You can use a pre-defined variable <b class="variablenamebold">BallDiameter</b> to get the ball diameter value. 
+  <p>
+    <img src="/images/shootblackballdown.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+
+  <p><b>Challenge:</b> calculate <span class="variablename">aimy</span> using <b class="variablenamebold">Balls[1].y</b> and <b class="variablenamebold">BallDiameter</b> so that the cue ball can <b>ALWAYS</b> hit the black ball into pocket 4, though the black ball's y-coordinate is randomly determined. Note: the y-coordinate increases as you move down the table. </p>
+  <code isHidden="true">
+function getCallShot() {
+  //TODO: hit the black ball into bottom pocket
+  return { 
+    aimx: Balls[1].x,
+    //h0::aimy should be less than Balls[1].y by BallDiameter
+    ::aimy: Balls[1].y - BallDiameter,
+    ::aimy: Balls[1].y + BallDiameter,
+    ::aimy: BallDiameter - Balls[1].y,
+    aimy: ?, 
+    strength: 50 
+  };
+  //ENDTODO
+}          
+  </code>
+  <cleancode>
+function getCallShot() {
+  return { 
+    aimx: Balls[1].x, 
+    aimy: Balls[1].y - BallDiameter, 
+    strength: 50
+  }; 
+}
+
+function getBreakShot() {
+  return { 
+    aimx: 0, 
+    aimy: 0, 
+    strength: 80
+  }; 
+}    
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+  <p>Good job! Test your program a few more times, verifying that your bot can always hit the black ball into pocket 4, even though its y coordinate is random.</p>
+  <p>
+    <b>Summary:</b> In this tutorial, we revisited a use case for randomness, and you also learned how to access the array <b class="variablenamebold">Balls</b> to read ball positions.
+  </p>
+  <p>
+    <b>Exercise 1:</b> Can you change your call shot so that it always knocks the black ball to the right horizontally? Think about where the aiming point would be. 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Can you change your call shot so that <b>it always knocks the black ball 45 degrees to the bottom/right direction</b> as shown below? For a hint, the contact point should be 45 degrees to the left/top of the black ball, so its x and y coordinates are shifted from the blackball's coordinates for the same amount. Also, in JavaScript, you can get the square root of a number using by calling the function "<span class="variablename">Math.sqrt(number)</span>".
+    <p>
+      <img src="/images/shoot45degrees.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+    
+  </p>  
+</element>
+
+<!-- 
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 2, cueballx: 0, cuebally: 0 };
+}
+
+function getCallShot() { 
+  const blackBallPos = Balls[1];
+  return { strength: 600, aimx: 0, aimy: blackBallPos.y - BallDiameter, cueballx: 0, cuebally: 0 };
+}
+-->

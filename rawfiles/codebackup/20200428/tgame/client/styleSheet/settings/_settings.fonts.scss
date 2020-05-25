@@ -1,0 +1,45 @@
+$tg-fs-icon-small: 7px;
+$tg-fs-very-tiny: 8px;
+$tg-fs-tiny: 10px;
+$tg-fs-x-tiny: 11px;
+$tg-fs-small: 13px;
+$tg-fs-regular: 14px;
+$tg-fs-large: 21px;
+$tg-fs-x-large: 24px;
+$tg-fs-xx-large: 28px;
+$tg-fs-xxx-large: 32px;
+$tg-fs-4xl-large: 34px;
+
+// basic font size
+$tg-fs-heading1: 32px;
+$tg-fs-heading2: 28px;
+$tg-fs-heading3: 24px;
+$tg-fs-heading4: 18px;
+$tg-fs-heading5: 16px;
+$tg-fs-body: 14px;
+$tg-fs-comment: 12px;
+
+// basic fond family
+$tg-ff-body: Montserrat, sans-serif;
+$tg-ff-form: 'Droid Sans', sans-serif;
+
+@font-face {
+  font-family: 'EurostileBold';
+  src: url('/fonts/SFUEurostileBoldCondensed.TTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FuturaHeavy';
+  src: url('/fonts/SFUFuturaHeavy.TTF');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Summernote';
+  src: url('/fonts/summernote.ttf');
+  font-weight: normal;
+  font-style: normal;
+}

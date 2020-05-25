@@ -1,0 +1,343 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, // aim at table center 
+    strength: 80      // using a strength of 80
+  }; 
+}   
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back! In this lesson, we'll review function definition, and teach your robot how to make a random shot.
+  </p>    
+  <p>
+    Click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to start.
+  </p>
+</element>
+
+<element elementid="101" elementType="Language" languageSkills="JavaScript:Object|Python:Dictionary">
+</element>
+  
+
+<element elementid="102" elementType="Info">
+  <p>
+    After the initial break shot, whenever it's your bot's turn to make the next shot, the game engine will ask your robot, "<b>hey, how do you want to make the next shot?</b>", and your robot will reply "<b>let's aim at this point (x, y) on the table</b>". 
+  </p>
+  <p>
+    This is very similar to how the break shot works, right? That's why the code will be very similar too. <b>Can you add a new function <span class="variablenamebold">getCallShot</span> to your robot code below the <span class="variablenamebold">getBreakShot</span> function</b>? It should return a shot command object to aim at aimx of 0 and aimy of 0 for now, with a strength of 50. 
+  </p>
+</element>
+
+
+<element elementid="104" elementType="Coding" condition="TestFinishedAimYCall00">
+  <p>
+    If you need some guidance, you can copy the code below, and <b>replace every "?" with your code</b>. You can refer to the getBreakShot function as an example.
+  </p>
+  <p>
+    <img src="/images/addcallshot.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  
+  <p>
+    When you are finished, click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/>. Type "<b>hint</b>" or click <img src='/images/icon-hint.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/> if you need some help.
+  </p>  
+
+  <code isHidden="false">
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}      
+
+//TODO: add new getCallShot function
+
+//h0::add a function name and a parameter list
+::function getCallShot {
+::function getCallShot() {
+::function getCallShot[] {
+function ? {
+  return { 
+    //h1::add 2 properties: aimy of value 0 and strength of 50::write ", aimy: 0, strength: 50"
+    ::aimx: 0, aimy, strength
+    ::aimx: 0 aimy: 0 strength: 50
+    ::aimx: 0, aimy: 0, strength: 50
+    aimx: 0, ? , ?
+  }; 
+}      
+//ENDTODO
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+
+function getCallShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 50
+  };
+}          
+    </cleancode>  
+</element>
+
+<!-- 
+<element elementid="105" elementType="Quiz" answerKey="D" answerReason="A is missing parameter list; B is missing statements; C is missing the 'function' keyword.">
+  <p>
+    When a pool game begins, the game engine will ask your robot "<b>hey, how do you want to take the break shot?</b>", and your robot replies with "<b>let's aim at this point (...) on the table</b>".
+  </p>
+  <p>
+    To make that interaction happen in your robot's digital world, your robot needs to implement a <b>function</b> called "getBreakShot"
+  </p>
+  <p>
+    To make that happen in computer code, we need to use a <b>function</b>, which is a chunk of code that performs a task or calculates a value. A function definition contains 4 parts:
+  </p>
+  <p>
+      <img src="/images/function4parts.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <br />
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 4 choices below, which one is a complete function definition?
+  </p>
+  <p>
+      <ul>
+        <li>
+          <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> function A {} 
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> function B()
+          </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> func C() {}
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> function D() {}
+        </li>
+      </ul>
+    </p>
+  </element> -->
+
+<element elementid="106" elementType="Info">
+  <p>
+    Well done! Now that your function is working, you also need to ensure that it is properly formatted. We have two tools to assist you with formatting:
+  </p>
+  <p>
+    <img src="/images/beautifyformat.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+
+  <p>
+    One is the "BEAUTIFY" button, which reformats your code, adding the <b>correct number of spaces before each line to achieve alignment of all statements in a block</b>. 
+  </p>
+  <p>
+    Another tool is the highlighter for matching brackets, which allows you to see whether <b>each closing bracket is matched with the correct open bracket, and vice versa</b>.
+  </p>
+</element>
+
+<element elementid="109" elementType="Info">
+  <p>
+    Now to make your robot more fun, let's make it shoot <b>randomly</b>. Sounds silly, right? But how would we do that? 
+  </p>
+  <p>
+    Whenever we need some random behavior, we call the function, <b class="variablename">Math.random</b>, like this: "<span class="variablename">number = Math.random()</span>". Here the "()" represent an empty list of inputs, since we don't need any inputs to generate a new random number.
+  </p>
+  <p>
+    <img src="/images/magicrandomnumber.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+  </p>
+  <p>
+    The number returned by <span class="variablename">Math.random()</span> can be any number between 0 and 1, such as 0.251. Each time you call <span class="variablename">Math.random</span>, it will return a new random number. It is like a magician pulling numbers out of a magic bag. No one knows exactly which number he'll pull out next, except that it won't be less than 0 or more than 1.
+  </p>
+</element>
+<element elementid="109.3" elementType="Info">
+  <p>
+    Let's do an interesting experiment. <b>Please click <a href="https://www.webtoolkitonline.com/javascript-tester.html" target="_blank">Javascript Tester</a> to open it in a new tab</b>, and write one line of code in the editor: Math.random(). When you click the "Execute" button, you should see a popup message showing you the result of your code, which is a random number.
+  </p>
+  <p>
+    <img src="/images/testmathrandom.gif" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <p>
+    Try to click "Execute" 20 times, and count how many times the random number is less than 0.2. It should happen for around 4 times, since on average we should get a random number less than 0.2 for 20% of the time.
+  </p>
+</element>
+<element elementid="109.5" elementType="Info">
+  <p>
+    Random numbers are very interesting. For example, when we run '<span class="variablename">Math.random()</span>', we get a random number between 0 and 1; when we run '<span class="variablename">2 * Math.random()</span>', we get a random number between 0 and 2, essentially <b>doubling its range of possible values</b>; and if we execute '<span class="variablename">2 * Math.random() + 3</span>', we <b>shift the range of values by 3</b>, generating a random number between 3 and 5. 
+  </p>
+  <p>
+    <img src="/images/randomnumberrange.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    Essentially you can scale and shift the range of a random number to your needs, using math operations.
+  </p>
+  <!-- <p AScratchExample>
+    If you know Scratch, there is a similar block<img src='/images/pickrandom0to10.png' style='width: auto; height: 25px; vertical-align: bottom;'/> that allows you to pick a random number between two numbers, so "pick random 0 to 10" is similar to "<span class="variablename">Math.random() * 10</span>", except that "<span class="variablename">Math.random</span>" can give you any decimal number between 0 and 10, not just one of the 11 whole numbers. 
+  </p>   -->
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    To generate a new random numbers within a given range, we have pre-defined a function <b>getRandomNumber(min, max)</b> for you. The 2 input paramters <b>min</b> and <b>max</b> specify the range of possible values, and its output is a new random number. You can call this helper function in your robot code like this:
+  </p>
+  <p>
+      <pre class="brush: js">
+// generate a random number between 0 and 100        
+number1 = getRandomNumber(0, 100); 
+// generate a random number between -50 and 50
+number2 = getRandomNumber(-50, 50);
+      </pre>
+  </p>
+</element>
+
+<!-- <element elementid="110" elementType="Quiz" answerKey="D" answerReason="'1600 * Math.random()' gives us a random number between 0 and 1600, then subtracting 800 gives us a random number between -800 and 800. ">  
+
+  <p>
+    Now if we need a <b>random number between -800 and 800</b>, which code would be correct? 
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 800 * Math.random() - 800
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 1600 * Math.random() - 1600
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 800 * Math.random() - 1600
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 1600 * Math.random() - 800
+      </li>
+    </ul>
+  </p>
+</element>   -->
+  <!-- <p>
+    An <b>object</b> is a collection of "property: value" pairs wrapped by "{}". For more information on JavaScript objects, type a question like "<b>what is an object in JavaScript?</b>". You may be surprised by how much I know or how much I don't know:) But I am learning really fast!
+    </p> -->
+<element elementid="111" elementType="Coding" condition="TestFinishedAnyResultAimXY">
+  <p>
+    Now let's change your robot to make random shots. Using the following code as a starting point, please change your <b class="variablename">getCallShot</b> function to return a random aiming point, with <span class="variablename">aimx</span> between -800 and 800, and <b><span class="variablename">aimy</span> between -400 and 400</b>.
+  </p>
+  <p>
+    <img src="/images/addRandomX.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    Click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button when you are done. 
+  </p>
+<code isHidden="false">
+//TODO: make getCallShot random
+function getCallShot() {
+  return { 
+    aimx: getRandomNumber(-800, 800), 
+    // make aimy a random number between -400 and 400
+    //h0:: call function getRandomNumber
+    ::aimy: getRandomNumber(-400 400),
+    ::aimy: getRandomNumber(-400, 400),
+    ::aimy: getRandomNumber(-400; 400),
+    aimy: ?, 
+    strength: 50
+  }; 
+}      
+//ENDTODO
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+
+function getCallShot() {
+  return {
+    aimx: getRandomNumber(-800, 800), 
+    aimy: getRandomNumber(-400, 400), 
+    strength: 50
+  };
+}        
+    </cleancode>  
+</element>
+
+<element elementid="112" elementType="Info">
+  <p>
+    On one last note, let me quickly revisit "comments".<b> Comments are informational notes in your program that are not code. They are ignored when your code runs. Their sole purpose is to comment on what the code is doing.</b> 
+  </p>
+  <p>
+    In JavaScript, a comment is distinguished (from the code) by starting the line with "//". <b>All text following on the same line after this sign</b> is treated as a comment. 
+  </p>
+  <p>
+    Alternatively, you can use a pair of "/*" and "*/" to <b>enclose one or multiple lines</b> of text as a comment. This is helpful when you need to include a longer comment or block of information. Below are some examples:
+  </p>
+  <pre class="brush: js">
+// this is a typical one line comment 
+
+/* 
+and this is a 
+multi-line comment.
+*/
+    </pre>
+    <p>
+      <b>Can you add some comments to your getCallShot function?</b> Try to use both forms of comments. 
+    </p>
+</element>
+<!-- 
+<element elementid="113" elementType="Coding" condition="TestFinishedAnyResultAimXYStrength">
+    <p>
+      For the last challenge of this lesson, can you <b>add a new property "strength" to the shot command</b> in the getCallShot function? The strength ranges from 0 to 100, and I suggest you set the strength to 50.
+    </p>
+    <p>
+      Click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button when you are done. 
+    </p>
+  <code isHidden="true">
+function getCallShot() {
+  //TODO: add the strength property
+  return { 
+    aimx: 2000 * Math.random() - 1000, 
+    aimy: 1000 * Math.random() - 500 
+    //h0::don't forget to add a comma before strength
+    ::add ", strength: 50"
+    ::add ", strength 50"
+    ::add ", strength = 50"
+    ?
+  }; 
+  //ENDTODO
+}      
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}            
+
+function getCallShot() {
+  return { 
+    aimx: 2000 * Math.random() - 1000, 
+    aimy: 1000 * Math.random() - 500,
+    strength: 50
+  }; 
+}         
+    </cleancode>  
+</element> -->
+
+<element elementid="200" elementType="Conclusion">
+  <p>Congratulations on completing your second function! </p>
+  <p>
+    <b>Summary:</b> you have <b>reviewed how to use a function and object</b> to specify an aiming point for call shots, and <b>how to generate random aiming points using <span class="variablename">Math.random()</span></b>.
+  </p>
+  <p>
+    <b>Exercise 1:</b> click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> a few times, and observe the random aiming points selected. Can you change your code such that <b>the random aiming point will fall only in the upper-left quarter of the table</b>? Recall that the table is <b>2000 by 1000</b> units. 
+  </p>
+  <p>
+    <b>Exercise 2:</b> can you change your code such that <b>the strength is a random number between 30 and 80</b>? 
+  </p>
+  <p>
+    <b>Exercise 3 (optional):</b> for more fun reading, please check out our knowledge base article on random numbers and probability <a href="https://forum.tgame.ai/t/more-about-randomness-and-probability/206/1" target="_blank">here</a>.
+  </p>
+</element>
+
+<!-- even more fun answer: aimx: 515, aimy: 32.5 -->
+

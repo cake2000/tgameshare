@@ -1,0 +1,58 @@
+.modal-Shopping{
+  border-radius: 20px;
+  background: #469dd7;
+  padding: 20px 25px 25px 20px;
+  box-shadow: inset 0px 0px 18px 10px #ffffff26;
+  &__header{
+    display: flex;
+    justify-content: center;
+    padding-bottom: 25px;
+    &__title{
+      flex: 1;
+      font-weight: 700;
+      font-size: 24px;
+      color: #fff;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__close{
+      span{
+        margin-left: 15px;
+        cursor: pointer;
+        justify-content: center;
+        font-weight: 700;
+        height: 35px;
+        border-radius: 7px;
+        background: #ff172f;
+        width: 35px;
+        display: flex;
+        align-items: center;
+        font-size: 24px;
+        color: #fff;
+        transition: 0.3s;
+        border-bottom: 3px solid #a80000;
+        &:hover{
+          background: #ff5c5c;
+          box-shadow: none;
+        }
+        &:active {
+          transform: translateY(2px);
+          border-bottom-width: 2px;
+        }
+      }
+    }
+  }
+  &__main{
+    // border-radius: 10px;
+    background: #fff;
+    height: calc(100vh - 200px);
+    overflow: overlay;
+  }
+}
+
+.modalDes {
+  font-size: 18px;
+  margin-bottom: 10px;
+}

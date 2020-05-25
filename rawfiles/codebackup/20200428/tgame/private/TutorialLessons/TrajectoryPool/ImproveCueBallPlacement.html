@@ -1,0 +1,443 @@
+<element elementid="100" elementType="Info">
+  <p>
+    Hey! Welcome back! The previous tutorial is really tough. So in this one, we'll talk about an easier topic. 
+  </p>    
+  <p>
+    At the beginning of the intermediate lessons, we learned how to place the cue ball freely after the opponent makes a foul. Now we'll revisit <b>getCueBallPlacement</b> function, and teach our robots not to place the cue ball on an impossible position, such as on a cushion or on another ball. 
+  </p> 
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    First, let's see how we can avoid placing cue ball on another ball. It sounds straight forward. We can run through all balls and check if one of them overlops with the cue ball. Note that checking the center positions only is not enough. We have to make sure there is no overlap on the entire cue ball within BallDiameter. 
+  </p>
+  <p>
+    As shown in the picture below, the distance between the two balls' centers should be greater than BallDiameter. I've created a helper function, <b>getDistance(pos1, pos2)</b>, for you to get the distance between any two positions.  
+  </p>
+  <p>
+    <img src="/images/cueBallOnAnotherBall.png" style="width: 30%; height: auto; margin-left: 35%; vertical-align: top;"/>
+  </p>  
+</element>
+
+<element elementid="105" elementType="Coding" condition="TestFinishedAnyResult_CueBallNoOverlap">
+  <p>
+    <b>Challenge:</b> can you modify your <b>getCueBallPlacement</b> function to avoid placing cue ball on another ball? In current test setup, your robot should not target ball 2 and pocket 1. To make code easy to read, let's write a new function and call it in getCueBallPlacement. 
+  </p>
+  <code isHidden="false">
+function isNoBallAtPosition(position) {
+  //TODO: check if a ball exists at the given position
+  //h0::use for-loop to go through all balls
+  ::for (let i = 0; i &lt; Balls.length; i ++) {
+  ::for (let i = 1; i &lt;= Balls.length; i ++) {
+  ::for (let i = 0; i > Balls.length; i ++) {
+  for ( ? ) {
+    //h1::check if ball i is overlap with position::check the distance between ball center and given position is greater than BallDiameter
+    ::if (getDistance(Balls[i], position) &lt;= 2 * BallDiameter)
+    ::if (getDistance(Balls[i], position) &lt;= BallDiameter)
+    ::if (getDistance(Balls[i], position) &lt; BallDiameter)
+    if ( ? )
+      return false;
+  }
+  //ENDTODO
+  return true;
+}
+
+function getCueBallPlacement() {
+  let legalBallIDs = world.CandidateBallList[MyID]; 
+  for (let k=0; k &lt; legalBallIDs.length; k++) {
+    const ballPos = Balls[legalBallIDs[k]];
+    for (let pocketID=0; pocketID &lt;=5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+        if (isNoBallAtPosition(pos))
+          return pos;
+      }
+    }
+  }
+}
+  </code>
+  <cleancode>
+function isNoBallAtPosition(position) { 
+  for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+    if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+      return false; 
+  } 
+  return true; 
+}
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+        if (isNoBallAtPosition(pos))
+        	return pos; 
+      }
+    }
+  }
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+  // initialize the cache if it is not defined 
+  if( typeof getProbForCmd.probCache == 'undefined' ) { 
+    getProbForCmd.probCache = {}; 
+  } 
+  // convert shot command to a string 
+  const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+  // if cmdStr is in the cache, return the corresponding probability 
+  if ( cmdStr in getProbForCmd.probCache ) 
+    return getProbForCmd.probCache[cmdStr]; 
+  // otherwise, calculate and store into cache 
+  const prob = await calculateProbability(cmd); 
+  getProbForCmd.probCache[cmdStr] = prob ; 
+  return prob; 
+} 
+
+async function refineCommand(cmd) { 
+  // Initialization 
+  let center = 50, step = 16; 
+  let leftBoundary = 0, rightBoundary = 100; 
+    
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+    // center 
+    cmd.strength = center; 
+    const centerProb = await getProbForCmd(cmd); 
+    // left 
+    const leftStrength = Math.max(leftBoundary, center - step); 
+    cmd.strength = leftStrength; 
+    const leftProb = await getProbForCmd(cmd); 
+    // right 
+    const rightStrength = Math.min(rightBoundary, center + step); 
+    cmd.strength = rightStrength; 
+    const rightProb = await getProbForCmd(cmd); 
+    if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+      // optimal point is within current range 
+      // reduce steps to search more carefully 
+      step /= 2; 
+      leftBoundary = leftStrength; 
+      rightBoundary = rightStrength; 
+    } else { 
+      center = leftProb > rightProb ? leftStrength : rightStrength; 
+    } 
+  } 
+  cmd.strength = center; 
+  const prob = await getProbForCmd(cmd); 
+  return {cmd: cmd, prob: prob}; 
+} 
+  
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+        const endStates = await calculateEndState(cmd, true);
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+        (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          isInPocket = true;
+          break;
+        }
+      }
+      if (isInPocket) {
+        cmd.spin = -0.5;
+        const endStates = await calculateEndState(cmd); 
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+          (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          continue;
+        }
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const probWithCmd = await refineCommand(cmd);
+      if ( probWithCmd.prob > highestProb ) {
+        // found a better command: record the command and its probability
+        bestCommand = probWithCmd.cmd ; 
+        highestProb = probWithCmd.prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}      
+  </cleancode>      
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Cool. Your robot has learned never to place the cue ball on top of another ball. Let's move on to the next mission: to avoid placing the cue ball on or beyond cushions. 
+  </p>
+  <p>
+    In the picture below, the cushion edges are marked by a white rectangle. In addition, we still need to consider <b>BallDiameter</b>. So the cue ball has to be placed on or within the red rectangle shown in the picture. I've calculated the coordinates of red lines and stored them in variable <b>Boundaries</b>, which has four properties: TOP_Y, BOTTOM_Y, LEFT_X, and RIGHT_X. 
+  </p>
+  <p>
+    <img src="/images/cueBallAvoidCushion.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p> 
+</element>
+
+<element elementid="115" elementType="Coding" condition="TestPPPocketBall_3_In_3">
+  <p>
+    <b>Challenge:</b> modify your <b>getCueBallPlacement</b> function to avoid placing cue ball on or beyond cushions. In current test setup, your robot should not target ball 3 and pocket 1. Let's write another new function to do the work. 
+  </p>
+  <p>
+    In the end of <b>getCueBallPlacement</b> function, if there is no good position, we put cue ball at (-500, 0). 
+  </p>
+  <code isHidden="false">
+function isWithinCushions(position) {
+  //TODO: check if position is on or beyond cushions. 
+  //h0::check if position.x is out of [Boundaries.LEFT_X, Boundaries.RIGHT_X] or position.y is out of [Boundaries.TOP_Y, Boundaries.BOTTOM_Y]
+  ::if (position.x &lt;= Boundaries.LEFT_X &amp;&amp; position.x >= Boundaries.RIGHT_X &amp;&amp; position.y &lt;= Boundaries.TOP_Y &amp;&amp; position.y >= Boundaries.BOTTOM_Y)
+  ::if (position.x &lt; Boundaries.LEFT_X &amp;&amp; position.x > Boundaries.RIGHT_X &amp;&amp; position.y &lt; Boundaries.TOP_Y &amp;&amp; position.y > Boundaries.BOTTOM_Y)
+  ::if (position.x &lt;= Boundaries.LEFT_X || position.x >= Boundaries.RIGHT_X || position.y &lt;= Boundaries.TOP_Y || position.y >= Boundaries.BOTTOM_Y)
+  ::if (position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X || position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+  if ( ? )
+    return false;
+  return true; 
+}
+
+function getCueBallPlacement() {
+  ...
+  for (let k=0; k &lt; legalBallIDs.length; k++) {
+    ...
+    for (let pocketID=0; pocketID &lt;=5; pocketID ++) {
+      ...
+      if ( !isBlocked ) {
+        const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+        //h1::call isNoBallAtPosition and isWithinCushions function
+        ::if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+        ::if (isNoBallAtPosition(pos) || isWithinCushions(pos))
+        if ( ? )
+          return pos;
+      }
+    }
+  }
+  return new Victor(-500, 0);
+}
+  </code>
+  <cleancode>
+function isWithinCushions(position) { 
+  if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+      position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+    return false; 
+  return true;  
+}
+
+function isNoBallAtPosition(position) { 
+  for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+    if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+      return false; 
+  } 
+  return true; 
+}
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+        if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+          return pos; 
+      }
+    }
+  }
+  return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+  // initialize the cache if it is not defined 
+  if( typeof getProbForCmd.probCache == 'undefined' ) { 
+    getProbForCmd.probCache = {}; 
+  } 
+  // convert shot command to a string 
+  const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+  // if cmdStr is in the cache, return the corresponding probability 
+  if ( cmdStr in getProbForCmd.probCache ) 
+    return getProbForCmd.probCache[cmdStr]; 
+  // otherwise, calculate and store into cache 
+  const prob = await calculateProbability(cmd); 
+  getProbForCmd.probCache[cmdStr] = prob ; 
+  return prob; 
+} 
+
+async function refineCommand(cmd) { 
+  // Initialization 
+  let center = 50, step = 16; 
+  let leftBoundary = 0, rightBoundary = 100; 
+    
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+    // center 
+    cmd.strength = center; 
+    const centerProb = await getProbForCmd(cmd); 
+    // left 
+    const leftStrength = Math.max(leftBoundary, center - step); 
+    cmd.strength = leftStrength; 
+    const leftProb = await getProbForCmd(cmd); 
+    // right 
+    const rightStrength = Math.min(rightBoundary, center + step); 
+    cmd.strength = rightStrength; 
+    const rightProb = await getProbForCmd(cmd); 
+    if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+      // optimal point is within current range 
+      // reduce steps to search more carefully 
+      step /= 2; 
+      leftBoundary = leftStrength; 
+      rightBoundary = rightStrength; 
+    } else { 
+      center = leftProb > rightProb ? leftStrength : rightStrength; 
+    } 
+  } 
+  cmd.strength = center; 
+  const prob = await getProbForCmd(cmd); 
+  return {cmd: cmd, prob: prob}; 
+} 
+  
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+        const endStates = await calculateEndState(cmd, true);
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+        (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          isInPocket = true;
+          break;
+        }
+      }
+      if (isInPocket) {
+        cmd.spin = -0.5;
+        const endStates = await calculateEndState(cmd); 
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+          (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          continue;
+        }
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const probWithCmd = await refineCommand(cmd);
+      if ( probWithCmd.prob > highestProb ) {
+        // found a better command: record the command and its probability
+        bestCommand = probWithCmd.cmd ; 
+        highestProb = probWithCmd.prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}      
+  </cleancode>            
+</element>
+
+<element elementid="200" elementType="Conclusion">
+  <p>Bravo! </p>
+  <p><b>Summary:</b> in this lesson, your robot has learned not to place the cue ball on any other balls, nor beyond cushions. </p>
+  <p>
+      <b>Exercise:</b> In the last challenge, instead of using Boundaries, can you calculate the range of x and y by yourself, given pocket positions?  
+  </p>
+</element>
+

@@ -1,0 +1,84 @@
+// Style Author Vienpn 
+.modaltest{
+  &--challenge-modal{
+    // background-image: linear-gradient(to bottom, #0074d4, #0067b1, #00588f, #00496d, #17394d);
+    padding: 0px;
+    .challenge{
+      &--main{}
+      &__line{
+        font-size: 16px;
+        margin-bottom: 30px;
+        line-height: 20px;
+        color: #333;
+        a{
+          margin-right: 20px;
+          font-weight: 600;        
+        }
+        span{
+          color: #f7bf00;
+          font-weight: 600;
+        }
+      }
+    }
+    .modal{
+      &__header{
+        &__title {
+          color: #0093ff;
+          font-size: 26px;
+          line-height: 3px;
+          text-transform: capitalize;
+          text-align: center;
+          padding: 30px 0px 30px 0px;
+          border: 2px dashed #002535;
+          width: 360px;
+          flex: 0 0 320px;
+          justify-content: center;
+          margin: 0 auto;
+          background: #fff;
+        }
+      }
+      &__body{
+        margin-top: -20px;
+        padding: 60px 30px 20px 30px;
+        border: 2px dashed #000;
+        background: #fff;
+        color: #333;
+        min-width: 780px;
+      }
+      &__footer{
+        &__content{
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: -22px;
+        }
+        button{
+          padding: 12px 50px;
+          border-radius: 20px;
+          border: 1px solid transparent;
+          background: rgb(0,159,255);
+          background: linear-gradient(175deg, rgba(0,159,255,1) 0%, rgba(0,124,213,1) 35%, rgba(0,147,255,1) 100%);
+          color: #fff;
+          font-weight: 600;
+          font-size: 18px;
+          max-width: 265px;
+          &:hover{
+            background: rgb(50, 125, 171);
+            background: linear-gradient(175deg, rgb(10, 138, 216) 0%, rgb(32, 128, 197) 35%, rgb(10, 121, 204) 100%);
+            color: #f7bf00;
+          }
+          &.start-now{
+            margin-bottom: 35px;
+          }
+          &.cancel-battle{        
+            font-size: 16px;
+            padding: 10px 40px;   
+          }
+          &.cancel{        
+            margin-bottom: 35px;
+          }
+        }        
+      }
+    }
+  }
+}

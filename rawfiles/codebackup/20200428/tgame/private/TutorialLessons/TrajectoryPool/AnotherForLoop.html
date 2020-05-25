@@ -1,0 +1,251 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+    const aimPoint = getAimPosition(Balls[3], Pockets[pocketID]);
+    const cmd = {
+      aimx: aimPoint.x, 
+      aimy: aimPoint.y, 
+      strength: 30,
+      targetBallID: 3, 
+      targetPocketID: pocketID
+    };
+    const prob = await calculateProbability(cmd);
+
+    if (prob > highestProb) {
+      bestCommand = cmd;
+      highestProb = prob;
+    }
+
+    if (prob > 50) {
+      break;
+    }
+  } // end of for loop "pocketID"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}  
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Since you have successfully completed the previous tutorial, your bot can select the best shot from among all six pockets for ball 3. In this tutorial we'll improve it further so that your bot can <b>choose the best shot from among all possible ball-and-pocket combinations</b>.
+  </p>
+  <p>
+    FYI the discussions for this topic is located <a href="https://forum.tgame.ai/t/another-for-loop-to-walk-through-all-balls/27" target="_blank">here</a> in our forum.
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    Before we start coding, let's discuss how to walk through an <a href="#" onclick="ClickToSendChat(event, 'array')" class="inlinebutton"><b>array</b></a> of numbers, such as "<span class="variablename">const A = [2, 5, 7]</span>". Since the index of an array starts with 0, we use <span class="variablename">A[0]</span>, <span class="variablename">A[1]</span> and <span class="variablename">A[2]</span> to access the three numbers stored in the array <span class="variablename">A</span>. 
+  </p>
+  <p>
+    In other words, <b>the highest index for the array is always the length of the array minus 1 (<span class="variablename">A.length-1</span> in JavaScript)</b>. If <span class="variablename">A</span> has 5 elements in it, then the index value would range from 0 to 4.
+  </p>
+  <p>
+    The for-loop is a natural choice to use when iterating through arrays, as shown below. The index variable (<span class="variablename">k</span> in this example) increments from 0 to n - 1 (where n is the array's length). Recall that "<span class="variablename">k++</span>" is simply a shorthand for "<span class="variablename">k = k + 1</span>".
+  </p>
+  <p>
+      <pre class="brush: js">
+// an array of 3 numbers      
+const A = [2, 5, 7];        
+// k will iterate from 0 to array's length - 1
+for (let k=0; k &lt;= A.length-1; k++) {
+  // print the k-th item using index k
+  console.log("item " + k + " is " + A[k]);
+}
+// will print 
+// item 0 is 2
+// item 1 is 5
+// item 2 is 7
+      </pre>
+    </p>
+    <p AScratchExample>
+      If you know Scratch, the above code can be implemented using a list and the "repeat until" block as shown below. Note that in Scratch the first item in a list has index 1, but in JavaScript the first item has index 0. Comparing the code above and below, I hope you appreciate the simplicity of JavaScript now.
+    </p>
+    <p AScratchExample>
+      <img src="/images/scratch_forlooplist.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+</element>
+
+<element elementid="103" elementType="Quiz" answerKey="C" answerReason="Index k will go from 2 to 4 to 6, so we'll print out B[2], B[4] and B[6]."> 
+    <p>
+      <b>Quiz:</b> For the code below, what's the output we will get? Please type or click <b>A</b>, <b>B</b>, <b>C</b> or <b>D</b>.
+    </p>
+    <p>
+        <pre class="brush: js">
+// an array of 7 numbers      
+const B = [3, 4, 5, 6, 7, 8, 9];        
+for (let k=2; k &lt; B.length; k=k+2) {
+  // print out value of B[k]
+  console.log(B[k]);
+}
+        </pre>
+      </p>
+    <p>
+      <ul>
+        <li>
+          <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> 3 5 7 9</a>
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> 2 4 6 8</a>
+          </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> 5 7 9</a>
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> 5 6 7 8 9</a>
+        </li>
+      </ul>
+    </p>
+  </element>
+
+<element elementid="104" elementType="Info">
+  <p>
+    Now let's change your bot to <b>iterate through all legal balls</b>. As you know, your bot can shoot only a subset of all the balls legally (i.e. without incurring a penalty), since some balls are already in pockets, and some balls belong to your opponent. To get the IDs of all balls your bot can target, you need to use the following line of code:
+  </p>
+  <p>
+    <pre class="brush: js">
+const legalBallIDs = world.CandidateBallList[MyID];
+    </pre>
+  </p>
+  
+  <p >
+      <img src="/images/arrayofarrays.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+  <p>
+    The object <b class="variablenamebold">world</b> is a predefined object representing the game world, and it has a property <b class="variablenamebold">CandidateBallList</b>, which is an array of length 2. <b class="variablenamebold">world.CandidateBallList[0]</b> is an array of ball IDs for player 0, and <b class="variablenamebold">world.CandidateBallList[0]</b> is an array of ball IDs for player 1. And <b class="variablenamebold">MyID</b> is a predefined variable representing your bot's ID, either 0 or 1.
+    <!-- <b class="variablenamebold">MyID</b> is a predefined variable representing your bot's ID, either 0 or 1. <b class="variablenamebold">world.CandidateBallList[MyID]</b> is itself an array containing ball IDs (e.g. [2, 3, 6, 7]) that can be legally shot by the player whose ID is <b class="variablenamebold">MyID</b>. In other words, <b><span class="variablenamebold">world.CandidateBallList</span> is an array of arrays</b>.  -->
+  </p>
+  <p>
+    After you have defined the variable <b>legalBallIDs</b>, you can read the ball IDs in this array using <b>legalBallIDs[0]</b>, <b>legalBallIDs[1]</b>, etc.
+  </p>
+</element>
+
+
+<element elementid="110" elementType="Coding" condition="TestPPPocketBall_6_In_2">
+  <p>
+    <b>Challenge:</b> please change your <span class="variablename">getCallShot</span> function to pick the best target ball-and-pocket combination. Basically you need to complete the new for-loop with an index variable <b>k</b> (outside the existing loop with the index variable of <b>pocketID</b>) such that the outer for-loop will <b>iterate through all ball IDs in the array <span class="variablenamebold">legalBallIDs</span></b>. 
+  </p>
+  <p>
+    <!-- <b>I suggest you compare the code template below line-by-line with your exiting code carefully</b>, and insert the newly added lines into your code first, before replacing the "?" with the correct implementation. Also, don't forget that your new outer for-loop needs to have a pair of open and closing curly brackets, which should <b>fully enclose the existing for-loop for pocketID inbetween them</b>.  -->
+    You need to follow the comments to replace the "?" with your code:
+  </p>
+  <code isHidden="false">
+//TODO: complete for-loop to iterate through legalBallIDs using index k  
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  
+  // new code starts here
+  // array of ball IDs that can be legally targeted
+  // such as [2, 3, 6]
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  // Step 1: add new for-loop for all legal ball IDs
+  //h0::k should range from 0 to legalBallIDs.length-1
+  ::for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+  ::for (let k = 0 ; k &lt;= legalBallIDs.length ; k=k+1 ) {
+  for (let k = ? ; k &lt;= ? ; k = ? ) {
+    // Step 2: define ballID as k-th item in legalBallIDs array
+    //h1::ballID should be the k-th item in legalBallIDs::write "legalBallIDs[k]"
+    const ballID = ?;
+
+    // existing for-loop for pocketID
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      //h2::target at the ball with ID of ballID::write "Balls[ballID]"
+      const aimPoint = getAimPosition(Balls[?], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        //h3::target at the ball with ID of ballID::write "targetBallID: ballID"
+        targetBallID: ?, 
+        targetPocketID: pocketID 
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; 
+        highestProb = prob;
+      }
+    } // end of the "pocketID" for-loop 
+  }   // end of the "k" for-loop 
+  
+  // return the best command we found
+  return bestCommand;
+}    
+//ENDTODO
+  </code>
+  <cleancode>
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30,
+        targetBallID: ballID, 
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of "pocketID" for-loop 
+  } // end of "k" for-loop 
+  
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}   
+  </cleancode>
+</element>
+  
+<element elementid="180" elementType="Conclusion">
+    <p>Tutorial completed!</p>
+    <p>
+      <b>Summary:</b> We have reviewed using for-loop to iterate through an array, and now you have a full implementation of <b class="variablenamebold">getCallShot</b> that walks through all legal balls and all pockets to find the best shot by probability.
+    </p>
+    <p>
+      Your bot is in pretty good shape now. I suggest you <b>release a new version of your bot and test it out in practice games</b>.
+    </p>
+    <p>
+      <b>Exercise 1:</b> Can you modify your <span class="variablename">getCallShot</span> function so that if you find a command with a probability of at least 80%, then return that command immediately? Note that you can call the <b>return</b> command anywhere inside a function to exit that function immediately.
+    </p>
+    <p>
+      <b>Exercise 2:</b> So far your bot has been using a "hardcoded" strength of 30. Can you <b>add another for-loop to search through an array of strength values</b> inside the current loop on <span class="variablename">pocketID</span>? For example, you can define an array "<span class="variablename">const strengthValues = [30, 50, 70]</span>" and search through these values for the shot command with highest probability. For a hint, this new for-loop should fully enclose the definition of "<span class="variablename">cmd</span>" and "<span class="variablename">prob</span>", and also the condtional code block that updates <span class="variablename">bestCommand/highestProb</span>.
+    </p>
+</element>

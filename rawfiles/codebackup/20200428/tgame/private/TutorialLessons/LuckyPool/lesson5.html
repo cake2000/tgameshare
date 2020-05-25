@@ -1,0 +1,89 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Advanced and Professional levels have different features and limits, and your robot can decide to behave differently based on the game difficulty level.</p>
+</element>
+
+<element elementid="110" elementType="Info">
+    <h5 class="elementheader">Difficulty Levels</h5> 
+    <p>The <b>world</b> object contains a field <b>level</b> that tells what level of game you are playing. As shown in the table below, different levels have different limits on strength, and the game engine will cap your strength at these limits.</p>
+    <p>
+        <table class="ReferenceTable">
+            <thead>
+                <th> world.level </th> <th> game level</th> <th>strengh limit</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0</td> <td>Beginner</td> <td>1000</td>
+                </tr>
+                <tr>
+                    <td>1</td> <td>Advanced</td> <td>1100</td>
+                </tr>
+                <tr>
+                    <td>2</td> <td>Professional</td> <td>1200</td>
+                </tr>
+            </tbody>
+        </table>
+    </p>
+</element>
+
+
+<element elementid="120" elementType="Coding" condition="TestFinishedValidBreakShot">
+    <!-- <h5 class="elementheader">Change Break Shot Strength</h5>  -->
+    <p><b>Challenge:</b> Please add a switch clause in your function <b>this.getBreakShot</b> to specify different strength depending on the game level.</p>
+    <code>
+this.getBreakShot = function() {
+    // use switch clause based on world.level
+    switch (world.level) {
+        case 0:    
+            return {
+                aimx: 0, aimy: 0, strength: 1000
+            };
+        case 1:    
+            return {
+                aimx: 0, aimy: 0, strength: 1200
+            };
+        case 2:    
+            return {
+                aimx: 0, aimy: 0, strength: 1700
+            };
+    }
+};
+    </code>
+</element>
+    
+
+<!-- <element elementid="130"  elementType="Hint">
+    <h5 class="elementheader">Hint</h5> 
+    <p>
+        You can use the if-else clause like this:
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getBreakShot = function() { // REPLACEFUNC
+    if (world.level == 0) {
+        return {
+            aimx: 0, aimy: 0, strength: 1000
+        };
+    } else if (world.level == 1) {
+        return {
+            aimx: 0, aimy: 0, strength: 1200
+        };
+    } else {
+        return {
+            aimx: 0, aimy: 0, strength: 1700
+        };
+    }
+}; // REPLACEFUNC
+        </pre>
+    </p>
+</element> -->
+    
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>The same idea can be applied to call shots as well, so that your robot can adapt its behavior by checking <b>world.level</b>.</p>
+    <p>
+        <b>Extra Credit:</b> try different strength to use until you are happy with the results of your break shot. Note that the stronger your break shot, the more likely you will be able to pocket a ball and so continue to make call shots, but also the greater probability that you may pocket the cue ball along the way:)
+    </p>
+</element>

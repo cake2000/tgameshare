@@ -1,0 +1,223 @@
+<element elementid="100" elementType="Info">
+  <h5 class="elementheader">Introduction to State Machine</h5> 
+  <p><b>State Machine</b> is one of the most useful tools for controlling robot behaviors. A robot can be in one of many <b>states</b> at any moment, and it can <b>transit</b> from the current state to another state when some condition is met.</p>
+  <p>
+    <img src="/images/1_2_statemachine.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>    
+  <p>In this tutorial, we'll give your robot a state machine with 2 states, <b>TurnLeft</b> and <b>TurnRight</b>. Your robot will draw a random number to decide whether to stay in the curren state or transit to the other state.</p>
+  <p>Are you ready to get started?</p>
+</element>
+
+<element elementid="101" elementType="Info">
+  <h5 class="elementheader"><b>this.initialize</b> function</h5> 
+  <p>When the robot is created, its <b>initialize</b> function is called to do the initial setup work, and this is the perfect place for setting the initial state of the robot. Note that the initialize function is only called once, while the update function is called many, many times repeatedly thereafter.</p>
+  <p>Please add the <b>this.initialize</b> function to your robot program like below, and also add a new attribute <b>state</b> to the robot to keep track of the current state of the robot. It will be storing string values such as "TURNLEFT" or "TURNRIGHT".</p>
+  <p>When you are done, type "ok" to continue.</p>
+  <code isHidden='false'>
+this.initialize = function(data) {
+  //TODO: set state of robot to "TURNLEFT"
+
+  //h0::assign "TURNLEFT" to this.state
+  this.state = "TURNLEFT";
+};                              
+  </code>
+</element>
+
+
+<element elementid="102" elementType="Coding" condition="TestDBTurningLeft"  conditionind="200">
+  <h5 class="elementheader">Take action based on <b>state</b></h5>
+  <p>Now it's time to modify the update function to send different commands based on robot's state. Please use the following code as a starting point and send the correct command out.</p>
+  <p>When you are done, click <b>TEST</b> to see if your car keeps turning left.</p>
+  <code isHidden='false'>
+this.initialize = function(data) {
+  this.state = "TURNLEFT";
+};  
+
+this.update = function(info) {
+  //TODO: send "L" or "R" based on robot's state
+  //h0::check if state is "TURNLEFT"
+  ::if (this.state = "TURNLEFT") {
+  ::if (this.state == "TURNLEFT") {
+  ::whether (this.state == "TURNLEFT") {
+  if (this.state == "TURNLEFT") {
+    //h1::send command "L"
+    sendCommand("L");
+  //h2::otherwise, check if state is "TURNRIGHT"
+  ::else if (this.state == "TURNRIGHT") {
+  ::} else (this.state == "TURNRIGHT") {
+  ::} else if (this.state == "TURNRIGHT") {
+  } else if (this.state == "TURNRIGHT") {
+    //h3::send command "R"
+    sendCommand("R");
+  //h4::close block for h2 with }
+  }
+
+  sendCommand("F");
+};                  
+  </code>
+</element>
+
+
+<element elementid="130"  elementType="Coding" condition="TestDBTurningLeftThenRight"  conditionind="600">
+  <h5 class="elementheader">Transit from turning left to right</h5> 
+  <p>
+    Obviously it's a bit boring if our car just keeps turning left. Let's add some state transition logic so that your car will switch to turn right randomly. 
+  </p>
+  <p>
+    To achieve a random effect, in real life, you can throw a coin and choose different actions based on which side of the coin is facing up. We have something much more powerful in the computer world: <b>Math.random()</b>. This is a function of the <b>Math</b> libray, and every time you call it, it returns a new random number between 0 and 1.
+  </p>
+  <p>
+    So to simulate a coin flip, you just need to check if the random number is greater than 0.5 or not to call it a "head", since there is a 50% chance the random number is greater than or equal to 0.5. 
+  </p>
+  <p>
+        <img src="/images/Mathrandomcoin.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+      If you keep drawing random numbers using Math.random, it gives you a series of simulated coin tosses like this:
+      <table class="ReferenceTable">
+            <thead>
+                <th> Math.random outputs: </th> <th>0.34</th> <th>0.58</th> <th>0.79</th> <th>0.13</th> <th>0.80</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>simulated coin tosses:</td>
+                    <td>
+                        <img src="/images/pennytail.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                    </td>
+
+                    <td>
+                        <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                    </td>
+    
+                    <td>
+                        <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                    </td>
+
+                    <td>
+                        <img src="/images/pennytail.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                    </td>
+
+                    <td>
+                        <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                    </td>
+                </tr>
+            </tbody>
+      </table>
+  </p>
+  <p>
+    Now let's use this new tool to achieve some random state transitions. Please change the robot's state to "TURNRIGHT" if you get a random number that's greater than 0.98. This would give the car a 2% probability to switch to turn right every time the update function is called.
+  </p>
+  <p>When you are done, please click <b>TEST</b> to see if your car will switch from turning left to turning left after a while.</p>
+  <code isHidden='false'>
+this.initialize = function(data) {
+  this.state = "TURNLEFT";
+};                              
+      
+this.update = function(info) {
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+    //TODO: switch state to "TURNRIGHT" at 2% probability
+    //h0::draw a random number r::call Math.random() and store the output
+    ::let r = Math.random();
+    ::let r = Math.random;
+    ::let r = Math.Random();
+    let r = Math.random();
+    //h1::check if r is greater than 0.98
+    ::if (r == 0.98) {
+    ::if r > 0.98 {
+    ::if (r > 0.98) {
+    if (r > 0.98) {
+      //h2::switch state to "TURNRIGHT"::change value of this.state
+      ::this.state = "TURNRIGHT";
+      ::this.state = TURNRIGHT;
+      ::this.state == "TURNRIGHT";
+      this.state = "TURNRIGHT";
+    //h3::close h1 block with }
+    }
+
+  } else if (this.state == "TURNRIGHT") {
+    sendCommand("R");
+  }
+  sendCommand("F");
+};                  
+  </code>
+</element>
+  
+
+<element elementid="135"  elementType="Coding" condition="TestDBTurningLeftThenRightThenLeft"  conditionind="900">
+  <h5 class="elementheader">Transit back from turning right to left</h5> 
+  <p>
+    So far your robot will transit into the TURNRIGHT state then stay in that state. Our last challenge is to add similar state transition logic so that the robot randomly switches back to TURNLEFT state.
+  </p>
+  <p>
+    When you are done, please click <b>TEST</b> to see if your car will be transiting between the turning left and right states repeatedly.
+  </p>
+  <code isHidden='false'>
+this.initialize = function(data) {
+  this.state = "TURNLEFT";
+};                              
+      
+this.update = function(info) {
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+    let r = Math.random();
+    if (r > 0.98) {
+      this.state = "TURNRIGHT";
+    }
+  } else if (this.state == "TURNRIGHT") {
+    sendCommand("R");
+
+    //TODO: switch state to "TURNRIGHT" at 2% probability
+    //h0::draw a random number r::follow example in TURNLEFT state
+    let r = Math.random();
+    //h1::check if r > 0.98::follow example in TURNLEFT state
+    if (r > 0.98) {
+      //h2::switch to TURNLEFT state::follow example in TURNLEFT state
+      this.state = "TURNLEFT";
+    //h3::close h1 block with }::follow example in TURNLEFT state
+    }
+
+  }
+  sendCommand("F");
+};                  
+  </code>
+</element>
+
+
+<element elementid="140" elementType="Conclusion">
+  <h5 class="elementheader">Tutorial Completed!</h5> 
+  <p>Congratulations! Although this is a fairly simple state machine, it can be extended to produce very complex behavior for your robot when the number of states grows.</p>
+  <p>
+    For more exercise, try to add another state <b>GoStraight</b>, and also add the necessary transitions to and from this new state to the 2 existing states based on a random number.
+  </p>
+</element>
+
+
+
+
+<!-- 
+
+this.initialize = function(data) { 
+    this.state = "TURNLEFT"; 
+};                               
+this.update = function(info) { 
+    //TODO: send "L" or "R" command based on robot state 
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+    const r = Math.random();
+    if (r > 0.98 ) {
+      this.state = "TURNRIGHT";
+    }
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R");
+    const r = Math.random();
+    if (r > 0.98 ) {
+      this.state = "TURNLEFT";
+    }
+  }
+  sendCommand("F"); 
+}; 
+
+
+
+-->

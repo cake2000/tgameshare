@@ -1,0 +1,84 @@
+
+<element elementid="100" elementType="Info">
+    <!-- <h5 class="elementheader">Hitting the black ball</h5>  -->
+    <h5 class="elementheader">Introduction</h5> 
+    <p>After a successful breakshot, the 2 players start to make <b>Call Shots</b>, where one target ball and one target pocket are required. For a simple starting point, in this tutorial, we teach your robot to hit the black ball into a pocket. Shall we start?</p>
+</element>
+
+<element elementid="110"  elementType="Coding" condition="TestFinishedAnyResultAimXYStrength">
+    <p>First let's add a new function <b>this.getCallShot</b>, which specifies the aiming point's coordinate and how much strength to use in a call shot. It should be very similar to your <b>this.getBreakShot</b> function, returning a shot command object with properties aimx/aimy/strength.</p>
+    <p>When you are done, hit the <b>TEST</b> button to have your robot take its first call shot.</p>
+    <code isHidden="true">
+this.getCallShot = function() {
+    return {                    
+        aimx: 0,
+        aimy: 0,             
+        strength: 500,
+    };                          
+};                             
+    <code/>
+</element>
+
+<element elementid="115"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch">
+    <p>Now to make it interesting, we are placing the black ball on a random point between the table center and the bottom center pocket. In numbers, the x coordinate of the black ball is always 0, but the y coordinate may be any number between 0 and 400. But don't worry, your robot can retrieve the position of the black ball as follows:</p>
+    <p><pre class="brush: js">var blackBall = world.Balls[1];</pre></p>
+    <p><b>Challenge:</b> please add the line above to the beginning of the <b>this.getCallShot</b> function, then modify the value of aimx/aimy to use blackBall.x and blackBall.y so that your robot can always hit the black ball.</p>
+    <code isHidden="true">
+this.getCallShot = function() {
+    var blackBall = world.Balls[1];
+    return {                    
+        aimx: blackBall.x,
+        aimy: blackBall.y, 
+        strength: 800,              
+    };                          
+};                             
+    <code/>
+</element>
+
+
+<!-- <element elementid="120"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch" codecondition="UseVariableSpeified">
+    <h5 class="elementheader">Calculating aiming position</h5> 
+    <p>Now, instead of always placing the blackball at (0,200), we'll place it at a random position. So to make sure you can hit the black ball, you will need to use a new variable to get its position:</p>
+    <p><pre class="brush: js"></pre>var blackBall = world.Balls[1];</pre></p>
+    <p>Here world.Balls is an array containing position of all balls, and world.Balls[1] always contains the position of the black ball (ballID equals 1).</p>
+    <p><b>Challenge:</b> change aimx and aimy to use blackBall.x and blackBall.y so that the cue ball always hits the black ball no matter where it is.</p>    
+    <code isHidden="true">        
+this.getCallShot = function() {
+    var blackBall = world.Balls[1];
+    return {     
+        aimx: blackBall.x,
+        aimy: blackBall.y, 
+        strength: 800,              
+    };                          
+};                              
+    </code>
+</element> -->
+
+
+<element elementid="130"  elementType="Coding" condition="TestFinishedBlackBallPocketed">
+    <h5 class="elementheader">Pocketing the black ball</h5> 
+    <p>Now let's try to hit the black ball into the bottom center pocket. To kick the black ball vertically down, the cue ball needs to be on top of the black ball when they touch, as shown below.</p>
+    <p>
+        <img src="/images/callshotaimingexample.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+    <p>When the cue ball is touching the black ball, the distance between their centers is exactly 2 times the ball radius, i.e. the ball diameter, as represented by the variable <b>world.BallDiameter</b>.</p>
+    <p><b>Challenge:</b> change aimy to use both blackBall.y and world.BallDiameter so that the cue ball hits the black ball into the bottom center pocket.</p>
+    <code isHidden="true">
+this.getCallShot = function() {
+    var blackBall = world.Balls[1];
+    return {                    
+        aimx: blackBall.x, 
+        aimy: blackBall.y - world.BallDiameter,
+        strength: 800,          
+    };                          
+};                              
+    </code>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing your second tutorial! Try to test run it a few more times, and note that your robot can hit the black ball no matter where it appears.</p>
+    <p>
+        For more exercise, can you change your call shot so that it always shoot the black ball to the right horizontally?
+    </p>
+</element>

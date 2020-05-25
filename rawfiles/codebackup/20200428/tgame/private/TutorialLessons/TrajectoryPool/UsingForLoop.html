@@ -1,0 +1,281 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[2], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 2, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[2], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 2, targetPocketID: 1
+  };
+  const aimPoint2 = getAimPosition(Balls[2], Pockets[5]);
+  const cmd2 = {
+    aimx: aimPoint2.x, aimy: aimPoint2.y, strength: 30,
+    targetBallID: 2, targetPocketID: 5
+  };
+
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  const prob2 = await calculateProbability(cmd2);
+
+  // walk through commands and compare probability 
+  let bestCommand = null;
+  let highestProb = -1;
+
+  if (prob0 > highestProb) {
+    bestCommand = cmd0;
+    highestProb = prob0;
+  }
+
+  if (prob1 > highestProb) {
+    bestCommand = cmd1;
+    highestProb = prob1;
+  }
+
+  if (prob2 > highestProb) {
+    bestCommand = cmd2;
+    highestProb = prob2;
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial, you learned how to walk through three target pockets and pick the one with the highest probability of success. The final code has a lot of repetitions. When you change the target ball from 3 to 2, for example, you have to change the code in quite a few places. Let's fix that problem in this tutorial, crating a more "elegant" solution by using a <b>for-loop</b>.
+  </p>
+  <p>
+    As a quick reminder, if you get stuck anywhere, ask a question <a href="https://forum.tgame.ai/t/using-for-loop-to-walk-through-all-pockets/26" target="_blank">in our forum</a>!
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    When it is necessary for your program to perform the same task for a number of times repeatedly, we usually use a <b>for-loop</b>. 
+  </p>
+</element>
+
+<element elementid="103" elementType="Language" languageSkills="JavaScript:ForLoop|Python:ForLoop">
+</element>
+
+<element elementid="104" elementType="Coding" condition="TestPPPocketBall_3_In_1">
+  <p>
+    Let's refactor our code from the previous tutorial using a for-loop. The goal is to walk through all six pockets: 0, 1, 2, 3, 4 and 5, and compare the probability of success. I have created the baseline code in your code editor. Compared to the example for-loop below, you need to use the index variable "pocketID" instead of "i", and pocketID will go from 0 to 5, at step size of 1.
+  </p>
+  <p>
+    <img src="/images/forloopformat2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>  
+  <p>
+    <b>Challenge:</b> Complete the for-loop using an index variable of <b class="variablenamebold">pocketID</b>; also set <span class="variablename">highestProb</span> and <span class="variablename">bestCommand</span> by comparing <span class="variablename">highestProb</span> with <span class="variablename">prob</span> in each step.
+  </p>
+  <code isHidden="true">
+//TODO: go through all pockets using for-loop
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // complete for-loop below:
+
+  //h0::initialize pocketID to 0::increment pocketID by 1 each step up to 5
+  ::for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID-1) {
+  ::for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID+1) {
+  ::for (let pocketID = 0; pocketID &lt;= 6 ; pocketID = pocketID+1) {
+  for (let pocketID = ?; pocketID &lt;= ? ; ?) {
+    const aimPoint = getAimPosition(Balls[3], Pockets[pocketID]);
+    const cmd = { 
+      aimx: aimPoint.x, 
+      aimy: aimPoint.y, 
+      strength: 30, 
+      targetBallID: 3, 
+      targetPocketID: pocketID 
+    };
+    const prob = await calculateProbability(cmd);
+
+    //h1::see if prob is greater than highestProb
+    ::if (prob > highestProb) {
+    ::if (prob == highestProb) {
+    ::if (prob &lt;= highestProb) {
+    if ( ? ) {
+      bestCommand = cmd; 
+      highestProb = prob;
+    }
+  } // end of for loop "pocketID"
+  // return the best command we found
+  return bestCommand;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+async function getCallShot() {
+  // place holder for best command
+  let bestCommand = null;
+  let highestProb = -1;
+
+  for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+    const aimPoint = getAimPosition(Balls[3], Pockets[pocketID]);
+    const cmd = {
+      aimx: aimPoint.x,
+      aimy: aimPoint.y,
+      strength: 30,
+      targetBallID: 3,
+      targetPocketID: pocketID
+    };
+    const prob = await calculateProbability(cmd);
+
+    if (prob > highestProb) {
+      bestCommand = cmd;
+      highestProb = prob;
+    }
+  } // end of for loop "pocketID"
+
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}    
+  </cleancode>
+</element>
+  
+<!-- <element elementid="105" elementType="Info">
+  <p>
+    Now that your code is getting more complex, please start paying attention to indentation, which means adding blank spaces at line start so it is easy to identify a block of code.
+  </p>
+  <p>
+    There is a simple test for good indentation: if you look at your code from 10 feet away, you should still be able to tell the basic structure of your code, like the picture below. Note how the line starts are clearly aligned. 
+  </p>
+  <p>
+    <img src="/images/indentationblock.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    Once you get into a good habit of using good indentation, you will make much less mistakes like forgetting a closing "}", and your code starts to look professional.
+  </p>
+  <p>
+    If you really don't know how to indent your code, the easiest way to learn is to paste all your code into the editor at <a href="http://jsbeautifier.org/" target="_blank">jsbeautifier</a>, and click the big "Beautify JavaScript or HTML" button. It will indent the code for you.
+  </p>
+</element> -->
+
+<element elementid="106" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+  <p>
+    Sometimes you want to stop the for-loop before the test condition becomes false. For example, what if we want to exit the loop whenever we get a shot command with a success probability of more than 50%? 
+  </p>
+  <p>
+    To exit a for-loop, use the keyword <b class="keyword">break</b>.
+  </p>
+  <p>
+    <b>Challenge:</b> Change your code such that when success probability is more than 50% for a shot command, you terminate the search and exit the loop right away. Note that the probability returned by <span class="variablename">calculateProbability</span> is a value between 0 and 100, so 50% is represented by the value, 50.
+  </p>
+  <code isHidden="true">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  //TODO: break out of loop when prob is more than 50%
+
+  for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+    const aimPoint = getAimPosition(Balls[3], Pockets[pocketID]);
+    const cmd = { 
+      aimx: aimPoint.x, 
+      aimy: aimPoint.y, 
+      strength: 30, 
+      targetBallID: ballID, 
+      targetPocketID: pocketID 
+    };
+    const prob = await calculateProbability(cmd);
+
+    if (prob > highestProb) {
+      bestCommand = cmd; 
+      highestProb = prob;
+    }
+
+    // new code starts here:
+    //h0::compare prob with 50::write "prob > 50"
+    if ( ? ) {
+      //h1::break out of the loop right away::write "break;"
+      ?
+    }
+    // end of new code
+
+  } // end of for loop "pocketID"
+  // return the best command we found
+  return bestCommand;
+  //ENDTODO
+}
+  </code>
+  <cleancode>
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+    const aimPoint = getAimPosition(Balls[3], Pockets[pocketID]);
+    const cmd = {
+      aimx: aimPoint.x,
+      aimy: aimPoint.y,
+      strength: 30,
+      targetBallID: 3,
+      targetPocketID: pocketID
+    };
+    const prob = await calculateProbability(cmd);
+
+    if (prob > highestProb) {
+      bestCommand = cmd;
+      highestProb = prob;
+    }
+
+    if (prob > 50) {
+      break;
+    }
+  } // end of for loop "pocketID"
+  
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}  
+  </cleancode>
+</element>
+
+<element elementid="180" elementType="Conclusion">
+  <p>Tutorial completed!</p>
+  <p>
+    <b>Summary:</b> You have learned how to use a for-loop to search through a list of items and how to break out of the loop using an if-statement and the <span class="keyword">break</span> keyword.
+  </p>
+  <!-- <p>
+    <b>Extra Fun:</b> try to change ball ID from 3 to 2, and see if your robot can correctly pick pocket 5 for ball 2.
+  </p> -->
+  <p>
+    <b>Exercise 1:</b> The current for-loop always goes from pocket 0 to 5. Can you change it to search in the opposite direction, from pocket 5 down to pocket 0? 
+  </p>    
+  <p>
+    <b>Exercise 2:</b> Can you change the current for-loop so that it will skip the pocket 3? Note that you can use a conditional statement with <b>if</b> and the keyword <b>continue</b>. Is there a way to do it without using <b>continue</b>?
+  </p>      
+</element>
+

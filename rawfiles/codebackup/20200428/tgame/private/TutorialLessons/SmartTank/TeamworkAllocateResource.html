@@ -1,0 +1,453 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+const MSG_CLAIM_CRYSTAL = 1;
+const MSG_CLAIM_WEAPON = 2;
+const MSG_ATTACK = 3;
+const MSG_UNATTACK = 4;
+
+let dangerScores = null;
+let graph = null;
+
+function isBombBlockedAtPos(col, row, color) {
+  // filter Tanks array
+  const temp = Tanks.filter( t => t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row);
+  const result = temp.length > 0 || Maze[row][col] == 'R' || Maze[row][col] == 'T';
+  return result;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  const myColor = MyTank.color;
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.tankID == MyID || t.color == myColor) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1 + dangerScores[i][j];
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / (1 + MyTank.specialPower.speed);
+
+    let flag = false;
+    for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+      const oppo = oppoTanks[j];
+      const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+      const oppoTime = oppoDis / (1 + oppo.specialPower.speed);
+      if (oppoTime * 1.5 &lt; myTime) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  const target = getClosestItem(Crystals);
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  const curPreference = myPreference[MyTank.specialWeapon.type];
+  const candidates = Weapons.filter(w => myPreference[w.type] &lt; curPreference);
+  const closeBestWeapon = getClosestItem(candidates);
+  if (closeBestWeapon == null) return [];
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  if (MyTank.health &lt;= 2000) return "";
+
+  let weakestTarget = null;
+  
+  // go through all tanks
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const target = Tanks[i];
+
+    if (target.tankID == MyID || target.color == MyTank.color || target.r == MyTank.r &amp;&amp; target.c == MyTank.c) {
+      continue;
+    }
+
+    let toAttack = MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health;
+    toAttack = toAttack &amp;&amp; (MyTank.specialPower.damage == MAX_POWER || MyTank.specialPower.reload === MAX_POWER);
+
+    if (toAttack &amp;&amp; (!weakestTarget || target.health &lt; weakestTarget.health || target.specialPower.damage &lt; weakestTarget.specialPower.damage)) {
+      weakestTarget = target;
+    }
+  }
+
+  return attackTank(weakestTarget);
+}
+
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}
+
+function amILeader() {
+  let smallestID = MyTank.tankID;
+  for (let i = 0; i &lt; Tanks.length; i++) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color &amp;&amp; t.tankID &lt; smallestID) {
+      smallestID = t.tankID;
+    }
+  }
+  if (smallestID == MyTank.tankID) {
+    MyTank.isLeader = true;
+  } else {
+    MyTank.isLeader = false;
+  }
+}
+
+function getNewCommand() {
+  amILeader();
+  if (MyTank.isLeader) {
+    console.log("Tank " + MyTank.tankID + " is the leader!");
+  }
+
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // escape from danger
+  const ds = dangerScores[MyTank.r][MyTank.c];
+  let isInDanger = MyTank.health &lt; 1500 &amp;&amp; ds > 4;
+  isInDanger = isInDanger || MyTank.specialPower.healthRegen &lt; 2 &amp;&amp; ds > 6;
+  isInDanger = isInDanger || ds > 10; 
+  if (isInDanger) {
+    const cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}       
+
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    case MSG_CLAIM_CRYSTAL:
+      console.log("Got message to claim a crystal.");
+      break;
+    case MSG_CLAIM_WEAPON:
+      console.log("Got message to claim a special weapon.");
+      break;
+    case MSG_ATTACK:
+      console.log("got message to attack an opponent tank.");
+      break;
+    case MSG_UNATTACK:
+      console.log("got message NOT to attack an opponent tank.");
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back! In last tutorial, we built up the communication channel among team members. So starting from this tutorial, we will use this channel to achieve the two main tasks for teamwork: <b>allocating resources</b> and <b>attacking opponent</b>. We'll focus on the first one in this tutorial. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    There are two types of resources for the team leader to allocate: crystals and special weapons. We will discuss about crystal allocation in the tutorial and leave weapon allocation for exercise and open directions. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    As we discussed in last tutorial, if a new crystal emerges in the battlefield, the elected team leader will allocate it to the team member that needs it most. Then the team leader will send the decision as a team message to all team members. When each team member receives the message, it will record the information and act accordingly: <b>if the new crystal allocate to itself, it will go and get the crystal; otherwise, ignore the crystal</b>.
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    There are a couple of questions we need to solve before we are able to draw an accurate picture of the entire process. First, <b>how can the team leader know that a new crystal emerges?</b> And if an opponent tank gets the crystal, how will other tanks know about that and won't bother to collect the crystal?
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Fortunately, the game engine provides two services related to crystals: 1) when a new crystal appears, it will call function <span class="variablenamebold">allocateNewCrystal</span> on each tank if the function is defined in the tank's bot code. 2) when a crystal disappears, it will call another function <span class="variablenamebold">ackDisCrystal</span> if defined.  
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    The second question is, <b>who should has all the records about assignments of un-collected crystals?</b> We know that the team leader and the owner of the crystal should know the information. How about other team members? Let's one scenario as below. 
+  </p>
+  <p>
+    <img src="/images/infoateachtank.jpg" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+  <p>
+    Tank 0 is killed after it allocated the crystal to Tank 4 but before Tank 4 collects the crystal. At this moment, Tank 2 is elected as the new leader. If Tank 2 doesn't know the crystal has been allocated to Tank 4, it has to re-do the allocation work. To avoid such cases, we'd like all team members share and save all the information. 
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    The information will be stored in a global variable <span class="variablenamebold">ownerOfCrystals</span> on each tank. The variable is an object: the property names are tank IDs, and property values are arrays holding the positions of crystals that allocated to the corresponding tank IDs. 
+  </p>
+  <p>
+    For example, if the crystal at (3, 3) is allocated to Tank 4, <span class="variablenamebold">ownerOfCrystals</span> will be <span class="variablename">{ 4: [ "3_3" ] }</span>. 
+  </p>
+  <p>
+    Note that the property name should be a string. So to get the string format of tank ID, you can call function <span class="variablenamebold">MyTank.tankID.toString()</span>.
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    Please add the following line at the beginning of your bot code.
+  </p>
+  <p>
+    <pre class="brush:js">
+const ownerOfCrystals = {};
+    </pre>
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Great! Now we've solved all our questions, we can go ahead and draw a picture of the process as below.
+  </p>
+  <p>
+    <img src="/images/allocatecrystal.png" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    This is what happens after a new crystal appears in the battlefield. 
+  </p>
+  <p>
+    <ul>
+      <li>
+        (1) After a new crystal is generated, the game engine calls function <span class="varaiblenamebold">allocateNewCrystal</span> on every colored tank.
+      </li>
+      <li>
+        (2) Non-leader tank ignores the message. But team leader allocates the crystal to one team member based on the current enviroment information. 
+      </li>
+      <li>
+        (3) By calling function <span class="varaiblenamebold">sendMessageToTeam</span>, the team leader sends its decision to the game engine.
+      </li>
+      <li>
+        (4) The game engine forward the message to every memeber in the same team with the sender by calling function <span class="varaiblenamebold">receiveTeamMessage</span>.
+      </li>
+      <li>
+        (5) Each team member (include the leader) updates its own record of crystal ownership in variable <span class="varaiblenamebold">ownerOfCrystals</span>.
+      </li>
+      <li>
+        (6) (not shown in the picture) Each team member collects crystals based on the ownership. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Here is what happens after a crystal disappears.
+  </p>
+  <p>
+    <img src="/images/ackdiscrystal.png" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        (7) After a crystal is taken, the game engine call function <span class="variablenamebold">ackDisCrystal</span> on every colored tank.
+      </li>
+      <li>
+        (8) Each tank removes the ownership of that crystal from its own record variable <span class="variablenamebold">ownerOfCrystals</span>. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Now we understand the entire process. To build the process in our bot code, we need to implement step (2) (3) (5) (6) and (8). Let's do it step by step.
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    Let's take a break! 
+  </p>
+  <p>
+    <b>Summary:</b> In this tutorial, we designed the process of crystal allocation among team members. We will implement the process in the next tutorial. 
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="TOBEUPDATED" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+

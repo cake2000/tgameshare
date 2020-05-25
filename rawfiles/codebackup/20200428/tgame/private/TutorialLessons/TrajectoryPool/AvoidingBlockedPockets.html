@@ -1,0 +1,303 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getCueBallPlacement() {
+  return extrapolatePoints(Pockets[5], Balls[2], 2 * BallDiameter);
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30,
+        targetBallID: ballID, 
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+    <p>
+      In the previous tutorial, you learned how to position the cue ball such that your robot would easily shoot ball 2 into pocket 5. Now let's change the <span class="variablename">getCueBallPlacement</span> function to <b>search for the best cue ball placement point considering all ball-and-pocket combinations</b>. 
+    </p>
+    <p>
+      If you need any help, check out the discussions on this lesson <a href="https://forum.tgame.ai/t/avoiding-blocked-pockets-when-placing-cue-ball/45" target="_blank">here in our forum</a>.
+    </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    There are many options in choosing which ball to shoot next when you have the cue ball in hand. But the bottom line is that you want to guarantee your bot a successful shot. Although your bot can place the cue ball in a straight line with any target ball and target pocket, other balls may be blocking the ball path</b>. 
+  </p>
+  <p>
+    For example, in the current table setup, the black ball is blocking pocket 0 from all balls, and the yellow ball is blocking ball 2 from pocket 1.
+  </p>
+  <!-- <p>
+    <img src="/images/pocket0blocked.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> -->
+</element>
+
+<element elementid="103" elementType="Info">
+  <p>
+      To <b>detect whether a path between two points is blocked by any other ball(s)</b>, you can use the helper function <b class="variablenamebold">isPathBlocked</b>, which takes as parameters any two points on the table (each with x and y properties), and returns <b class="variablenamebold">true</b> if the path is at least partially blocked. Usually the two parameters, <span class="variablename">point1</span> and <span class="variablename">point2</span>, are positions of balls or pockets.
+    </p>
+    <p>
+      <pre class="brush: js">
+const isBlocked = isPathBlocked(point1, point2);
+      </pre>
+    </p>
+    <p>
+      In case you are curious, the function <span class="variablename">isPathBlocked</span> simply draws a line from <span class="variablename">point1</span> to <span class="variablename">point2</span> and then checks whether any other ball is too close to this line (distance to line is less than BallDiameter).
+    </p>
+    <p>
+      <img src="/images/ispathblocking.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+</element>
+
+<element elementid="104" elementType="Coding" condition="TestPPPocketBall_3_In_1">
+  <p>
+   To keep it simple, <b>let's assume we know that we want to shoot ball 3 after we place the cue ball</b>. Now, let's select a clear, unobstructed shot by assessing each of the six pockets. This process will be very similar to the search done in <span class="variablename">getCallShot</span>, with one key difference: in this case, <b>you do not need to check all pockets</b>. Since any one unobstructed shot is as good as another, you can simply stop searching and return the cue ball placement once you discover <b>the first unobstructed pocket</b> from ball 3. 
+   
+   <!-- Once you have found one clear shot for ball 3, you can use that pocket to calculate cue ball placement and exit the <span class="variablename">getCueBallPlacement</span> function right away. -->
+  </p>
+  <p>
+    <b>Challenge:</b> Please change the <span class="variablename">getCueBallPlacement</span> function by adding a call to the <b class="variablenamebold">isPathBlocked</b> function to select an unobstructed pocket for ball 3.
+  </p>
+  <code isHidden="false">
+//TODO: calculate whether this pocket is blocked from ball 3
+function getCueBallPlacement() {
+  // hardcode to target ball 3 for now
+  const ballPos = Balls[3];
+  // use a for-loop to go through all 6 pockets
+  for (let pocketID=0; pocketID &lt;=5; pocketID ++) {
+    const pocketPos = Pockets[pocketID];
+    //h0::call isPathBlocked with ballPos and pocketPos::write 'isPathBlocked(ballPos, pocketPos)'
+    const isBlocked = ?;
+    //h1::if not blocked, then return placement position immediately::use '!isBlocked'
+    if ( ? ) {
+      return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+    }
+  }
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  // hardcode to target ball 3 for now
+  const ballPos = Balls[3];
+  // use a for-loop to go through all 6 pockets
+  for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+    const pocketPos = Pockets[pocketID];
+    const isBlocked = isPathBlocked(ballPos, pocketPos);
+    if (!isBlocked) {
+      return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30,
+        targetBallID: ballID, 
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestPPPocketBall_2_In_2">
+  <p>
+    Now let's search through all balls instead of limiting the search to ball 3. Again, this will be very similar to the <span class="variablename">getCallShot</span> function in that you need an <b>outer for-loop</b> to iterate through all the ball IDs stored in <b class="variablenamebold">legalBallIDs</b>.
+  </p>
+  <p>
+    <b>Challenge:</b> enhance the <span class="variablename">getCueBallPlacement</span> function to consider all balls that you can legally shoot in an outer for-loop. 
+    </p>
+    <p>
+      You need to make four code changes:
+      <ul>
+        <li>
+          Step 1: Add the new array variable <span class="variablename">legalBallIDs</span> to represent the IDs of all the balls you can shoot legally next.
+        </li>
+        <li>
+          Step 2: Remove the line of code assigning <span class="variablename">ballPos</span> to <span class="variablename">Balls[3]</span> since <span class="variablename">ballPos</span> will be updated inside the for-loop now.
+        </li>
+        <li>
+          Step 3: Add an outer for-loop to iterate through all balls in the <span class="variablename">legalBallIDs</span> array. 
+        </li>
+        <li>
+          Step 4: Don't forget the closing curly bracket for the new for-loop. Click "BEAUTIFY" button to get check for indentations. 
+        </li>
+      </ul>
+    </p>
+    <p>
+    Click <b>TEST</b> to see if your robot places cue ball correctly, calling ball 2 towards pocket 2 for the next shot.
+  </p>
+  <code isHidden="false">
+//TODO: complete outer for-loop to iterate through legalBallIDs using index k
+function getCueBallPlacement() {
+  // Step 1: retrieve all legal ball IDs
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  // Step 2: comment out or remove the old definition of ballPos
+  //const ballPos = Balls[3];
+
+  // Step 3: add an outer for-loop to iterate through all balls in legalBallIDs array.
+  //h0::k should range from 0 to legalBallIDs.length-1::use the same outer loop used in getCallShot
+  ::for (let k = 0; k &lt; legalBallIDs.length-1; k ++)
+  ::for (let k = 0; k &lt;= legalBallIDs.length-1; k ++)
+  ::for (let k = 0; k &lt;= legalBallIDs.length; k ++)
+  for (let k = ? ; ? ; ? ) {
+    //h1::set ballID to next item in legalBallIDs::use 'legalBallIDs[k]'
+    const ballID = ?;
+    //h2::set ballPos to position of ball with ballID::use 'Balls[ballID]'
+    const ballPos = ?;
+
+    for (let pocketID=0; pocketID &lt;=5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    } // end of for loop "pocketID"
+  
+  } // Step 4: don't forget this closing bracket for the "k" for-loop
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x,
+        aimy: aimPoint.y,
+        strength: 30,
+        targetBallID: ballID,
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+  
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+  
+<element elementid="180" elementType="Conclusion">
+  <p>Tutorial completed!</p>
+  <p>
+    <b>Summary:</b> In this tutorial you have improved your bot such that it will place the cue ball in line with a ball and pocket for a clear shot (a shot that is not blocked by other balls). This is probably another good time for you to save a new release of your bot and test it out!
+  </p>
+  <p>
+    <b>Exercise 1:</b> The two side pockets (1 and 4) are usually the most difficult target pockets since they have a smaller opening angle. <b>Change your <span class="variablenamebold">getCueBallPlacement</span> function to skip those two pockets</b>. You can check that if <span class="variablename">pocketID</span> is 1 or 4, use the keyword <b class="keyword">continue</b> to jump to the next iteration of the for-loop. Feel free to ask me about <a href="#" onclick="ClickToSendChat(event, 'JavaScript keyword continue')" class="inlinebutton">"JavaScript keyword continue"</a> if you want to learn more about how it is used. 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Put ball 4 on the table using this line of code "<span class="variablename">PlaceBallOnTable(4, -612, 169);</span>" <b>in your test script</b>, before the line that places ball 5. This new line will put ball 4 so that it partially blocks between the cue ball and ball 2. To avoid this newly introduced obstruction between the cue and target balls, <b>you will need to use the <span class="variablenamebold">isPathBlocked</span> function again</b> to check whether the path is blocked between the position of the target ball and the position returned by <span class="variablenamebold">extrapolatePoints</span></b>.
+
+    <!-- if ( !isBlocked ) {
+      const pp1 = extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      const isBlocked2 = isPathBlocked(ballPos, pp1);
+      if (!isBlocked2) return pp1;
+    } -->
+
+  </p>
+</element>
+

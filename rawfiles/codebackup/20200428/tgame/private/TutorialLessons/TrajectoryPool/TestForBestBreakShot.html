@@ -1,0 +1,565 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x,
+        aimy: aimPoint.y,
+        strength: 30,
+        targetBallID: ballID,
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}         
+  </cleancode>
+</element>
+  
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome to the intermediate level tutorials! Now you have built a working game bot that can probably beat many human players already, there is one problem: <b>everyone else who has completed the beginner lessons also has a bot nearly identical to yours!</b>
+  </p>
+  <p>
+    Don't worry. Starting from this tutorial, we'll add more advanced capabilities to your bot, and <b>you will have plenty of opportunities to customize your bot's behaviors</b>. 
+  </p>
+  <p>
+    In this lesson, let's work on improving your robot's break shot.
+  </p>
+  <p>
+    As a reminder, if you need any help, check out the discussions on this lesson <a href="https://forum.tgame.ai/t/repeated-simulation-for-the-break-shot/57" target="_blank">here in our forum</a>.
+  </p>
+</element>
+
+
+<element elementid="101" elementType="Info">
+  <p>
+    As you should know from playing the pool game manually, your bot does not have to take the break shot from the default cue ball position. Instead, it can specify a cue ball position at any point on or to the left of the head string (the white vertical line) using two additional properties for the break shot command: <b class="variablenamebold">cueballx</b> and <b class="variablenamebold">cuebally</b>. 
+  </p> 
+  <p>
+    In order to meet the positional requirements described above, <span class="variablename">cueballx</span> must be between -930 and -500, and <span class="variablename">cuebally</span> needs to be between about -435 and 435. For example, the following <span class="keyword">return</span> command for the <span class="variablename">getBreakShot</span> function should place the cue ball near the bottom left corner of the table:
+  </p>
+  <p>
+    <pre class="brush: js">
+return {
+  cueballx: -800, cuebally: 400, aimx: 0, aimy: 0, strength: 80
+};
+    </pre>
+  </p>
+  <!-- <p>
+    Note that you can use multiple lines to define an object, so long as you separate the properties using commas.
+  </p> -->
+</element>
+
+<element elementid="105" elementType="Coding" condition="TestFinishedFirstTouchBall_2_CueballXY">
+  <p>
+    <b>Challenge: </b>please add the two new properties to your shot command in the <span class="variablename">getBreakShot</span> function: <b><span class="variablenamebold">cueballx</span> (at -800)</b> and <b><span class="variablenamebold">cuebally</span> (at 400)</b>, as shown in example code below. Then <b>specify <span class="variablenamebold">aimx</span> and <span class="variablenamebold">aimy</span> in the code</b> such that the cue ball would hit the red ball 2 on the left first. Note that <b>you can drag the cue ball to around the point (-800, 400) on the table</b> and then move the pink aiming point to help you estimate <span class="variablename">aimx/aimy</span>.
+  </p>
+  <p>
+    <img src="/images/tryoutbreakshotaim.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    Click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> when you are ready.
+  </p>
+  <code isHidden="false">
+//TODO: change aimx and aimy to hit red ball 2
+function getBreakShot() {
+  return { 
+    //h0::try aimx = 0, aimy around 106
+    cueballx: -800, cuebally: 400, aimx: ?, aimy: ?, strength: 80
+  }; 
+}  
+//ENDTODO    
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x,
+        aimy: aimPoint.y,
+        strength: 30,
+        targetBallID: ballID,
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    cueballx: -800,
+    cuebally: 400,
+    aimx: 0,
+    aimy: 106,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+    
+
+<element elementid="108" elementType="Info">
+  <p>
+    Now that you know all five properties necessary to setting the break shot command, you need to take full advantage of them in order to get a great break. <b>Ideally you want to pocket a colored ball with your break shot so that you can continue to make call shots</b> and build an advantage early in the game. 
+  </p>
+  <p>
+    Since the game engine adds a random shock to your shot, <b>you need to test the performance of your break shot with many trials in order to know whether it works well most of the time</b>. To test it manually, you would need to conduct your test by the following procedure: take a break shot and record the result; reset the table, take another break shot, and record result; reset the table, take another break shot ... etc. Then, when you have done enough tests, summarize the results.
+  </p>
+  <p>
+    <img src="/images/repeatedtests.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <p>
+    We can actually <b>automate this repetitive process</b> fairly easily with the help of test scripts.
+  </p>
+</element>
+
+<element elementid="109" elementType="Info">
+  <p>
+    <b>To evaluate a break shot, you need to know what will be the "end position" of every ball as it rolls to a stop after the shot.</b> When you play the game manually, you can see the trajectory lines of all the balls, and there is a small circle at the end of each trajectory, indicating where each ball would stop at. If a ball will remain unaffected by the shot (the ball will not move), the circle is drawn at the ball's current position.
+  </p>
+  <p>
+  <img src="/images/endpositions2.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+</p>
+</element>
+
+
+<element elementid="110" elementType="Info">
+  <p>
+    You can get the end position information by calling a helper function <b class="variablenamebold">calculateEndState</b>, which takes two input parameters:
+    </p>
+    <p>
+      <ul>
+        <li>
+          The shot command to be evaluated, which is an object with these properties: aimx, aimy, strength, spin and hspin. And for break shot, this command object can take 2 additional properties of "cueballx" and "cuebally".
+        </li>
+        <li>
+          A boolean variable (<b class="variablenamebold">true</b> or <b class="variablenamebold">false</b>) indicating whether the game engine should add a random noise on to this shot command. Set this parameter to <span class="variablename">true</span> if you allow random shocks added to your shots as if in a real game. The random errors will produce a slightly different end state for each repeated simulation. If you set the parameter to <span class="variablename">false</span>, then <span class="variablename">calculateEndState</span> will only return the baseline projections, assuming no random shocks to the shot.
+        </li>
+      </ul>
+    </p>
+    <p>
+    The <span class="variablename">calculateEndState</span> function returns the end states of all balls in an array, and you can use it like this (don't forget the <b class="keyword">await</b> keyword):
+  </p>
+  <p>
+    <pre class="brush: js">
+const shotCmd = {cueballx: -800, cuebally: 400, aimx: 0, aimy: 106, strength: 80};
+const endStates = await calculateEndState(shotCmd, true);
+    </pre>
+  </p>
+  <p>
+    Note that <b>the <span class="variablename">calculateEndState</span> function causes no change to the positions of balls on the table</b>. The game engine simply runs a quick simulation of the shot without actually moving the balls on the table. It is as if you click a point on the table to look at the trajectory lines of a potential shot without actually taking the shot.
+  </p>
+</element>
+
+<element elementid="112" elementType="Coding" condition="TestFinishedCalcStateCountRandom_10">
+  <p>
+      Since <span class="variablename">endStates</span> is an array, you can find out the end state of a particular ball by <span class="variablename">ballID</span> using <b class="variablenamebold">endStates[ballID]</b>, and access its properties like this:
+      <ul>
+        <li>
+          <b class="variablenamebold">endStates[ballID].inPocketID:</b> the id of the pocket (0 to 5) the ball has fallen into, or <span class="variablename">null</span> if the ball is not in any pocket. Note that <b>"<span class="variablenamebold">null</span>" is a special keyword representing "nothing" in JavaScript</b>.
+        </li>
+        <li>
+          <b class="variablenamebold">endStates[ballID].x:</b> x coordinate of the ball (undefined if this ball is already in a pocket)
+        </li>
+        <li>
+          <b class="variablenamebold">endStates[ballID].y:</b> y coordinate of the ball (undefined if this ball is already in a pocket)
+        </li>
+      </ul>
+    </p>
+    <p>
+      For example, to find out the cue ball's end position, we can look at <span class="variablenamebold">endStates[0].x</span> and <span class="variablenamebold">endStates[0].y</span>.
+    </p>
+    <p>
+      <b>Challenge:</b> modify your <b>test script</b> to test a break shot with <b>10 trials</b> using the <span class="variablename">calculateEndState</span> function. You can use the code below as a guide. Note that <b>since we are using <span class="variablenamebold">calculateEndState</span> for simulations only, we don't need to call <span class="variablenamebold">TakeBreakShot</span> or <span class="variablenamebold">WaitForAllBallStop</span></b>.
+    </p>
+    <code isHidden="false">
+//TODO: get 10 random end states for this shot
+
+// reset table to game start layout
+ResetTable(false);
+
+// no longer need to call the break shot since we'll estimate end state
+// TakeBreakShot();
+
+// create the break shot command to be tested
+const cmd = {
+  cueballx: -800, 
+  cuebally: 400, 
+  aimx: 0, 
+  aimy: 106, 
+  strength: 80
+};
+
+// place cue ball according to the shot command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+//h0::use a for loop with an index variable i
+::for (let i=0; i&lt;10; i++) {
+::for (const i=0; i&lt;=10; i++) {
+::for (let i=0; i&lt;10; i--) {      
+for ( ? ; ? ; ?) {
+  //h1::call calculateEndState with randomness::use 'calculateEndState with proper parameters'
+  ::let endStates = await calculateEndState(cmd, false);
+  ::let endStates = await calculateEndState(cmd, true);
+  ::let endStates = calculateEndState(cmd, true);
+  let endStates = ?;
+} // end of for loop
+
+// no ball is actually shot so no need to wait
+//await WaitForAllBallStop();
+
+ReportEndOfTest();
+//ENDTODO
+
+  </code>
+  <cleancode>
+// reset table to game start layout
+ResetTable(false);
+// create the shot command to test
+const cmd = {
+  cueballx: -800, 
+  cuebally: 400, 
+  aimx: 0, 
+  aimy: 106, 
+  strength: 80
+};
+// replace cue ball according to the command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+// get 10 random end states for this shot
+for (let i=0; i &lt; 10; i++) {
+  let endStates = await calculateEndState(cmd, true);
+} // end of for loop "i"
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+
+<element elementid="112.5" elementType="Info">
+  <p>
+    Now that our basic simulation is working, let's summarize the result. We can use a new "counter" variable <b class="variablenamebold">GoodRunCount</b> to keep track of how many good runs we see (we'll define what's a good run later). After all trials are complete, we need to print out the value of <span class="variablename">GoodRunCount</span> and review it.
+  </p>
+  <p>
+     In JavaScript, you can use the <b class="variablenamebold">console.log(text)</b> function to print out any text information you'd like to review. For example, the following code will print out the value of <span class="variablename">GoodRunCount</span>. Use the operator "+" to concatenate string literals together, such as <span class="variablename">"hello " + "world!"</span>.
+  </p>
+  <p>
+    <pre class="brush: js">
+// will print a line like "GoodRunCount is 0" on developer console
+console.log("GoodRunCount is " + GoodRunCount); 
+    </pre>
+  </p>
+  <p>
+    <!-- Note that you can create a string using double quote ("") or single quote ('') around it, and you can "add" multiple strings or numbers into a bigger string using the "+" operator. -->
+    <!-- If you need an empty line, use the special character "\n" in your string like this: "line 1\nline2".  -->
+    <!-- For example, you can build a string like this: "1 &nbsp; " + 2 + " &nbsp; " + 3. Behind the scenes, the numbers are converted to a string first, then concatenated with the other strings. -->
+  </p>
+  </element>
+
+<element elementid="113" elementType="Info">  
+  <p>
+    To view the printed log, you can open the <b>developer console</b> on your web browser. If you are using <b>Chrome</b> on a <b>Windows</b> or <b>Linux</b> computer, you can simply press <b>F12</b> or <b>Ctrl + Shift + I</b> on your keyboard to open/close the console. Otherwise, please refer to this page: <a href="http://wickedlysmart.com/hfjsconsole/" target="_blank">using the browser console</a>.
+  </p>
+  <p>
+    <img src="images/opendeveloperconsole.gif" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+  <p>
+    As shown above, the developer console should appear as a panel docked on the right or bottom of your browser window, though you can detach it into a separate window on its own. Please make sure the <b>Console</b> tab is selected, and you'll find your log messages in the console.
+  </p>
+  <p>
+    <img src="/images/consoletab.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+</element>
+
+<element elementid="113.5" elementType="Coding" condition="TestFinishedCallConsoleLogTest">
+  <p>
+    <b>Challenge:</b> Follow the code below to add a new counter variable <b class="variablenamebold">GoodRunCount</b>, increment it by 1 for every end state calculation, and print its value at the end.
+  </p>
+  <code isHidden="false">
+// reset table to game start layout
+ResetTable(false);
+
+// create the shot command to test
+const cmd = {
+  cueballx: -800, 
+  cuebally: 400, 
+  aimx: 0, 
+  aimy: 106, 
+  strength: 80
+};
+
+// replace cue ball according to the command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+//TODO: print a summary of the runs
+
+//h0::initialize a counter variable for number of good runs::it should start with value of 0
+let GoodRunCount = ?;
+
+// get 10 random end states for this shot
+for (let i=0; i &lt; 10; i++) {
+  let endStates = await calculateEndState(cmd, true);
+
+  // simply increment GoodRunCount by 1 for now
+  //h1::use 'GoodRunCount ++' or 'GoodRunCount = GoodRunCount + 1'
+  GoodRunCount = ?;
+} // end of for loop "i"
+
+//h2::replace ? with GoodRunCount
+console.log("There are " + ? + " good runs."); 
+//ENDTODO
+
+ReportEndOfTest();
+  </code>
+  <cleancode>
+// reset table to game start layout
+ResetTable(false);
+// create the shot command to test
+const cmd = {
+  cueballx: -800,
+  cuebally: 400,
+  aimx: 0,
+  aimy: 106,
+  strength: 80
+};
+// replace cue ball according to the command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+let GoodRunCount = 0;
+// get 10 random end states for this shot
+for (let i = 0; i &lt; 10; i++) {
+  let endStates = await calculateEndState(cmd, true);
+  GoodRunCount = GoodRunCount + 1;
+} // end of for loop "i"
+
+// print out total number of good runs
+console.log("There are " + GoodRunCount + " good runs.");
+
+ReportEndOfTest();
+  </cleancode>
+</element>  
+
+
+<element elementid="114" elementType="Coding" condition="TestFinishedCallConsoleLogTest">
+  <p>
+    Lastly, let's define some rules to determine whether a simulation run is "good" by checking the end states of all balls. To keep it simple, let's use only these three rules for a good run:
+  </p>
+  <p>
+    <ul>
+      <li>
+        The cue ball will not be pocketed.
+      </li>
+      <li>
+        The black ball will not be pocketed.
+      </li>
+      <li>
+        At least one of the colored balls will be pocketed.
+      </li>
+    </ul>
+  </p>
+
+  <p>
+    <b>Challenge:</b> Implement the three checks above in your test script, using the code below as a guidance. 
+  </p>
+  <code isHidden="false">
+   
+// reset table to game start layout
+ResetTable(false);
+// create the shot command to test
+const cmd = {
+  cueballx: -800, 
+  cuebally: 400, 
+  aimx: 0, 
+  aimy: 106, 
+  strength: 80
+};
+// replace cue ball according to the command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+//TODO: check if this is a good run
+
+let GoodRunCount = 0;
+
+// get 10 random end states for this shot
+for (let i=0; i&lt;10; i++) {
+  let endStates = await calculateEndState(cmd, true);
+
+  // if the cue ball's inPocketID is not null, it is not a good run 
+  if (endStates[0].inPocketID != null) {
+    // move on to the next simulation
+    continue;
+  }
+
+  // if the black ball's inPocketID is not null, it is not a good run 
+  if (endStates[1].inPocketID != null) {
+    // move on to the next simulation
+    //h0::use 'continue'
+    ?;
+  }
+
+  // check if any other ball is pocketed successfully
+  //h1::iterate through all colored balls::ballID should go from 2 to Balls.length-1
+  ::for (let ballID=2; ballID &lt; Balls.length; ballID = ballID+1) {
+  ::for (let ballID=0; ballID &lt;= Balls.length; ballID = ballID+1) {
+  ::for (let ballID=2; ballID &lt; Balls.length-1; ballID = ballID+1) {
+  for (let ballID=?; ballID ?; ballID = ?) {
+    //h2::check if this ball is in pocket::use '!=' for not equal to null
+    if (endStates[ballID].inPocketID ? null) {
+      // add one more run to counter
+      GoodRunCount = GoodRunCount + 1;
+      // no longer need to check other balls
+      //h3::should exit loop right away::use 'break'
+      ?;
+    }
+  } // end of for loop "ballID"
+} // end of for loop "i"
+
+// print out total number of good runs
+console.log("There are " + GoodRunCount + " good runs."); 
+
+ReportEndOfTest();
+//ENDTODO
+  </code>
+  <cleancode>
+// reset table to game start layout
+ResetTable(false);
+// create the shot command to test
+const cmd = {
+  cueballx: -800,
+  cuebally: 400,
+  aimx: 0,
+  aimy: 106,
+  strength: 80
+};
+// replace cue ball according to the command
+PlaceBallOnTable(0, cmd.cueballx, cmd.cuebally);
+
+let GoodRunCount = 0;
+// get 10 random end states for this shot
+for (let i = 0; i &lt; 10; i++) {
+  let endStates = await calculateEndState(cmd, true);
+
+  // if the cue ball is pocketed, it is not a good run 
+  if (endStates[0].inPocketID != null) {
+    // move on to the next simulation
+    continue;
+  }
+
+  // if the black ball is pocketed, it is not a good run 
+  if (endStates[1].inPocketID != null) {
+    // move on to the next simulation
+    continue;
+  }
+
+  // check if any red or yellow ball is pocketed successfully
+  for (let ballID = 2; ballID &lt; Balls.length; ballID = ballID + 1) {
+    if (endStates[ballID].inPocketID != null) {
+      GoodRunCount = GoodRunCount + 1;
+      // no longer need to check other balls
+      break;
+    }
+  } // end of for loop "ballID"
+} // end of for loop "i"
+
+// print out total number of good runs
+console.log("There are " + GoodRunCount + " good runs.");
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+
+  
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! You have completed your first intermediate lesson!</p>
+  <p>
+    <b>Summary:</b> You have learned how to automate the trials of your break shot using <span class="variablenamebold">calculateEndState</span> repeatedly, and also how to print out a summary of the test result.
+  </p>
+  <p>
+    <b>Exercise 1:</b> Now it's time for you to try different break shot commands until you can find a good one. <b>Try different starting locations for the cue ball and different aiming point/strength</b>. I suggest that you test a break shot command with at least 1000 trials (allowing random errors) in order to get a reliable estimate of its performance. As a rule of thumb, <b>if you can get more than 500 good runs out of 1000 random simulations, you have a pretty good break shot</b>. Note that the 1000 runs will take some time to finish.
+    <!-- Post your highest good run count <a href="https://forum.tgame.ai/t/repeated-simulation-for-the-break-shot/57" target="_blank">here in our forum</a> if you think you have the best break! -->
+  </p>
+  <p>
+    <b>Exercise 2:</b> Strength is a critical factor in the quality of a break shot. Can you change your test script to research the relationship between strength and number of good runs? Specifically, you can add a new outer for-loop for different strength values <b>s</b>, going from 50 to 100 at a step size of 5, and print out the number of good runs (per 1000 simulations) given each strength value. To keep it simple you can use a shot command like this: <span class="variablename">const cmd = { cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: s};</span>. Try to plot the number of good runs against the strength value using <a target="_blank" href="https://www.desmos.com/calculator">an online plotting tool</a>. You need to click the "+" to add a new table, then input your strength values in the X column and the good run count in the Y column. <b>Below is an example screenshot with fake numbers for illustration</b>. What conclusion can you draw from your plot?
+    <p>
+      <img src="/images/plotgoodruncount.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+  </p>
+  <p>
+
+  </p>
+</element>
+

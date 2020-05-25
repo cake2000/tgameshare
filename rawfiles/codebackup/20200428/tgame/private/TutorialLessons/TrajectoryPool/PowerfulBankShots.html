@@ -1,0 +1,1268 @@
+<element elementid="099" elementType="InitialCode">
+    <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // play safety when we don't have a good shot
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}         
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back. In this lesson, we'll look at another difficult scenario. Consider the situation in which <b>the cue ball is blocked from every one of your legal balls</b>. This usually occurs late in the game, when you have only one or two balls left to shoot, and they are all blocked by opponent balls or the black ball. Remember, at times your opponent may play a safety shot and deliberately position the cue ball behind his own balls.
+    <!-- Compared you watch profassional pool games, you will notice that currently your robot is missing one powerful skill called <b>kick shots</b>, in which <b>the cue ball or the target ball rebounds off the cushions</b>. A kick shot can help you pocket a ball when there are no good direct shots, or no direct path to any of your balls at all! -->
+  </p>
+  <p>
+    Your cue ball's first contact must be with one of your own balls, so, to avoid a foul, your bot needs to command a <b>kick shot</b>. A kick shot uses the cushions (sides) of the table to create an indirect route to a target ball of yours. In other words, <b>the cue ball rebounds off one or more cushions before hitting the target ball</b>. In this tutorial, I will explain how ball rebounding works and walk you through an example implementation. 
+  </p>
+  <p>
+    All discussions and questions are located at <a href="https://forum.tgame.ai/t/kick-shots-to-the-rescue/67" target="_blank">this lesson's topic</a> in our forum.
+  </p>
+</element>
+
+<element elementid="103" elementType="Coding" condition="TestFinishedFirstTouchBall_2">
+  <p>
+    Now let's look at the test case given in this lesson, where the cue ball is blocked from the red balls by the yellow balls.
+  </p>
+  <p>
+    In such a situation, most human players would try to find a good kick shot like the one shown below.
+  </p>
+  <p>
+    <img src="/images/tryrebound.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>  
+  <p>
+    <b>Challenge:</b> Change your code such that <b>if the search for a good command has failed (<span class="variablename">bestCommand.prob</span> is -1), your robot will target ball 2 by rebounding off the top cushion</b>. You can use the code below as a starting point, and <b>locate your aim point manually for now</b>. <b>Please make sure that when <span class="variablenamebold">bestCommand.prob</span> is less than 0, your robot doesn't enter the logic to find a safety shot</b>.
+  </p>
+  <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  } // end of for-loop for "k"
+
+  //TODO: try to hit ball 2 with a rebound when there is no direct shot
+
+  // new code starts here
+
+  // Step 1: do not enter the safety shot logic when no good shot is found
+  //h0::check if bestCommand.prob is 0 or positive
+  ::if (bestCommand.prob &lt; 0 &amp;&amp; bestCommand.prob &lt; 50) {
+  ::if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+  ::if (bestCommand.prob == 0 &amp;&amp; bestCommand.prob &lt; 50) {
+  if (? &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // Step 2: no direct shot available, return a manually picked aiming point for now
+    //h1::try to find an aiming point as illustrated::try aiming at (542, -346)
+    bestCommand = {aimx: ?, aimy: ?, strength: 45};
+  }
+
+  // new code ends here
+
+  // return the best command we have found
+  return bestCommand;
+}    
+//ENDTODO
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // return a manually chosen aim point
+    bestCommand = {aimx: 542, aimy: -346, strength: 45};
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+  </cleancode>
+</element>
+
+
+
+<element elementid="104" elementType="Info">
+  <p>
+    That was an acceptable shot that helps us avoid a foul. Now let's <b>calculate the aiming point for the kick shot</b>, instead of hardcoding its values.
+  </p>
+  <p>
+    <b>The key to understanding rebounds is to think of the cue ball bouncing off the cushion in the same way light bounces off a mirror. </b> As shown below, aiming for point <b>P(x, y)</b> via kick shot off a given cushion (sideline) is exactly the same as aiming at the mirror image (we'll call it <b>P'(x', y')</b>) of <b>P</b> across that cushion. The actual mirror line is located at a distance of one ball radius inside the sideline, since ball position is measured at ball center, and the ball center is one radius away from the cushion when the ball touches the cushion. Therefore, we only need to calculate the position of mirror image <b>P'</b> and use that point as our optimal aiming point. Note that here <i>y'</i> is just another variable name, commonly used when a variable is derived (calculated) from another variable without the prime symbol (i.e. y' is derived from y).
+  </p>
+  <p>
+    <img src="/images/ballreflection2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>  
+  <p>
+    As shown in the picture above, there are four sidelines for which rebound calculation may be necessary. I've pre-defined a variable called <b class="variablenamebold">Boundaries</b>, which has four properties: <span class="variablename">TOP_Y</span>, <span class="variablename">BOTTOM_Y</span>, <span class="variablename">LEFT_X</span>, and <span class="variablename">RIGHT_X</span>, corresponding to the four red cushion lines. For example, <b>the top mirror line would have a y coordinate of <span class="variablenamebold">Boundaries.TOP_Y</span></b>, and the left mirror line would have an x coordinate of <span class="variablename">Boundaries.LEFT_X</span>.
+  </p>
+</element>
+    
+
+<element elementid="105" elementType="Info">
+    <p>
+      Now that we have the mirror line coordinates, how do we use them to calculate the coordinates of mirror image <b>P'</b>? There are two kinds of reflections: <b>horizontal</b> and <b>vertical</b>, as illustrated below.  
+    </p>
+    <p>
+        <img src="/images/twokindsreflections.png" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+    </p>
+    <p>
+      Take the horizontal reflection as an example. Point <b>P'(x', y')</b> is the mirror point of <b>P(x, y)</b> over the mirror line <b>y = a</b>. Here the x value for position <b>P</b> and <b>P'</b> will be equal, but the y value for <b>P'</b> will be just as far beyond the mirror line as the y value for <b>P</b> is inside it. Since the distances from <b>P</b> to mirror line and <b>P'</b> to mirror line are equal, we have: <b>a - y = y' - a, or y' = 2 * a - y</b>. Therefore, the coordinates of <b>P'</b> are (x, 2*a - y). For a concrete example in numbers, if <b>a=5</b> and <b>the point P is at (6, -2)</b>, then y' = 2 * 5 - (-2) = 12, so <b>P' is at (6, 12)</b>.
+    </p>
+    <p>
+        <img src="/images/reflectovery.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>   
+    <p>
+      Don't worry if you don't fully understand the calculations above. <b>Just remember for now that for a point P with coordinate (x, y), and a horizontal mirror line at y = a, the mirror point P' will be (x, 2*a - y)</b>. 
+    </p>
+</element>
+    
+<element elementid="110" elementType="Quiz" answerKey="B" answerReason="x' = 2 * b - x = 2 * 3 - (-1) = 7, and y' = y = 5.">
+  <p>
+    For a vertical mirror line <b>x = b</b>, the y value for positions <b>P</b> and <b>P'</b> will be equal, but the x value for <b>P'</b> will be just as far beyond the mirror line as the x value for <b>P</b> is inside it. The mirror point <b>P'</b>, then, will have an x coordinate of <b>2*b - x</b>.
+  </p>
+    <p>
+        <img src="/images/reflectoverx.png" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+    </p>
+    <p>
+      <b>Quiz:</b> The picture above is an example of vertical reflection. Out of the four choices (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A</b></a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B</b></a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C</b></a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D</b></a>) below, which one is the coordinates of P'?
+    </p>
+    <p>
+        <ul>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> (5, 7) 
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> (7, 5)
+            </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> (5, 5)
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> (8, 5)
+        </li>
+        </ul>
+    </p>
+</element>
+
+
+
+<element elementid="113" elementType="Coding" condition="TestFinishedFirstTouchBall_2_BoundaryTop">
+    <p>
+      <b>Challenge:</b> Use the method we discussed to <b>calculate the aiming point as a mirror image of ball 2</b>. You can use the following code as a starting point (and remove the line added in the previous challenge to hardcode the <span class="variablename">bestCommand</span>).
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+
+    //TODO: use mirror point of ball 2 as aim point
+
+    // new code starts here
+
+    // Step 1: remove hardcoding
+    // bestCommand = {aimx: 542, aimy: -346, strength: 45};
+
+    // Step 2: calculate mirror point of ball 2
+    //h0::x should be same as ball 2::y should be calculated using Boundaries.TOP_Y and Balls[2].y 
+    ::const mirrorPoint = {x: Balls[2].x, y: Boundaries.TOP_Y - Balls[2].y};
+    ::const mirrorPoint = {x: Balls[2].x, y: 2 * Boundaries.TOP_Y - Balls[2].y};
+    ::const mirrorPoint = {x: Balls[2].x, y: 2 * Boundaries.TOP_Y + Balls[2].y};
+    const mirrorPoint = {x: ?, y: ?};
+
+    // Step 3: use mirror point of ball 2 as aim point
+    bestCommand = {aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+  }
+
+  // new code ends here
+  //ENDTODO       
+
+  // return the best command we found
+  return bestCommand;
+}   
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    const mirrorPoint = {x: Balls[2].x, y: 2 * Boundaries.TOP_Y - Balls[2].y};
+    bestCommand = {aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+  </cleancode>
+</element>
+  
+<element elementid="114" elementType="Quiz" answerKey="D" answerReason="I'll explain below.">
+    <p>
+      Though we have successfully avoided a foul, it would be awesome if we could try to pocket ball 2 rather than just touching it, right? 
+    </p>
+    <p>
+        <b>Quiz:</b> among the following ideas, which one would help us pocket ball 2 into pocket 3?
+    </p>
+
+      <p>
+          <ul>
+          <li>
+              <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> aim at pocket 3
+          </li>
+          <li>
+              <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> aim at pocket 3's mirror point
+              </li>
+          <li>
+              <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> aim at the contact point calculated using getAimPosition on ball 2 and pocket 3
+          </li>
+          <li>
+              <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> calculate the aim point using getAimPosition on ball 2 and pocket 3, then take the mirror point of that point
+          </li>
+          </ul>
+      </p>
+  </element>
+  
+
+<element elementid="115" elementType="Coding" condition="TestFinishedFirstTouchBall_2_UsingAimForMirror">
+  <p>
+    As shown below, we need first to find the contact point the old way (using <span class="variablename">getAimPosition</span> with ball 2 and pocket 3), and then <b>aim at the mirror point of that contact point</b>.
+  </p>
+  <p>
+    <img src="/images/mirrorofaimpoint.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+    <p>
+      <b>Challenge:</b> as shown below, please use <span class="variablename">getAimPosition</span> to calculate the contact position to shoot ball 2 into pocket 3, and then take that point's mirror point as the real aiming point.
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+
+    //TODO: shoot at mirror point of aim point 
+
+    // new code starts here
+
+    // Step 1: original aim point for shooting ball 2 into pocket 3
+    const contactPoint = getAimPosition(Balls[2], Pockets[3]);
+
+    // Step 2: calculate the mirrored point for contactPoint 
+    //h0::x is the same as contactPoint::y should be calculated using Boundaries.TOP_Y and contactPoint.y 
+    ::const mirrorPoint = {x: contactPoint.x, y: Boundaries.TOP_Y - contactPoint.y};
+    ::const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y + contactPoint.y};
+    ::const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+    const mirrorPoint = {x: ?, y: ?};
+
+    bestCommand = {aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+
+    // new code ends here
+    //ENDTODO      
+
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    const contactPoint = getAimPosition(Balls[2], Pockets[3]);
+    const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+    bestCommand = {aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+  </cleancode>
+</element>
+  
+
+
+<element elementid="116" elementType="Info">
+  <p>
+    If you were expecting ball 2 to fall in pocket 3, sorry to disappoint you! We are still one step away from working out an awesome kick shot.
+  </p>
+  <p>
+    As illustrated below, it turns out that the cushion rebound is a "skewed mirror". All balls spin as they roll forward, so when a ball hits the cushion, <b>the rebound angle (angle at which it leaves the cushion) is usually a little wider than the incoming (approach) angle (from which it strikes the cushion)</b>. Therefore, <b>we need to adjust the mirror point left to correct for the asymmetry of the rebound</b>.
+  </p>
+  <p>
+      <img src="/images/adjustmirrorpoint.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    Now the only question left is how can we know how much to adjust the mirror point left? I think you probably know the answer, don't you?
+  </p>
+</element>
+
+<element elementid="117" elementType="Coding" condition="TestPPPocketBall_2_In_3">
+  <p>
+    The answer, again, is "to search for it". Though we could design a rebound angle calculation formula using the the ball's approach angle, speed and spin, it is too complicated for you. A much simpler solution is to search for it by adjusting the mirror point left, gradually, until you find a shot with the highest success probability.
+  </p>
+  <p>
+      <img src="/images/searchforrebound.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>  
+  <p>
+    <b>Challenge:</b> please change your code to <b>search for an optimal aiming point by subtracting incremental amounts from the mirror point's x coordinate</b>. Let's try an adjustment amount of 0, 1, ... until 50. You can use the code below as a starting point. 
+  </p>
+  <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+
+    //TODO: adjust mirrorPoint's x coordinate left to improve success probability
+
+    // new code starts here  
+    
+    // calculate mirror of aim point
+    const contactPoint = getAimPosition(Balls[2], Pockets[3]);
+    const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+    // new code starts here
+    // search for the optimal adjustment amount 
+    
+    // Step 1: initialize bestCommand 
+    //h0::initialize bestCommand with prob of -1::write 'prob: -1'
+    bestCommand = {prob: ?, aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+
+    // Step 2: try adjustment from 0 to 50
+    //h1::increase adjustX by 1 in each iteration
+    for (let adjustX = ?; adjustX &lt; ?; adjustX = ?) { 
+      //h2::aimx should be based on mirrorPoint.x and adjustX::use 'mirrorPoint.x - adjustX'
+      const cmd = {aimx: ? , aimy: mirrorPoint.y, strength: 45, targetBallID: 2, targetPocketID: 3};    
+      cmd.prob = await calculateProbability(cmd); 
+      console.log("adjustX " + adjustX + ": prob " + cmd.prob); 
+      
+      // Step 3: update bestCommand to the new command if it's better
+      if (cmd.prob > bestCommand.prob) { 
+        bestCommand = cmd; 
+      } 
+    }   
+    // new code ends here
+    //ENDTODO     
+
+  }
+
+  // return the best command we found
+  return bestCommand;
+}     
+    </code>
+    <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // calculate mirror of aim point
+    const contactPoint = getAimPosition(Balls[2], Pockets[3]);
+    const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+
+    // search for the optimal adjustment amount 
+
+    bestCommand = {prob: -1, aimx: mirrorPoint.x, aimy: mirrorPoint.y, strength: 45};
+
+    // try adjustment from 0 to 50
+    for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+      const cmd = {aimx: mirrorPoint.x - adjustX, aimy: mirrorPoint.y, strength: 45, targetBallID: 2, targetPocketID: 3};    
+      cmd.prob = await calculateProbability(cmd); 
+      console.log("adjustX " + adjustX + ": prob " + cmd.prob); 
+      if (cmd.prob > bestCommand.prob) { 
+        bestCommand = cmd; 
+      } 
+    }   
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+  </cleancode>
+</element>
+  
+  
+<element elementid="119" elementType="Coding" condition="TestPPPocketBall_3_In_4">
+    <p>
+      <b>That was a beautiful kick shot, right?</b> Well done!
+    </p>
+    <p>
+      But what if ball 2, pocket 3 is not the best combination for the kick shot? Probably we should check other ball(s) and pockets. In order to do this we need to update your code such that it iterates through all legal balls, and checks the probability of all three bottom pockets (pockets 3/4/5) for each ball.
+    </p>
+    <p>
+      Note that we had to adjust the <span class="variablename">mirrorPoint</span> left, since the cue ball is to the left of ball 2. That will not always be the case, however, so the code must be able to adjust in either direction. We can create a new variable <b class="variablenamebold">direction</b>, and <b>set it to 1 or -1 depending on whether cue ball is to the right or left of the target ball</b>. If the cue ball is to the right of the target ball, then with each step we'll adjust the mirror point's x coordinate to the right.
+    </p>
+    <p>
+      <b>Challenge:</b> Change your code use the new logic for all legal balls (reuse the <span class="variablename">legalBallIDs</span> array) and all bottom pockets and select the command giving the highest <b>pocketing probability</b>. Basically we need to add two for-loops outside the current for-loop. You can use the code below as a starting point. 
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    //TODO: search for best kick shot command with highest success probability
+
+    // new code starts here  
+    
+    // Step 1: setup the bestCommand as negative probability so it will be reassigned later
+    bestCommand = {prob: -1};
+    
+    // Step 2: iterate through all legal ball IDs
+    for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+      const ballID = legalBallIDs[k];
+
+      // Step 3: iterate through all bottom pockets
+      //h0::pocketID should take values of 3/4/5::use '(let pocketID = 3; pocketID &lt;= 5 ; pocketID = pocketID + 1)'
+      for (let pocketID = ?; pocketID &lt;= ? ; pocketID = ? ) {
+        // Step 4: update hardcoding with ballID and pocketID
+        const contactPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);   
+        const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+        // Step 5: search for the optimal adjustment amount 
+        let direction = 1;
+        //h1::if target ball is on right of cue ball, direction is -1::use '>'
+        if (Balls[ballID].x ? Balls[0].x) {
+          direction = -1;
+        }
+        
+        for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+          // Step 6: adjust mirror point's x coordinate; replace hardcoding with ballID and pocketID
+          //h2::adjust mirrorPoint.x using adjustX and direction::use 'adjustX * direction'
+          const cmd = {aimx: mirrorPoint.x + ?, aimy: mirrorPoint.y, strength: 45, targetBallID: ballID, targetPocketID: pocketID};    
+          cmd.prob = await calculateProbability(cmd); 
+          console.log("ball " + ballID + " pocket " + pocketID + " adjustX " + (adjustX * direction) + ": prob " + cmd.prob); 
+          if (cmd.prob > bestCommand.prob) { 
+            console.log("new best!");
+            bestCommand = cmd; 
+          } // end of if block for prob comparison
+
+        // Step 7: match all '{'s with '}'s
+        } // end of adjustX for-loop
+      } // end of pocketID for-loop
+    } // end of legalBallIDs for-loop
+
+    // new code ends here
+    //ENDTODO      
+
+  } // end of if block on bestCommand.prob == -1
+
+  // return the best command we found
+  return bestCommand;
+}      
+      </code>
+      <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // search for best kick shot command with highest success probability
+
+    // setup the bestCommand as negative probability so it will be reassigned later
+    bestCommand = {prob: -1};
+    
+    // iterate through all legal ball IDs
+    for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+      const ballID = legalBallIDs[k];
+
+      // iterate through all bottom pockets
+      for (let pocketID = 3; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+        const contactPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);   
+        const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+        // search for the optimal adjustment amount 
+        let direction = 1;
+        if (Balls[ballID].x > Balls[0].x) {
+          direction = -1;
+        }
+        
+        for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+          const cmd = {aimx: mirrorPoint.x + adjustX * direction, aimy: mirrorPoint.y, strength: 45, targetBallID: ballID, targetPocketID: pocketID};    
+          cmd.prob = await calculateProbability(cmd); 
+          console.log("ball " + ballID + " pocket " + pocketID + " adjustX " + (adjustX * direction) + ": prob " + cmd.prob); 
+          if (cmd.prob > bestCommand.prob) { 
+            console.log("new best!");
+            bestCommand = cmd; 
+          } 
+        }   
+      }
+    }      
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+    </cleancode>
+  </element>
+    
+  
+
+<element elementid="200" elementType="Conclusion">
+  <p>
+      <b>Summary:</b> In this tutorial you have learned <b>how to calculate the mirror point of an aiming point</b> as well as <b>how to adjust that point in order to maximize the success probability of the kick shot</b>. Though kick shots are used less frequently than direct shots, when your bot needs to use one, it makes a big difference.  
+  </p>
+  <p>
+    <b>Open Directions</b>We have only given the simplest example to illustrate the things you can do with rebounds. There are many other improvements you can make to your bot using rebounds. Below, find a few ideas for your exploration. I hope that you will brainstorm and come up with your own idea as well.
+  </p>
+  <p>
+      <ul>
+          <li>
+            <b>Other rebound directions</b>: so far we only talked about the upper cushion and bottom pockets. You could use almost the same code to achieve kick shots using the bottom cushion and the top three pockets. Kick shots off the left and right cushions are very similar, except that they work with the y coordinate rather than the x.
+          </li>
+          <li>
+            When we search for the best adjustment, the current range, 0 to 50, may be too small or large. For our example, <b>the search range should not be larger than the horizontal distance between cue ball and target ball</b>. In addition, if the code should encounter a shot probability of 0 (meaning that this adjustment is useless) when the <span class="variablename">bestCommand</span>'s probability is greater than zero (meaning that the bot has seen at least one "good" kick shot), you should break out of the search loop, because you have already passed the optimal adjustment amount. You may wish, too, when <span class="variablename">bestCommand</span> has probability greater than 0, to reduce the incremental adjustment from 1 unit to a smaller amount.
+          </li>
+          <li>
+            When we searched for the best kick shot, we fixed the strength at 50. Obviously it is possible that you might discover a better shot by considering other strength values. 
+          </li>
+          <li>
+            If we are getting greedy, you may wish <b>not only pocket a ball with your kick shot, but also to plan for the cue ball's end position</b>. You can employ the strategies of lesson 14 into your new code searching for the optimal kick shot with a better cue ball end position.
+          </li>
+          <li>
+            There is another type of rebound shot called "bank shot" that we haven't discussed yet. In a bank shot, the cue ball strikes the target ball in such a way as to bounce the target ball off a cushion and then head towards a pocket. This shot is especially useful when your target ball is very close to the side cushion, as illustrated below. In such situations, the basic idea is to <b>get the mirror point of the target pocket, then use that mirror point to calculate the aim position</b>. Obviously some searching is needed to deal with the skewed rebounding, very similar to what we did for the kick shot in this lesson.
+            <p>
+                <img src="/images/anotherbankshottype.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+            </p>
+          </li>
+          <li>
+            The current <span class="variablename">getCallShot</span> function looks only for a kick shot when there is no direct shot (<span class="variablename">bestCommand.prob</span> is -1); but sometimes, even if you have an OK direct shot, there may be a rebound shot with even higher success probability or better cue ball end position. Maybe you would like to change the logic to search for a good kick shot when your best direct shot is not so good? Or maybe when there is no direct shot you can try the kick shot before falling back to a safety shot.
+          </li>
+          <li>
+            <p>
+              <b>Searching for the best kick shot is definitely time consuming, but many of the ideas we have discussed before can be applied here in order to accelerate the search process</b>. For example, if a pocket is blocked from a target ball, then you can skip that ball-pocket pair; if the target ball and target pocket are on opposite sides of the cue ball, we can safely skip that pair; if the cue ball is blocked from the adjusted mirror point of a target ball, we can skip that ball; if you find a kick shot that is good enough, you can break out of the search right away; you could search fewer values when you have more balls left to check out, etc.
+            </p>
+          </li>
+      </ul>
+  </p>
+  <p>
+    If you want to discuss an idea with someone or get some suggestions, feel free to post your questions in our forum, under <a href="https://forum.tgame.ai/t/kick-shots-to-the-rescue/67" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+    
+    

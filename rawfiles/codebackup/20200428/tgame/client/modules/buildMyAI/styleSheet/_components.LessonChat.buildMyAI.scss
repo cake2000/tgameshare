@@ -1,0 +1,90 @@
+.chatHistory{
+  &__List{
+    @include flexbox();
+    flex-direction: column;
+    &__Item{
+      margin: 1px;
+      display: inline-block;
+      width: calc(100% - 10px);
+      padding: 5px;
+      &__Line{
+        @include flexbox();
+        &--USER_TEXT{
+          justify-content: flex-end;
+          .chatHistory__List__Item__Line__Content{
+            margin-left: 0px;
+            margin-right: 15px;
+            flex: 0 0 auto;
+            max-width: 80%;
+          }
+          .chatHistory__List__Item__Line__User{
+            order: 2;
+          }
+          &.otherUser {
+            justify-content: flex-start;
+            .chatHistory__List__Item__Line__User{
+              order: 0 !important;
+            }
+            .chatHistory__List__Item__Line__Content{
+              margin-left: 15px;
+              margin-right: 0;
+              flex: 0 0 auto;
+              max-width: 80%;
+            }
+          }
+        }
+        &__User{
+          text-align: left;
+          flex: 0 0 45px;
+          color: #b0a7aa;
+          span{
+            margin-top: 5px;
+            padding-left: 7px;
+            display: inline-block;
+            width: 100%;
+            font-size: 12px;
+          }
+        }
+        &__Content{
+          @include flexbox();
+          flex-direction: column;
+          position: relative;
+          line-height: 22px;
+          flex: 1;
+          margin-left: 15px;
+          max-width: 80%;
+        }
+      }
+      time{
+        display: inline-block;
+        width: calc(100% - 60px);
+        font-size: 11px;
+        color: #b0a7aa;
+        padding-left: 60px;
+      }
+      &.USER_TEXT{
+        time{
+          text-align: right;
+          padding-right: 60px;
+          padding-left: 0px;
+        }
+      }
+
+    }
+  }
+}
+.chatHistoryForm{
+    @include flexbox();
+    padding: 15px;
+    border-top: 1px solid #e8e8e8;
+    padding: 5px 15px !important;
+    .sendChatButton{
+      margin-right: 10px;
+      margin-top: 10px;
+      background: $tg-col-basic-dark-blue;
+      color: $tg-col-basic-white;
+      padding: 8px 10px;
+      border-radius: 3px;
+      height: 30px;
+    }
+}

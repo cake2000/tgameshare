@@ -1,0 +1,968 @@
+<qa>
+    <question key="function" />
+    <answer>
+        <p>A JavaScript <span class="keyword">function</span> is a block of code designed to perform a particular task or calculate a value, like these two examples below. It can take some optional input parameters, and it can optionally return some object or value as output.</p>
+        <p>
+            <pre class="brush: js">
+// syntax 1
+function add(x, y) { 
+    return x + y;
+}
+// syntax 2
+let subtract = function(x, y) {
+    return x - y;
+};
+            </pre>
+        </p>
+        <p>
+            A JavaScript function <b>executes</b> when you <b>call a function</b> by appending a parameter list (can be an empty list) to it like this:
+        </p>
+        <p>
+            <pre class="brush: js">
+// call the add function with 2 parameters and assign 
+// the output to the variable result
+let result = add(2, 3);
+
+// call subtract function with 2 parameters
+// and print the result using the function console.log
+console.log(subtract(result, 2));
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+  <question key="async" />
+  <answer>
+    <p><b class="keyword">async</b> and <b class="keyword">await</b> are used together to wait on an asynchronous task to finish before continuing. For example, <b class="variablenamebold">setTimeout</b> is a commonly used asynchronous function: it says please run this function after this many milliseconds. Without using <span class="keyword">async</span> and <span class="keyword">await</span>, a JavaScript program runs "through" asynchronous calls like this: </p>
+    <p>
+      <pre class="brush: js">
+function run1() {        
+  // print "out 1"
+  console.log("out 1");
+  // wait 1000 milliseconds and then print "out 2"
+  setTimeout(function () {
+    console.log("out 2 ");
+  }, 1000);
+  // print "out 3"
+  console.log("out 3");
+}
+
+run1();
+
+// output: 
+//out 1
+//out 3 
+// after 1 second
+//out 2
+      </pre>
+    </p>
+    <p>As you can see, since <span class="variablename">setTimeout</span> is an asynchronous function, the execution continues passing the <span class="variablename">setTimeout</span> line to print "out 3" first, then after 1 second the "out 2" line is printed. </p>
+    <p>
+      If we want the execution to <b>block (wait)</b> at the setTimeout clause, we need to a) mark the function as <b class="keyword">async</b>, b) wrap the setTimeout call in a <b class="variablenamebold">Promise</b>, and c) use <b class="keyword">await</b> to call the new timeout function, like this:
+    </p>
+    <p>
+      <pre class="brush: js">
+function timeout(ms) {
+  // "wrap" the asynchronous function 'setTimeout' in a promise
+  return new Promise(resolve => setTimeout(function () {
+    console.log("out 2 ");
+    resolve();
+  }, ms));
+}            
+async function run2() {    
+  // print "out 1"        
+  console.log("out 1");
+  // call async function to print "out 2"
+  await timeout(1000);
+  // print "out 3"
+  console.log("out 3");
+}
+
+run2();
+
+// output: 
+//out 1
+//out 2
+//out 3
+      </pre>
+    </p>
+    <p>
+      <b>Cool Trick</b>: you can actually test-run both programs on any browser's developer console. For example, in Chrome or FireFox, press F12, and select the "Console" tab on top, then you can copy and paste the example code above to test it.
+    </p>
+  </answer>
+</qa>
+  
+
+
+
+<qa>
+  <question key="this" />
+  <answer>
+      <p>In JavaScript, the keyword <b class="keyword">this</b> can be confusing sometimes. For majority of use cases, it can be simplified to one of the following two scenarios: </p>
+      <p>1. When <b class="keyword">this</b> is used inside a function called through an object, it refers to that object. For example:</p>
+      <p>
+          <pre class="brush: js">
+const obj = {
+  name: "object1",
+  printName: function() {
+    console.log(this.name);
+  }
+};
+// invoking function through obj -> will print 'object1'
+obj.printName(); 
+          </pre>
+      </p>
+      <p>2. Otherwise, you can assume <b class="keyword">this</b> is referring to the global object <b class="variablenamebold">window</b>. For example:</p>
+      <p>
+          <pre class="brush: js">
+const printName = function() {
+  console.log(this.name);
+};
+// invoking function directly instead of through an object
+printName(); // will print window.name if that's defined
+          </pre>
+      </p>
+      <p>If you are an advanced learner, I suggest you visit <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this" target="_blank">this </a> or <a href="http://javascriptissexy.com/understand-javascripts-this-with-clarity-and-master-it/" target="_blank">that</a> link for some more in-depth explanations. </p>
+  </answer>
+</qa>
+
+
+
+<qa>
+    <question key="random" />
+    <answer>
+        <p>
+            In real life, to achieve a random effect, you can throw a coin and choose different actions based on which side of the coin is facing up. We have something much more powerful in the computer world: <b class="variablenamebold">let r = Math.random()</b>. This is a function of the <b class="variablenamebold">Math</b> libray, and every time you call it, it returns a new random number r between 0 and 1.
+        </p>
+        <p>
+            So to simulate a coin flip, you just need to keep generating new random numbers, and call it a "head" whenever it is greater than 0.5, since there is a 50% chance r is greater than 0.5. 
+        </p>
+        <p>
+            <img src="/images/Mathrandomcoin.png" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+        </p>
+        <p>
+            If you keep drawing random numbers using Math.random, it gives you a series of simulated coin tosses like this:
+            <table class="ReferenceTable">
+                <thead>
+                    <th> <span class="variablenamebold">Math.random</span> outputs: </th> <th>0.34</th> <th>0.58</th> <th>0.79</th> <th>0.13</th> <th>0.80</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>simulated coin tosses:</td>
+                        <td>
+                            <img src="/images/pennytail.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                        </td>
+    
+                        <td>
+                            <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                        </td>
+        
+                        <td>
+                            <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                        </td>
+    
+                        <td>
+                            <img src="/images/pennytail.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                        </td>
+    
+                        <td>
+                            <img src="/images/pennyhead.png" style="width: 100%; height: auto; margin-left: 0%; vertical-align: top;"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+        <p>
+            Of course, the threshold doesn't have to be exactly 0.5. For example, if you want to simulate a random event that happens with 20% probability, you can keep drawing random numbers using Math.random(), and trigger the event each time you get a number that's greater or equal to 0.8 (or less than 0.2).
+        </p>
+                        
+    </answer>
+</qa>
+    
+
+
+<qa>
+    <question key="array" />
+    <answer>
+        <p>An array is simply a list of things bound together. Let me show you how to use arrays with LEGO pieces:</p>
+        <p>
+            <pre class="brush: js; gutter: false;">
+// create an empty array A
+let A = [];
+// create a new LEGO brick
+let redBrick = {color:"red", knobs:3};
+// add redBrick to A
+A.push(redBrick);
+            </pre>
+            <img src="/images/awithonered.png" style="width: 30%; height: auto; margin-left: 35%; vertical-align: top;"/>            
+        </p>
+
+        <p>
+            <pre class="brush: js; gutter: false;">
+// create a new LEGO brick
+let blueBrick = {color:"blue", knobs:2};
+// add blueBrick to A
+A.push(blueBrick);
+            </pre>
+            <img src="/images/awithredandblueindex.png" style="width: 30%; height: auto; margin-left: 35%; vertical-align: top;"/>            
+        </p>
+
+        <p>
+            <pre class="brush: js; gutter: false;">
+//print A's length 
+console.log(A.length); // -> "2"
+
+//print knob count of first brick in A 
+console.log(A[0].knobs); // -> "3"
+
+//print color of second brick in A 
+console.log(A[1].color); // -> "blue"
+
+//create another array B with 3 bricks
+let greenBrick = {color:"green", knobs:4};
+let orangeBrick = {color:"orange", knobs:3};
+let blackBrick = {color:"black", knobs:2};
+let B = [greenBrick, orangeBrick, blackBrick];
+// concatenate B with A to get array C
+let C = A.concat(B);
+            </pre>
+            <img src="/images/cwith5bricks.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>            
+        </p>
+    
+        <p>
+            <pre class="brush: js; gutter: false;">
+// take out last brick from C
+C.pop();
+            </pre>
+            <img src="/images/cwith4bricks.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>            
+        </p>
+        
+        <p>
+            <pre class="brush: js; gutter: false;">
+// extract 2 bricks from C at index 1
+let D = C.splice(1, 2)
+            </pre>
+            <img src="/images/candd.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>            
+        </p>
+
+        <p>
+            <pre class="brush: js; gutter: false;">
+// iterate through C to print brick colors
+for (let i=0; i &lt; C.length; i++) {
+  console.log(i + ": " + C[i].color);
+}
+// will print 
+// 0: red 
+// 1: orange
+          </pre>
+        </p>
+            
+
+    </answer>
+</qa>
+    
+
+
+<qa>
+  <question key="for-loop" />
+  <answer>
+    <p>
+      To understand the for-loop, let's consider the simple task of listing all the even numbers from 0 to 6. The approach is fairly straight-forward: you start with 0 and add 2 each time, until you reach 6. 
+    </p>
+    <p>
+      Now let's code this repetition in a for-loop. As shown below, <b>a for-loop is composed of three key components: initialization, test condition and change step</b>, followed by the block of code to be repeated. Each repetition of the code is called an <b>iteration</b>.
+      <ul>
+        <li>
+            <b>initialization</b> defines a new <b>index varaible</b> using the keyword <b>let</b> (executed before the first iteration starts);
+        </li>
+        <li>
+          <b>test condition</b> is checked before each iteration, and no further iterations will be executed after the condition becomes false;
+        </li>
+        <li>
+          <b>change step</b> runs at the end of each iteration;
+        </li>
+      </ul>
+    </p>
+    <p>
+      <img src="/images/forloopformat2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+
+    <p>
+      As illustrated, <b>we first initialize the index variable, <span class="variablenamebold">i</span>, to 0</b>. (Note that you can use any variable for the index: "k" or "j" for example). Next, we <b>run the current iteration</b>, which prints "i is 0".</p> 
+      
+    <p> Then <b>the index variable i is increased by 2 with "i = i + 2"</b>. Note that when we write "i = i + 2", we first calculate the value of "i+2" to get the value of 2, then assign that value to the variable on the left of the equation, which is <b>i</b> itself. Now we <b>check the test condition <span class="variablenamebold">i &lt;= 6</span></b> again. Since the condition is true, we stay in the loop and "i is 2" is printed. 
+    </p>
+      <p>
+      
+      On the third and fourth iterations, "i is 4" and then "i is 6" are printed. When <b>i</b> is finally increased to 8, <b>the stopping condition "i &lt;= 6" no longer holds, so we exit the for-loop at that point</b>.
+    </p>
+    <p>
+      <img src="/images/forloopanimation.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+  </answer>
+</qa>
+
+
+<qa>
+    <question key="break" />
+    <answer>
+      <p>
+        When using a for loop or a while loop, if you want to stop the loop and break out right away, you can use the keyword <b class="keyword">break</b> like this example below. Note that when i becomes 6, the <b class="keyword">break</b> keyword gets called, and the program exits the for-loop right away.
+      </p>
+        <p>
+            <pre class="brush: js">
+for (let i=0; i &lt; 10; i++) {
+  if (i > 5) {
+    break;
+  }
+  console.log("iterator i is " + i);
+}
+// will print 
+// iterator i is 0 
+// iterator i is 1 
+// iterator i is 2 
+// iterator i is 3
+// iterator i is 4 
+// iterator i is 5 
+            </pre>
+          </p>
+        </answer>
+</qa>
+
+<qa>
+    <question key="continue" />
+    <answer>
+      <p>
+        When using a for loop or a while loop, if you want to skip the current iteration and jump to the next iteration right away, you can use the keyword <b class="keyword">continue</b> like this example below. Note that when i becomes 3, the <b class="keyword">continue</b> keyword gets called, and the program moves on to the next iteration right away.
+      </p>
+        <p>
+            <pre class="brush: js">
+for (let i=0; i &lt; 5; i++) {
+  if (i == 3) {
+    continue;
+  }
+  console.log("iterator i is " + i);
+}
+// will print 
+// iterator i is 0 
+// iterator i is 1 
+// iterator i is 2 
+// iterator i is 4 
+            </pre>
+          </p>
+        </answer>
+</qa>
+
+
+<qa>
+    <question key="grid search" />
+    <answer>
+        <p><b>Grid search</b> is a basic algorithm used to search through a list of items and select one <b>best</b> item. Here <b>best</b> is specified by you, which is usually based on some numeric value associated with each item.</p>
+        <p>
+            For example, imagine you are choosing a hero to use in a fighting game. There are 3 heroes to choose from, and each hero has a damage level and a speed level: 
+        </p>
+        <p>
+            <pre class="brush: js">
+var heroes = [];
+heroes.push({name: "FireMaster", damage: 6, speed: 2});
+heroes.push({name: "DragonKing", damage: 4, speed: 5});
+heroes.push({name: "SnowRunner", damage: 3, speed: 4});
+            </pre>
+        </p>
+        <p>
+            Now, assume you want to search for one hero that has the highest combined damage and speed levels, then you can write a simple grid search like this:
+        </p>
+        <p>
+            <pre class="brush: js">
+// record keeper for best combined level              
+let bestLevel = 0;
+// a pointer to the best hero so far as you iterate
+let bestHero = {};                
+// for-loop to iterate through all heros in array
+for(let i=0; i &lt; heroes.length;i++) {
+  // calculate level to be used for comparison
+  let combinedLevel=heroes[i].damage+heroes[i].speed;
+  // if level is better than best so far
+  if (combinedLevel &gt; bestLevel) {
+    // update best level record
+    bestLevel = combinedLevel;
+    // update pointer to point to current hero
+    bestHero = heroes[i];
+  }
+}             
+            </pre>
+        </p>
+        <p>
+            Note that since we are looking for a hero with the best combined level, we needed a variable <b>bestLevel</b> to keep track of the best level we have seen so far, and use it to compare with each new hero down the list. Also, whenever we have found a new best, we need to keep track of that hero using a separate variable <b>bestHero</b>. In our little example, the bestHero will be pointing to the <b>DragonKing</b>, as his combined level is at 9, the highest.
+        </p>
+    </answer>
+</qa>
+
+<!--qa>
+    <question key="var" />
+    <answer>
+        <p>In JavaScript, <b>var</b> declares a new variable, which is a container for you to store a value that you can read back later. For example: </p>
+        <p>
+            <pre class="brush: js">
+var x = 1;
+var y = 2;
+x = y + 3; // x is 5 now
+
+// var's value can be a string
+var w = "abc"; 
+console.log("w is " + w);
+
+// var's value can be a function
+var subtract = function(a, b) {
+    return a - b;
+};
+var result = subtract(x, y);
+            </pre>
+        </p>
+    </answer>
+</qa-->
+
+
+<qa>
+    <question key="let" />
+    <answer>
+        <p>In JavaScript, <b class="keyword">let</b> declares a new variable, which is a container for you to store a value that you can read back later. Unlike <a href="#" onclick="ClickToSendChat(event, 'how to use const?')" class="inlinebutton"><b>const</b></a>, you can assign a new value to it as well. For example: </p>
+        <p>
+            <pre class="brush: js">
+let x = 1;
+let y = 2;
+x = y + 3; // x is 5 now
+
+// variable's value can be a string
+let w = "abc"; 
+console.log("w is " + w);
+
+// variable's value can be a function
+let subtract = function(a, b) {
+    return a - b;
+};
+let result = subtract(x, y);
+            </pre>
+        </p>
+<!--
+        <p><b>let</b> is very similar to the keyword <b>var</b>, except that <b>let</b> limits the scope of a variable within the current block. For example: </p>
+        <p>
+            <pre class="brush: js">
+let x = 1; 
+var y = 1;
+
+if (x == 1) {
+  let x = 2;
+  var y = 2;
+  // this would print x=2 y=2
+  console.log("Inside {}: x=" + x + " y=" + y);
+}
+// this would print x=1 y=2
+console.log("Outside {}: x=" + x + " y=" + y);
+            </pre>
+        </p>
+    -->
+    </answer>
+</qa>
+
+
+
+<qa>
+    <question key="const" />
+    <answer>
+        <p>In JavaScript, <b class="keyword">const</b> declares a new constant container that will not be reassigned later. For example: </p>
+        <p>
+            <pre class="brush: js">
+const x = 1;
+const y = {
+    a: 2
+};
+// you can change the property of y
+y.a = y.a + 1;
+
+// but you cannot reassign y
+y = {
+    b: 3
+};
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+
+<qa>
+    <question key="object" />
+    <answer>
+        <p>
+            A <b>JavaScript object</b> is used to represent a real-world object in the computer world, such as a car or a movie. 
+        </p>
+        <p>
+            When we describe a real-world object, we can talk about both its <b>attributes</b> and its <b>behavior</b>. <br/>
+            Each <b>attribute</b> has a <b>name</b> and a <b>value</b>: a car's <b>color</b> is <b>red</b>, <b>speed</b> is <b>50</b>; a movie's <b>title</b> is <b>Frozen</b>, <b>length</b> is <b>120</b> minutes. These attributes can be represented in JavaScript like this:
+            <pre class="brush: js">
+let car = {
+    color: "red",
+    speed: 50
+};
+let movie = {
+    title: "Frozen"
+};                
+// you can attach new attributes to objects 
+movie.length = 120;       
+            </pre>                    
+            <b>Behavior</b> is more about what the object can do. When a car <b>runs</b>, its position is changed as a result. Some behaviors are more abstract. For example, a movie can <b>rename</b> itself by changing its title. These behaviors can be represented in JavaScript as <b>method functions</b> attached to the object like this:
+            <pre class="brush: js">
+let car = {
+    color: "red",
+    speed: 50,
+    // define behavior as part of object creation
+    run: function() {
+        // change position of car
+    }
+};
+// trigger a method
+car.run();
+
+let movie = {
+    title: "Frozen",
+    length: 120
+};            
+// attach new behavior to object 
+movie.rename = function(newTitle) {
+    this.title = newTitle;
+}
+       
+            </pre>                    
+        </p>
+        <p>There are a few key facts to remember about objects:
+            <ul>
+                <li>
+                    An object can be empty, as represented by {}. 
+                </li>
+                <li>
+                    It's perfectly fine for an object to have no method function defined, as we often just need to store some attributes in an object.
+                </li>
+                <li>
+                    The value of an attribute can be another object in itself. For example, a car's wheel can be an object itself:
+                    <pre class="brush: js">
+                        car.wheel = {
+                            diameter: 17, color: "silver"
+                        };
+                    </pre>
+                </li>
+            </ul>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="json" />
+    <answer>
+        <p>A JavaScript object (called JSON) is a collection of properties, where each property is a map from a key to a value. </p>
+        <p>JSON is very useful when you want to define a map from string type keys to their values, or when you want to represent an object with some properties. </p>
+        <p>Example:</p>
+        <p>
+            <pre class="brush: js">
+var obj = {
+    // the value can be any simple "primitive" value
+    key1: "string value", 
+    key2: 234,
+    // the value can be an object like a function 
+    key3: function() { console.log("hello")},
+    key4: {subkey1: 2, subkey2: "morning"}
+};
+// you can read/write the property value using the key.
+obj.key2 = obj.key2 + 10; 
+// you can also use [] to read/add/change a property
+obj["key2"] = obj["key1"] + " is like this"; 
+obj.key3();
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+
+<!--qa>
+    <question key="victor" />
+    <answer>
+        <p><a href="http://victorjs.org/" target="_blank">Victor.js</a> is a library for 2-dimensional vector operations. </p>
+        <p>
+            <table class="ReferenceTable">
+                <thead>
+                    <th> Usage </th> <th>Description</th>
+                </thead>
+                <tbody>
+                        <tr>
+                            <td>v1=new Victor(2,3)</td>
+                            <td>create a new vector</td>
+                        </tr>
+                        <tr>
+                            <td>v2=v1.clone()</td>
+                            <td>make a copy of v1</td>
+                        </tr>
+                        <tr>
+                            <td>L1=v1.length()</td>
+                            <td>get v1's length</td>
+                        </tr>
+                        <tr>
+                            <td>v1.normalize()</td>
+                            <td>scale v1 to length=1</td>
+                        </tr>
+                        <tr>
+                            <td>v1.scale(2)</td>
+                            <td>double v1's length</td>
+                        </tr>
+                        <tr>
+                            <td>v1.add(v2)</td>
+                            <td>set v1 to v1 + v2</td>
+                        </tr>
+                        <tr>
+                            <td>v1.subtract(v2)</td>
+                            <td>set v1 to v1 - v2</td>
+                        </tr>
+                    </tbody>
+            </table>
+        </p>
+    </answer>
+</qa-->
+
+<qa>
+    <question key="default parameter" />
+    <answer>
+        <p>
+            The parameters of JavaScript functions default to undefined, but in some scenarios, it might be useful to set a different default value. <b>Default parameters</b> allow formal parameters to be initialized with default values. In the example below, <b>the default value of paramter b is 1</b>.
+        </p> 
+        <pre class="brush: js">
+function add(a, b = 1) {
+    return a + b
+};
+
+console.log(add(3, 2));
+// expected output: 5
+
+console.log(add(3));
+// expected output: 4
+        </pre>
+    </answer>
+</qa>
+
+<qa>
+  <question key="javascript keywords" />
+  <answer>
+    <p>
+      Here is a list of JavaScript keywords that we need in our game bot code. If you'd like to include more keywords in this list, please post your requests at our <a href="https://forum.tgame.ai/c/site-feedback" target="_blank">forum</a>.
+    </p>
+    <p>
+      <table class="ReferenceTable">
+        <thead>
+          <th> Keyword </th> <th>Description</th> 
+        </thead>
+        <tbody>
+          <tr>
+            <td>function</td>
+            <td>Define a subroutine
+              <pre class="brush: js">
+function showAnExample(aParameter) {
+  // function statements
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>return</td>
+            <td>To return a value or an object from the callee function to the caller.
+              <pre class="brush: js">
+function showAnExample(aParameter) {
+  // function statements
+  return anReturnedObject;
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>if, else</td>
+            <td>Used in conditional statements.
+              <pre class="brush: js">
+if (someConditionIsTrue) {
+  // do this
+} else {
+  // do that
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>for</td>
+            <td>Create a for-loop to execute a block of statements repeatedly.
+              <pre class="brush: js">
+for (let i = 0; i &lt; 10; i = i + 1) {
+  // statements that will be repeated
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>continue</td>
+            <td>Used in a loop to jump to the next iteration immediately (skipping the remaining statements in the current iteration)
+              <pre class="brush: js">
+for (let i = 0; i &lt; 10; i = i + 1) {
+  // do not print if i is 5
+  if (i == 5) continue;
+  // print value of i
+  console.log("i is " + i); 
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>break</td>
+            <td>Jump out of the current loop and continue with the statements after the loop
+              <pre class="brush: js">
+for (let i = 0; i &lt; 10; i = i + 1) {
+  // exit loop when i is 5
+  if (i == 5) break;
+  // print value of i
+  console.log("i is " + i);
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>const</td>
+            <td>Define a variable whose value cannot be changed after initialization
+              <pre class="brush: js">
+const i = 0; 
+i = 1; // syntax error 
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>let</td>
+            <td>Define a variable whose value can be changed later
+              <pre class="brush: js">
+let i = 0; 
+i = 1; // no problem
+              </pre>              
+            </td>
+          </tr>
+          <tr>
+            <td>async, await</td>
+            <td>
+              Used together to wait on an asynchronous task to finish before continuing.
+              <pre class="brush: js">
+// define an async function
+async function workOnATask() {
+  // a time consuming task
+}
+// call the async function and wait on it
+await workOnATask();
+              </pre>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </p>
+  </answer>
+</qa>
+
+<qa>
+  <question key="javascript symbols" />
+  <answer>
+    <p>
+      Here is a list of JavaScript symbols that we need in our game bot code. For more information, please check out <a href="https://www.w3schools.com/jsref/jsref_operators.asp" target="_blank">JavaScript Operators Reference</a>.
+    </p>
+    <p>
+      <table class="ReferenceTable">
+        <thead>
+          <th> Symbol </th> <th>Description</th> <th>Example</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>.</td>
+            <td>A dot is used to refer to a property of an object.</td>
+            <td>anArray.length</td>
+          </tr>
+          <tr>
+            <td>;</td>
+            <td>A semicolon is used at the end of a completed statement.</td>
+            <td>const aNumber = t;</td>
+          </tr>
+          <tr>
+            <td>' or "</td>
+            <td>Single quotes or double quotes are used to wrap a string literal.</td>
+            <td>"a string", 'another string', or "a string has 'a string'"</td>
+          </tr>
+          <tr>
+            <td>: and ,</td>
+            <td>Colons and commas are used together to define an object's properties.</td>
+            <td>const car = { color: "red", seatCount: 2 };</td>
+          </tr>
+          <tr>
+            <td>()</td>
+            <td>Round brackets are used to enclose parameters for functions, if conditions or for-loop, etc.</td>
+            <td>
+              <pre class="brush: js">
+function plus(a, b) {
+  return a + b;
+}
+if ( a > b ) { 
+  // some statement 
+}
+for (let i = 0; i &lt; 5; i = i + 1) { 
+  // some statement 
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>[]</td>
+            <td>Square brackets are used with index numbers to refer to array elements.</td>
+            <td>Balls[0]</td>   
+          </tr>
+          <tr>
+            <td>{}</td>
+            <td>Curly brackets are used to enclose some statements in function definitions, conditional statements or for-loops.</td>
+            <td>
+              <pre class="brush: js">
+function plus(a, b) {
+  return a + b;
+}
+if ( a > b ) { 
+  // some statement 
+}
+for (let i = 0; i &lt; 5; i = i + 1) {
+  // some statement 
+}
+              </pre>
+            </td>
+          </tr>
+          <tr>
+            <td>+, -, * and /</td>
+            <td>Numeric operators</td>
+            <td>
+              <p>3 + 5</p>
+              <p>5 - 2</p>
+              <p>3 * 5</p>
+              <p>5 / 2</p>
+            </td>
+          </tr>
+          <tr>
+            <td>=</td>
+            <td>Equal symbol is used in assignments. </td>
+            <td>const a = 5;</td>
+          </tr>
+          <tr>
+            <td>+=, -=, *=, /=</td>
+            <td> shortcut for combining assignment with a numeric operation
+              <p>a += b -> a = a + b</p>
+              <p>a -= b -> a = a - b</p>
+              <p>a *= b -> a = a * b</p> 
+              <p>a /= b -> a = a / b</p> 
+            </td>
+            <td>
+              let a = 0; a += 1;
+            </td>
+          </tr>
+          <tr>
+            <td>==, !=, &lt;, &lt;=, >, >=</td>
+            <td>Comparison operators: equal to, not equal, less than, less than or equal to, greater than, greater than or equal to. </td>
+            <td>
+              <p>x == 5</p>
+              <p>x > 5</p>
+            </td>
+          </tr>
+          <tr>
+            <td>!, &amp;&amp;, ||</td>
+            <td>Logical operators: not, and, or.</td>
+            <td>
+              <p>!x</p>
+              <p>x == 5 &amp;&amp; y == 6</p>
+              <p>x == 5 || y == 6</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </p>
+  </answer>
+</qa>
+
+<qa>
+  <question key="scope" />
+  <answer>
+      Every time you define a new variable using <b class="keyword">let</b> or <b class="keyword">const</b>, that variable can be used only within the current scope, which can be the current function block or for-loop block. For now you can think of a scope block as anything in between a matching pair of curly brackets ( {} ). Please follow the example below to understand when a variable can or cannot be used.
+    </p>
+    <p>
+        <pre class="brush: js">
+  // define a in the global scope so it can be used anywhere 
+  let a = 10; 
+  
+  function f1() {
+    // define a local variable b that is only usable in function f1
+    let b = 20;
+    if (b > 10) {
+      // define a local variable within the if block
+      let c = 15;
+      // b can be used since the if block is f1's child scope
+      b = c + 5;
+      // a can be used since a is globally visible
+      a = b + 5;
+    }
+  
+    // c can't be used here since it is only visible within the if block
+    c = 20; // &lt;-- will cause an error
+  }
+  
+  // b can't be used here since it is only defined within the function f1's block
+  b = 30; // &lt;-- will cause an error
+      </pre>
+    </p>
+    <p>
+      For more advanced information on variable and scope, you can read <a href="https://www.digitalocean.com/community/tutorials/understanding-variables-scope-hoisting-in-javascript" target="_blank">this well-written tutorial online</a>.
+    </p>
+    <p>
+      <img src="/images/scopes.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+  </answer>
+</qa>
+
+<qa>
+  <question key="conditional" />
+  <answer>
+    <p>
+      A conditional statement is used to run certain code statement only when a particular condition is satisfied.
+    </p>
+    <pre class="brush: js">
+  if (condition) {
+    // code to run when condition is true
+  } else {
+    // code to run when condition is false
+  }     
+    </pre>     
+    <p>
+      Here <b>"condition"</b> must has a boolean value, either "true" or "false". It can be a comparison statement using one of the following comparison operations: <b>equal to ( == ), not equal to ( != ), greater than ( > ), less than ( &lt; ), greater than or equal to ( >= ), less than or equal to ( &lt;= )</b>.
+    </p>
+    <p>
+      If you know Scratch, this is equivalent to using the control block <img src='/images/scratch_ifthenelse.png' style='width: auto; height: 80px; vertical-align: bottom;'/> together with boolean blocks like <img src='/images/scratch_lessthan.png' style='width: auto; height: 25px; vertical-align: bottom;'/>.
+    </p>
+    <p>
+      When making more complicated decisions, you can combine multiple conditions with one or more of the following logical operators: "&amp;&amp;" (and), "||" (or), and "!" (not). 
+    </p>
+    <p>
+      <img src='/images/logicaloperations.png' style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+    </p>    
+  </answer>
+</qa>
+
+<qa>
+  <question key="return" />
+  <answer>
+    <p><span class="keyword">Return</span> is used in a function to submit a value or an object to the caller.</p>
+      <pre class="brush: js">
+function showAnExample(aParameter) {
+// function statements
+return anReturnedObject;
+}
+    </pre>
+  </answer>
+</qa>

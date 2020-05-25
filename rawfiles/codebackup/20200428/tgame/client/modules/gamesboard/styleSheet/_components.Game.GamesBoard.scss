@@ -1,0 +1,236 @@
+.game {
+
+  &--container {
+    display: flex;
+    justify-content: center;
+  }
+
+  &--wrapper {
+    min-width: 250px;
+    padding: 30px 20px;
+    margin-right: 20px;
+    // height: 100px;
+    cursor: pointer;
+    flex-basis: calc(50% - 84px);
+    transition: .3s ease;
+
+    &:hover, &.active {
+      & * {
+        color:$tg-col-basic-aqua;
+      }
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &__image {
+      height: 160px;
+      border: none !important;
+    }
+
+    &__title {
+      font-size: $tg-fs-heading4;
+      color: $tg-col-basic-orange;
+      font-weight: bold;
+      padding-top: 15px;
+    }
+
+    &__text {
+      font-size: $tg-fs-body;
+      color: $tg-col-basic-ivory;
+      font-family: $tg-ff-body;
+      padding-top: 15px;
+    }
+  }
+}
+
+.slick {
+  &--content {
+    display: block !important;
+    max-width: 700px;
+    position: relative;
+    width: 100% !important;
+    margin: 0px auto 0px;
+    // height: 100px;
+  }
+
+  &--dot {
+    text-align: center;
+    position: relative;
+    li {
+      display: inline-block;
+      button {
+        background: transparent;
+        border: none;
+        color: transparent;
+        position: relative;
+        outline: none;
+        &:after {
+          position: absolute;
+          content: '';
+          height: 5px;
+          width: 5px;
+          border-radius: 100%;
+          background: rgba(255, 255, 255, 0.57);
+        }
+      }
+    }
+
+    .slick-active {
+      button {
+        &:after {
+          background-color: white;
+        }
+      }
+    }
+  }
+}
+
+.gameWrapper {
+  touch-action: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none !important;
+
+  .buttons-game {
+    .powerButton {
+      width: 22vh;
+      height: 10vh;
+      position: fixed;
+      touch-action: none;
+      background-repeat: no-repeat;
+      background-size: 22vh;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none !important;
+
+      &.damagePower {
+        bottom: 26vh;
+        background-image: url(images/tank/1-damage.png);
+      }
+
+      &.speedPower {
+        bottom: 38vh;
+        background-image: url(images/tank/2-speed.png);
+      }
+
+      &.healthRegenPower {
+        bottom: 26vh;
+        right: 0;
+        background-image: url(images/tank/3-health-regen.png);
+      }
+
+      &.reloadPower {
+        bottom: 38vh;
+        right: 0;
+        background-image: url(images/tank/4-reload.png);
+      }
+    }
+
+    .buttonWrapper {
+      bottom: 3vh;
+      left: 0;
+      width: 22vh;
+      height: 22vh;
+      position: fixed;
+      touch-action: none;
+      background-image: url(images/arrowexamplebackground.png);
+      background-repeat: no-repeat;
+      background-size: 22vh;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none !important;
+    }
+
+    .buttonArrow {
+      width: calc(22vh / 3);
+      height: calc(22vh / 3);
+      position: fixed;
+      touch-action: none;
+      background-repeat: no-repeat;
+      background-size: calc(22vh / 3);
+      z-index: 1;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none !important;
+
+      &.upArrowButton {
+        bottom: 16vh;
+        left: 7.5vh;
+        background-image: url(images/newup.png);
+
+        &.upArrowButton2 {
+          background-image: url(images/newup2.png);
+          z-index: 0;
+        }
+      }
+
+      &.downArrowButton {
+        bottom: 5vh;
+        left: 7.5vh;
+        background-image: url(images/newdown.png);
+
+        &.downArrowButton2 {
+          background-image: url(images/newdown2.png);
+          z-index: 0;
+        }
+      }
+
+      &.leftArrowButton {
+        bottom: 10.5vh;
+        left: 2vh;
+        background-image: url(images/newleft.png);
+
+        &.leftArrowButton2 {
+          background-image: url(images/newleft2.png);
+          z-index: 0;
+        }
+      }
+
+      &.rightArrowButton {
+        bottom: 10.5vh;
+        left: 13vh;
+        background-image: url(images/newright.png);
+
+        &.rightArrowButton2 {
+          background-image: url(images/newright2.png);
+          z-index: 0;
+        }
+      }
+    }
+
+    .shootButton {
+      bottom: 3vh;
+      right: 0;
+      width: 22vh;
+      height: 22vh;
+      position: fixed;
+      touch-action: none;
+      background-image: url(images/shootbutton.png);
+      background-repeat: no-repeat;
+      background-size: 22vh;
+      z-index: 1;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none !important;
+
+      &.shootButton2 {
+        background-image: url(images/shootbutton2.png);
+        z-index: 0;
+      }
+    }
+
+    img {
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+  }
+}
+@media (max-width: 720px) {
+  .game {
+    &--container {
+      flex-direction: column;
+    }
+    &--wrapper:not(:first-child) {
+      margin-top: 5px;
+    }
+  }
+}

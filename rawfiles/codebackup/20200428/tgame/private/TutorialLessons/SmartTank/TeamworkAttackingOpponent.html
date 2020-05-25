@@ -1,0 +1,1837 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+const MSG_CLAIM_CRYSTAL = 1;
+const MSG_CLAIM_WEAPON = 2;
+const MSG_ATTACK = 3;
+const MSG_UNATTACK = 4;
+
+const ownerOfCrystals = {};
+
+let dangerScores = null;
+let graph = null;
+
+function isBombBlockedAtPos(col, row, color) {
+  // filter Tanks array
+  const temp = Tanks.filter( t => t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row);
+  const result = temp.length > 0 || Maze[row][col] == 'R' || Maze[row][col] == 'T';
+  return result;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  const myColor = MyTank.color;
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.tankID == MyID || t.color == myColor) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1 + dangerScores[i][j];
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / (1 + MyTank.specialPower.speed);
+
+    let flag = false;
+    for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+      const oppo = oppoTanks[j];
+      const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+      const oppoTime = oppoDis / (1 + oppo.specialPower.speed);
+      if (oppoTime * 1.5 &lt; myTime) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  let target = null;
+  const key = MyTank.tankID.toString();
+  if (key in ownerOfCrystals &amp;&amp; ownerOfCrystals[key].length > 0) {
+    const colAndRow = ownerOfCrystals[key][0];
+    target = Crystals.find(crystal => crystal.c + "_" + crystal.r === colAndRow);
+  } else {
+    // get all positions of assigned crystals
+    const allArrays = Object.values(ownerOfCrystals);
+    const merged = [].concat.apply([], allArrays);
+    // filter out assigned crystals
+    const available = Crystals.filter(crystal => !merged.includes(crystal.c + "_" + crystal.r));
+    target = getClosestItem(available);
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  const curPreference = myPreference[MyTank.specialWeapon.type];
+  const candidates = Weapons.filter(w => myPreference[w.type] &lt; curPreference);
+  const closeBestWeapon = getClosestItem(candidates);
+  if (closeBestWeapon == null) return [];
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  if (MyTank.health &lt;= 2000) return "";
+
+  let weakestTarget = null;
+  
+  // go through all tanks
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const target = Tanks[i];
+
+    if (target.tankID == MyID || target.color == MyTank.color || target.r == MyTank.r &amp;&amp; target.c == MyTank.c) {
+      continue;
+    }
+
+    let toAttack = MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health;
+    toAttack = toAttack &amp;&amp; (MyTank.specialPower.damage == MAX_POWER || MyTank.specialPower.reload === MAX_POWER);
+
+    if (toAttack &amp;&amp; (!weakestTarget || target.health &lt; weakestTarget.health || target.specialPower.damage &lt; weakestTarget.specialPower.damage)) {
+      weakestTarget = target;
+    }
+  }
+
+  return attackTank(weakestTarget);
+}
+
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}
+
+function amILeader() {
+  let smallestID = MyTank.tankID;
+  for (let i = 0; i &lt; Tanks.length; i++) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color &amp;&amp; t.tankID &lt; smallestID) {
+      smallestID = t.tankID;
+    }
+  }
+  if (smallestID == MyTank.tankID) {
+    MyTank.isLeader = true;
+  } else {
+    MyTank.isLeader = false;
+  }
+}
+
+function getNewCommand() {
+  amILeader();
+  if (MyTank.isLeader) {
+    console.log("Tank " + MyTank.tankID + " is the leader!");
+  }
+
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // escape from danger
+  const ds = dangerScores[MyTank.r][MyTank.c];
+  let isInDanger = MyTank.health &lt; 1500 &amp;&amp; ds > 4;
+  isInDanger = isInDanger || MyTank.specialPower.healthRegen &lt; 2 &amp;&amp; ds > 6;
+  isInDanger = isInDanger || ds > 10; 
+  if (isInDanger) {
+    const cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}       
+
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    case MSG_CLAIM_CRYSTAL:
+      const key = message.ownerID.toString();
+      const loc = message.c + "_" + message.r;
+      if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+      if (!ownerOfCrystals[key].includes(loc)) {
+        ownerOfCrystals[key].push(loc);
+      }
+      break;
+    case MSG_CLAIM_WEAPON:
+      console.log("Got message to claim a special weapon.");
+      break;
+    case MSG_ATTACK:
+      console.log("got message to attack an opponent tank.");
+      break;
+    case MSG_UNATTACK:
+      console.log("got message NOT to attack an opponent tank.");
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+
+function allocateNewCrystal(data) {
+  amILeader();
+  if (!MyTank.isLeader) return;
+
+  // get team members
+  const teamMembers = Tanks.filter(tank => tank.color == MyTank.color);
+
+  // find the member has least special powers
+  let owner = null;
+  let leastPower = -1;
+  for (let i = 0; i &lt; teamMembers.length; i += 1) {
+    const tank = teamMembers[i];
+
+    // get sum of all special powers
+    const specialPowers = Object.values(tank.specialPower);
+    let sum = specialPowers.reduce((a, b) => a + b, 0);
+    // sum up the number of crystals already allocated to tank but not collected yet.
+    if (tank.tankID.toString() in ownerOfCrystals) {
+      sum += ownerOfCrystals[tank.tankID.toString()].length;
+    }
+
+    if (leastPower == -1 || sum &lt; leastPower) {
+      leastPower = sum;
+      owner = tank;
+    }
+  }
+
+  if (owner) {
+    sendMessageToTeam({
+      senderID: MyTank.tankID,
+      type: MSG_CLAIM_CRYSTAL,
+      c: data.c,
+      r: data.r,
+      ownerID: owner.tankID,
+    });
+    // update ownerOfCrystals
+    const key = owner.tankID.toString();
+    if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+    ownerOfCrystals[key].push(data.c + "_" + data.r);
+  }
+}
+
+function ackDisCrystal(data) {
+  const loc = data.c + "_" + data.r;
+  const keys = Object.keys(ownerOfCrystals);
+  for (let i = 0; i &lt; keys.length; i += 1) {
+    const key = keys[i];
+    ownerOfCrystals[key] = ownerOfCrystals[key].filter(a => a != loc);
+  }
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! In last tutorial, we built up the process of resource allocation among team members. Now, we are going to create another process, battle with opponent, to finish the discussion of team collaborations. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    So far, each tank decides whether to attack opponent tanks separately, based on individual status. To work as a team, we'd like the team leader make the decisions based on the status of entire team, and all other tanks follow the decision and attack one of the opposite tanks together. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    The process is similiar with but much simpler than the one we implemented for resource allocation. 
+  </p>
+  <p>
+    <ul>
+      <li>
+        (1) The team leader checks the information about its own team members and the other team, and decides attack or un-attack an opposite tank. 
+      </li>
+      <li>
+        (2) The team leader sends the decision to the game engine by calling function <span class="variablenamebold">sendMessageToTeam</span>.
+      </li>
+      <li>
+        (3) The game engine forwards the team message to each team member.
+      </li>
+      <li>
+        (4) Each team member updates the global variable <span class="variablenamebold">toAttackTankID</span> based on the received message, and acts accordingly.
+      </li>
+    </ul>
+  </p>
+  <p>
+    <img src="/images/attackopponent.png" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    We are going to implement step (1) (2) (4) in the bot code. First, we'll add step (1) and (2) in function <span class="variablenamebold">attackOpponent</span>. 
+  </p>
+  <p>
+    In what situation the team leader would like to initialize a battle? Here are my rules. You can create your own rules based on what you've learned from the manually played games.
+  </p>
+  <ul>
+    <li>
+      Total health scores or total health regeneration of my team is more than that of opponent team.
+    </li>
+    <li>
+      Total special powers of my team is at least half of maximum and at least three more than that of opposite team, or my team has maximal damage or reload power.
+    </li>
+  </ul>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    I've written a function, <span class="variablenamebold">getTeamSummary</span> for you, which summarizes the information of given team. Please copy it to your bot code. 
+  </p>
+  <p>
+    <pre class="brush:js">
+function getTeamSummary(team) {
+  let tHealth = 0;
+  let tHealthRegen = 0;
+  let tSpecialPower = 0;
+  let tDamage = 0;
+  let tReload = 0;
+  for (let i = 0; i &lt; team.length; i += 1) {
+    const tank = team[i];
+    tHealth += tank.health;
+    tHealthRegen += tank.specialPower.healthRegen;
+    tSpecialPower += Object.values(tank.specialPower).reduce((a, b) => a + b, 0);
+    tDamage += tank.specialPower.damage;
+    tReload += tank.specialPower.reload;
+  }
+  return { tHealth, tHealthRegen, tSpecialPower, tDamage, tReload };
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="150" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+    <b>challenge: </b>Rewrite function <span class="variablenamebold">attackOpponent</span>. If <span class="variablename">MyTank</span> is not the leader, the tank will check if variable <span class="variablenamebold">toAttackTankID</span> is set. If yes, attack that opponent tank. If <span class="variablename">MyTank</span> is the team leader, check if the above conditions are satisfied. If yes, the leader will find the weakest opponent tank, send a team message, and attack the target tank.
+  </p>
+  <code isHidden="false">
+//TODO
+let toAttackTankID = -1;
+
+function attackOpponent() {
+  let target = null;
+  if (!MyTank.isLeader) {
+    if (toAttackTankID > 0) {
+      target = Tanks.find(tank => tank.tankID == toAttackTankID);
+      return attackTank(target);
+    } else {
+      return "";
+    }
+  }
+  
+  // MyTank is the leader
+  const myTeam = Tanks.filter(tank => tank.color == MyTank.color);
+  //h0::get all opponent tanks::all tanks that not white or in MyTank.color
+  ::tank => tank.color != 'white' &amp;&amp; tank.color != MyTank.color
+  ::tank => tank.color == 'white' || tank.color == MyTank.color
+  ::tank => tank.color == 'white' &amp;&amp; tank.color == MyTank.color
+  const oppTeam = Tanks.filter( ? );
+  const mySummary = getTeamSummary(myTeam);
+  const oppSummary = getTeamSummary(oppTeam);
+
+  // condition1: total health scores or total health regeneration of my team is more than that of opponent team.
+  const condition1 = mySummary.tHealth >= oppSummary.tHealth || mySummary.tHealthRegen >= oppSummary.tHealthRegen;
+  const maxTotalPower = MAX_POWER * 4 * myTeam.length;
+  // total special powers of my team is at least half of maximum and at least three more than than that of opposite team
+  //h1::total special powers is mySummary.tSpecialPower
+  ::let condition2 = mySummary.tSpecialPower >= maxTotalPower || mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  ::let condition2 = mySummary.tSpecialPower >= maxTotalPower / 2 &amp;&amp; mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  ::let condition2 = mySummary.tSpecialPower >= maxTotalPower &amp;&amp; mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  let condition2 = ? ;
+  // or our team has maximal damage or reload power.
+  //h2::compare tDamage and tReload
+  ::condition2 = condition2 &amp;&amp; mySummary.tDamage == MAX_POWER * myTeam.length || mySummary.tReload == MAX_POWER * myTeam.length;
+  ::condition2 = condition2 &amp;&amp; mySummary.tDamage == MAX_POWER || mySummary.tReload == MAX_POWER;
+  ::condition2 = condition2 || mySummary.tDamage == MAX_POWER * myTeam.length || mySummary.tReload == MAX_POWER * myTeam.length;
+  condition2 = ? ;
+
+  if (condition1 &amp;&amp; condition2) {
+    for (let i = 0; i &lt; oppTeam.length; i += 1) {
+      const opp = oppTeam[i];
+      if (target == null || opp.health &lt; target.health) {
+        target = opp;
+      }
+    }
+  }
+
+  if (target) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_ATTACK,
+      attackTankID: target.tankID
+    });
+    return attackTank(target);
+  } else if (toAttackTankID > 0) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_UNATTACK,
+      attackTankID: toAttackTankID
+    });
+  }
+
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+const MSG_CLAIM_CRYSTAL = 1;
+const MSG_CLAIM_WEAPON = 2;
+const MSG_ATTACK = 3;
+const MSG_UNATTACK = 4;
+
+const ownerOfCrystals = {};
+let toAttackTankID = -1;
+let dangerScores = null;
+let graph = null;
+
+function isBombBlockedAtPos(col, row, color) {
+  // filter Tanks array
+  const temp = Tanks.filter( t => t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row);
+  const result = temp.length > 0 || Maze[row][col] == 'R' || Maze[row][col] == 'T';
+  return result;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  const myColor = MyTank.color;
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.tankID == MyID || t.color == myColor) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1 + dangerScores[i][j];
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / (1 + MyTank.specialPower.speed);
+
+    let flag = false;
+    for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+      const oppo = oppoTanks[j];
+      const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+      const oppoTime = oppoDis / (1 + oppo.specialPower.speed);
+      if (oppoTime * 1.5 &lt; myTime) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  let target = null;
+  const key = MyTank.tankID.toString();
+  if (key in ownerOfCrystals &amp;&amp; ownerOfCrystals[key].length > 0) {
+    const colAndRow = ownerOfCrystals[key][0];
+    target = Crystals.find(crystal => crystal.c + "_" + crystal.r === colAndRow);
+  } else {
+    // get all positions of assigned crystals
+    const allArrays = Object.values(ownerOfCrystals);
+    const merged = [].concat.apply([], allArrays);
+    // filter out assigned crystals
+    const available = Crystals.filter(crystal => !merged.includes(crystal.c + "_" + crystal.r));
+    target = getClosestItem(available);
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  const curPreference = myPreference[MyTank.specialWeapon.type];
+  const candidates = Weapons.filter(w => myPreference[w.type] &lt; curPreference);
+  const closeBestWeapon = getClosestItem(candidates);
+  if (closeBestWeapon == null) return [];
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  let target = null;
+  if (!MyTank.isLeader) {
+    if (toAttackTankID > 0) {
+      target = Tanks.find(tank => tank.tankID == toAttackTankID);
+      return attackTank(target);
+    } else {
+      return "";
+    }
+  }
+  
+  // MyTank is the leader
+  const myTeam = Tanks.filter(tank => tank.color == MyTank.color);
+  const oppTeam = Tanks.filter( tank => tank.color != 'white' &amp;&amp; tank.color != MyTank.color );
+  const mySummary = getTeamSummary(myTeam);
+  const oppSummary = getTeamSummary(oppTeam);
+
+  // condition1: total health scores or total health regeneration of my team is more than that of opponent team.
+  const condition1 = mySummary.tHealth >= oppSummary.tHealth || mySummary.tHealthRegen >= oppSummary.tHealthRegen;
+  const maxTotalPower = MAX_POWER * 4 * myTeam.length;
+  // total special powers of my team is at least half of maximum and at least three more than than that of opposite team
+  let condition2 = mySummary.tSpecialPower >= maxTotalPower / 2 &amp;&amp; mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  // or our team has maximal damage or reload power.
+  condition2 = condition2 || mySummary.tDamage == MAX_POWER * myTeam.length || mySummary.tReload == MAX_POWER * myTeam.length;
+  
+  if (condition1 &amp;&amp; condition2) {
+    for (let i = 0; i &lt; oppTeam.length; i += 1) {
+      const opp = oppTeam[i];
+      if (target == null || opp.health &lt; target.health) {
+        target = opp;
+      }
+    }
+  }
+
+  if (target) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_ATTACK,
+      attackTankID: target.tankID
+    });
+    return attackTank(target);
+  } else if (toAttackTankID > 0) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_UNATTACK,
+      attackTankID: toAttackTankID
+    });
+  }
+
+  return "";
+}
+
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}
+
+function amILeader() {
+  let smallestID = MyTank.tankID;
+  for (let i = 0; i &lt; Tanks.length; i++) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color &amp;&amp; t.tankID &lt; smallestID) {
+      smallestID = t.tankID;
+    }
+  }
+  if (smallestID == MyTank.tankID) {
+    MyTank.isLeader = true;
+  } else {
+    MyTank.isLeader = false;
+  }
+}
+
+function getNewCommand() {
+  amILeader();
+  if (MyTank.isLeader) {
+    console.log("Tank " + MyTank.tankID + " is the leader!");
+  }
+
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // escape from danger
+  const ds = dangerScores[MyTank.r][MyTank.c];
+  let isInDanger = MyTank.health &lt; 1500 &amp;&amp; ds > 4;
+  isInDanger = isInDanger || MyTank.specialPower.healthRegen &lt; 2 &amp;&amp; ds > 6;
+  isInDanger = isInDanger || ds > 10; 
+  if (isInDanger) {
+    const cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}       
+
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    case MSG_CLAIM_CRYSTAL:
+      const key = message.ownerID.toString();
+      const loc = message.c + "_" + message.r;
+      if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+      if (!ownerOfCrystals[key].includes(loc)) {
+        ownerOfCrystals[key].push(loc);
+      }
+      break;
+    case MSG_CLAIM_WEAPON:
+      console.log("Got message to claim a special weapon.");
+      break;
+    case MSG_ATTACK:
+      console.log("got message to attack an opponent tank.");
+      break;
+    case MSG_UNATTACK:
+      console.log("got message NOT to attack an opponent tank.");
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+
+function allocateNewCrystal(data) {
+  amILeader();
+  if (!MyTank.isLeader) return;
+
+  // get team members
+  const teamMembers = Tanks.filter(tank => tank.color == MyTank.color);
+
+  // find the member has least special powers
+  let owner = null;
+  let leastPower = -1;
+  for (let i = 0; i &lt; teamMembers.length; i += 1) {
+    const tank = teamMembers[i];
+
+    // get sum of all special powers
+    const specialPowers = Object.values(tank.specialPower);
+    let sum = specialPowers.reduce((a, b) => a + b, 0);
+    // sum up the number of crystals already allocated to tank but not collected yet.
+    if (tank.tankID.toString() in ownerOfCrystals) {
+      sum += ownerOfCrystals[tank.tankID.toString()].length;
+    }
+
+    if (leastPower == -1 || sum &lt; leastPower) {
+      leastPower = sum;
+      owner = tank;
+    }
+  }
+
+  if (owner) {
+    sendMessageToTeam({
+      senderID: MyTank.tankID,
+      type: MSG_CLAIM_CRYSTAL,
+      c: data.c,
+      r: data.r,
+      ownerID: owner.tankID,
+    });
+    // update ownerOfCrystals
+    const key = owner.tankID.toString();
+    if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+    ownerOfCrystals[key].push(data.c + "_" + data.r);
+  }
+}
+
+function ackDisCrystal(data) {
+  const loc = data.c + "_" + data.r;
+  const keys = Object.keys(ownerOfCrystals);
+  for (let i = 0; i &lt; keys.length; i += 1) {
+    const key = keys[i];
+    ownerOfCrystals[key] = ownerOfCrystals[key].filter(a => a != loc);
+  }
+}    
+  </cleancode>
+</element>
+
+<element elementid="160" elementType="Coding" condition="TestFinishedKilledOpponents_1">
+  <p>
+    Bravo! Next, we are going to work on step (4): each team member updates the global variable <span class="variablename">toAttackTankID</span> based on the messages received.
+  </p>
+  <p>
+    <b>challenge: </b>Update function <span class="variablenamebold">receiveTeamMessage</span> to handle team message <span class="variablenamebold">MSG_ATTACK</span> and <span class="variablenamebold">MSG_UNATTACK</span>.
+  </p>
+  <code isHidden="false">
+//TODO
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    ......
+
+    case MSG_ATTACK:
+      //h0::update toAttackTankID::target tankID is in message.attackTankID
+      ? 
+      break;
+    case MSG_UNATTACK:
+      //h1::update toAttackTankID
+      ? 
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+//ENDTODO
+  </code>
+  <cleancode>
+const MSG_CLAIM_CRYSTAL = 1;
+const MSG_CLAIM_WEAPON = 2;
+const MSG_ATTACK = 3;
+const MSG_UNATTACK = 4;
+
+const ownerOfCrystals = {};
+let toAttackTankID = -1;
+let dangerScores = null;
+let graph = null;
+
+function isBombBlockedAtPos(col, row, color) {
+  // filter Tanks array
+  const temp = Tanks.filter( t => t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row);
+  const result = temp.length > 0 || Maze[row][col] == 'R' || Maze[row][col] == 'T';
+  return result;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  const myColor = MyTank.color;
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.tankID == MyID || t.color == myColor) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1 + dangerScores[i][j];
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / (1 + MyTank.specialPower.speed);
+
+    let flag = false;
+    for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+      const oppo = oppoTanks[j];
+      const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+      const oppoTime = oppoDis / (1 + oppo.specialPower.speed);
+      if (oppoTime * 1.5 &lt; myTime) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  let target = null;
+  const key = MyTank.tankID.toString();
+  if (key in ownerOfCrystals &amp;&amp; ownerOfCrystals[key].length > 0) {
+    const colAndRow = ownerOfCrystals[key][0];
+    target = Crystals.find(crystal => crystal.c + "_" + crystal.r === colAndRow);
+  } else {
+    // get all positions of assigned crystals
+    const allArrays = Object.values(ownerOfCrystals);
+    const merged = [].concat.apply([], allArrays);
+    // filter out assigned crystals
+    const available = Crystals.filter(crystal => !merged.includes(crystal.c + "_" + crystal.r));
+    target = getClosestItem(available);
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  const curPreference = myPreference[MyTank.specialWeapon.type];
+  const candidates = Weapons.filter(w => myPreference[w.type] &lt; curPreference);
+  const closeBestWeapon = getClosestItem(candidates);
+  if (closeBestWeapon == null) return [];
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  let target = null;
+  if (!MyTank.isLeader) {
+    if (toAttackTankID > 0) {
+      target = Tanks.find(tank => tank.tankID == toAttackTankID);
+      return attackTank(target);
+    } else {
+      return "";
+    }
+  }
+  
+  // MyTank is the leader
+  const myTeam = Tanks.filter(tank => tank.color == MyTank.color);
+  const oppTeam = Tanks.filter( tank => tank.color != 'white' &amp;&amp; tank.color != MyTank.color );
+  const mySummary = getTeamSummary(myTeam);
+  const oppSummary = getTeamSummary(oppTeam);
+
+  // condition1: total health scores or total health regeneration of my team is more than that of opponent team.
+  const condition1 = mySummary.tHealth >= oppSummary.tHealth || mySummary.tHealthRegen >= oppSummary.tHealthRegen;
+  const maxTotalPower = MAX_POWER * 4 * myTeam.length;
+  // total special powers of my team is at least half of maximum and at least three more than than that of opposite team
+  let condition2 = mySummary.tSpecialPower >= maxTotalPower / 2 &amp;&amp; mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  // or our team has maximal damage or reload power.
+  condition2 = condition2 || mySummary.tDamage == MAX_POWER * myTeam.length || mySummary.tReload == MAX_POWER * myTeam.length;
+  
+  if (condition1 &amp;&amp; condition2) {
+    for (let i = 0; i &lt; oppTeam.length; i += 1) {
+      const opp = oppTeam[i];
+      if (target == null || opp.health &lt; target.health) {
+        target = opp;
+      }
+    }
+  }
+
+  if (target) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_ATTACK,
+      attackTankID: target.tankID
+    });
+    return attackTank(target);
+  } else if (toAttackTankID > 0) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_UNATTACK,
+      attackTankID: toAttackTankID
+    });
+  }
+
+  return "";
+}
+
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}
+
+function amILeader() {
+  let smallestID = MyTank.tankID;
+  for (let i = 0; i &lt; Tanks.length; i++) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color &amp;&amp; t.tankID &lt; smallestID) {
+      smallestID = t.tankID;
+    }
+  }
+  if (smallestID == MyTank.tankID) {
+    MyTank.isLeader = true;
+  } else {
+    MyTank.isLeader = false;
+  }
+}
+
+function getNewCommand() {
+  amILeader();
+  if (MyTank.isLeader) {
+    console.log("Tank " + MyTank.tankID + " is the leader!");
+  }
+
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // escape from danger
+  const ds = dangerScores[MyTank.r][MyTank.c];
+  let isInDanger = MyTank.health &lt; 1500 &amp;&amp; ds > 4;
+  isInDanger = isInDanger || MyTank.specialPower.healthRegen &lt; 2 &amp;&amp; ds > 6;
+  isInDanger = isInDanger || ds > 10; 
+  if (isInDanger) {
+    const cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}       
+
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    case MSG_CLAIM_CRYSTAL:
+      const key = message.ownerID.toString();
+      const loc = message.c + "_" + message.r;
+      if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+      if (!ownerOfCrystals[key].includes(loc)) {
+        ownerOfCrystals[key].push(loc);
+      }
+      break;
+    case MSG_CLAIM_WEAPON:
+      console.log("Got message to claim a special weapon.");
+      break;
+    case MSG_ATTACK:
+      toAttackTankID = message.attackTankID;
+      break;
+    case MSG_UNATTACK:
+      toAttackTankID = -1;
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+
+function allocateNewCrystal(data) {
+  amILeader();
+  if (!MyTank.isLeader) return;
+
+  // get team members
+  const teamMembers = Tanks.filter(tank => tank.color == MyTank.color);
+
+  // find the member has least special powers
+  let owner = null;
+  let leastPower = -1;
+  for (let i = 0; i &lt; teamMembers.length; i += 1) {
+    const tank = teamMembers[i];
+
+    // get sum of all special powers
+    const specialPowers = Object.values(tank.specialPower);
+    let sum = specialPowers.reduce((a, b) => a + b, 0);
+    // sum up the number of crystals already allocated to tank but not collected yet.
+    if (tank.tankID.toString() in ownerOfCrystals) {
+      sum += ownerOfCrystals[tank.tankID.toString()].length;
+    }
+
+    if (leastPower == -1 || sum &lt; leastPower) {
+      leastPower = sum;
+      owner = tank;
+    }
+  }
+
+  if (owner) {
+    sendMessageToTeam({
+      senderID: MyTank.tankID,
+      type: MSG_CLAIM_CRYSTAL,
+      c: data.c,
+      r: data.r,
+      ownerID: owner.tankID,
+    });
+    // update ownerOfCrystals
+    const key = owner.tankID.toString();
+    if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+    ownerOfCrystals[key].push(data.c + "_" + data.r);
+  }
+}
+
+function ackDisCrystal(data) {
+  const loc = data.c + "_" + data.r;
+  const keys = Object.keys(ownerOfCrystals);
+  for (let i = 0; i &lt; keys.length; i += 1) {
+    const key = keys[i];
+    ownerOfCrystals[key] = ownerOfCrystals[key].filter(a => a != loc);
+  }
+}    
+  </cleancode>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+    You might have noticed that, when an opponent tank is killed, the variable <span class="variablename">toAttackTankID</span> on each tank is still pointing to the dead tank. So when a tank is killed, we need to update that variable. Fortunately, the game engine provides the service to call function <span class="variablenamebold">ackTankDead</span> to notify each tank of a death.
+  </p>
+  <p>
+    <b>challenge: </b>Implement function <span class="variablenamebold">ackTankDead</span> to update <span class="variablename">toAttackTankID</span>.
+  </p>
+  <code isHidden="false">
+//TODO
+function ackTankDead(data) {
+  //h0::update toAttackTankID::if (toAttackTankID == data.tankID) toAttackTankID = -1;
+  ?
+}
+//ENDTODO
+  </code>
+  <cleancode>
+const MSG_CLAIM_CRYSTAL = 1;
+const MSG_CLAIM_WEAPON = 2;
+const MSG_ATTACK = 3;
+const MSG_UNATTACK = 4;
+
+const ownerOfCrystals = {};
+let toAttackTankID = -1;
+let dangerScores = null;
+let graph = null;
+
+function isBombBlockedAtPos(col, row, color) {
+  // filter Tanks array
+  const temp = Tanks.filter( t => t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row);
+  const result = temp.length > 0 || Maze[row][col] == 'R' || Maze[row][col] == 'T';
+  return result;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  const myColor = MyTank.color;
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.tankID == MyID || t.color == myColor) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isBombBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isBombBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1 + dangerScores[i][j];
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / (1 + MyTank.specialPower.speed);
+
+    let flag = false;
+    for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+      const oppo = oppoTanks[j];
+      const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+      const oppoTime = oppoDis / (1 + oppo.specialPower.speed);
+      if (oppoTime * 1.5 &lt; myTime) {
+        flag = true;
+        break;
+      }
+    }
+
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  let target = null;
+  const key = MyTank.tankID.toString();
+  if (key in ownerOfCrystals &amp;&amp; ownerOfCrystals[key].length > 0) {
+    const colAndRow = ownerOfCrystals[key][0];
+    target = Crystals.find(crystal => crystal.c + "_" + crystal.r === colAndRow);
+  } else {
+    // get all positions of assigned crystals
+    const allArrays = Object.values(ownerOfCrystals);
+    const merged = [].concat.apply([], allArrays);
+    // filter out assigned crystals
+    const available = Crystals.filter(crystal => !merged.includes(crystal.c + "_" + crystal.r));
+    target = getClosestItem(available);
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  const curPreference = myPreference[MyTank.specialWeapon.type];
+  const candidates = Weapons.filter(w => myPreference[w.type] &lt; curPreference);
+  const closeBestWeapon = getClosestItem(candidates);
+  if (closeBestWeapon == null) return [];
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  let target = null;
+  if (!MyTank.isLeader) {
+    if (toAttackTankID > 0) {
+      target = Tanks.find(tank => tank.tankID == toAttackTankID);
+      return attackTank(target);
+    } else {
+      return "";
+    }
+  }
+  
+  // MyTank is the leader
+  const myTeam = Tanks.filter(tank => tank.color == MyTank.color);
+  const oppTeam = Tanks.filter( tank => tank.color != 'white' &amp;&amp; tank.color != MyTank.color );
+  const mySummary = getTeamSummary(myTeam);
+  const oppSummary = getTeamSummary(oppTeam);
+
+  // condition1: total health scores or total health regeneration of my team is more than that of opponent team.
+  const condition1 = mySummary.tHealth >= oppSummary.tHealth || mySummary.tHealthRegen >= oppSummary.tHealthRegen;
+  const maxTotalPower = MAX_POWER * 4 * myTeam.length;
+  // total special powers of my team is at least half of maximum and at least three more than than that of opposite team
+  let condition2 = mySummary.tSpecialPower >= maxTotalPower / 2 &amp;&amp; mySummary.tSpecialPower > oppSummary.tSpecialPower + 3;
+  // or our team has maximal damage or reload power.
+  gcondition2 = condition2 || mySummary.tDamage == MAX_POWER * myTeam.length || mySummary.tReload == MAX_POWER * myTeam.length;
+  
+  if (condition1 &amp;&amp; condition2) {
+    for (let i = 0; i &lt; oppTeam.length; i += 1) {
+      const opp = oppTeam[i];
+      if (target == null || opp.health &lt; target.health) {
+        target = opp;
+      }
+    }
+  }
+
+  if (target) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_ATTACK,
+      attackTankID: target.tankID
+    });
+    return attackTank(target);
+  } else if (toAttackTankID > 0) {
+    sendMessageToTeam({
+      senderID: MyID,
+      type: MSG_UNATTACK,
+      attackTankID: toAttackTankID
+    });
+  }
+
+  return "";
+}
+
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}
+
+function amILeader() {
+  let smallestID = MyTank.tankID;
+  for (let i = 0; i &lt; Tanks.length; i++) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color &amp;&amp; t.tankID &lt; smallestID) {
+      smallestID = t.tankID;
+    }
+  }
+  if (smallestID == MyTank.tankID) {
+    MyTank.isLeader = true;
+  } else {
+    MyTank.isLeader = false;
+  }
+}
+
+function getNewCommand() {
+  amILeader();
+  if (MyTank.isLeader) {
+    console.log("Tank " + MyTank.tankID + " is the leader!");
+  }
+
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // escape from danger
+  const ds = dangerScores[MyTank.r][MyTank.c];
+  let isInDanger = MyTank.health &lt; 1500 &amp;&amp; ds > 4;
+  isInDanger = isInDanger || MyTank.specialPower.healthRegen &lt; 2 &amp;&amp; ds > 6;
+  isInDanger = isInDanger || ds > 10; 
+  if (isInDanger) {
+    const cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}       
+
+function receiveTeamMessage(message) {
+  switch (message.type) {
+    case MSG_CLAIM_CRYSTAL:
+      const key = message.ownerID.toString();
+      const loc = message.c + "_" + message.r;
+      if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+      if (!ownerOfCrystals[key].includes(loc)) {
+        ownerOfCrystals[key].push(loc);
+      }
+      break;
+    case MSG_CLAIM_WEAPON:
+      console.log("Got message to claim a special weapon.");
+      break;
+    case MSG_ATTACK:
+      toAttackTankID = message.attackTankID;
+      break;
+    case MSG_UNATTACK:
+      toAttackTankID = -1;
+      break;
+    default:
+      console.log("received undefined message type: " + message.type);
+  }
+}
+
+function allocateNewCrystal(data) {
+  amILeader();
+  if (!MyTank.isLeader) return;
+
+  // get team members
+  const teamMembers = Tanks.filter(tank => tank.color == MyTank.color);
+
+  // find the member has least special powers
+  let owner = null;
+  let leastPower = -1;
+  for (let i = 0; i &lt; teamMembers.length; i += 1) {
+    const tank = teamMembers[i];
+
+    // get sum of all special powers
+    const specialPowers = Object.values(tank.specialPower);
+    let sum = specialPowers.reduce((a, b) => a + b, 0);
+    // sum up the number of crystals already allocated to tank but not collected yet.
+    if (tank.tankID.toString() in ownerOfCrystals) {
+      sum += ownerOfCrystals[tank.tankID.toString()].length;
+    }
+
+    if (leastPower == -1 || sum &lt; leastPower) {
+      leastPower = sum;
+      owner = tank;
+    }
+  }
+
+  if (owner) {
+    sendMessageToTeam({
+      senderID: MyTank.tankID,
+      type: MSG_CLAIM_CRYSTAL,
+      c: data.c,
+      r: data.r,
+      ownerID: owner.tankID,
+    });
+    // update ownerOfCrystals
+    const key = owner.tankID.toString();
+    if (!(key in ownerOfCrystals)) ownerOfCrystals[key] = [];
+    ownerOfCrystals[key].push(data.c + "_" + data.r);
+  }
+}
+
+function ackDisCrystal(data) {
+  const loc = data.c + "_" + data.r;
+  const keys = Object.keys(ownerOfCrystals);
+  for (let i = 0; i &lt; keys.length; i += 1) {
+    const key = keys[i];
+    ownerOfCrystals[key] = ownerOfCrystals[key].filter(a => a != loc);
+  }
+}    
+
+function ackTankDead(data) {
+  if (toAttackTankID == data.tankID) toAttackTankID = -1;
+}
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    Excellent! So far we've finished the discussion on building up teamworks.
+  </p>
+  <p>
+    <b>Summary:</b> In this tutorial, we implemented the process of attacking opponent tanks as a team. We updated two functions: <span class="variablenamebold">receiveTeamMessage</span> and <span class="variablenamebold">attackOpponent</span>, and create a new one <span class="variablenamebold">ackTankDead</span>. Now our tanks are able to fight as a team!
+  </p>
+  <p>
+    <b>Exercise 1: </b>Imagine such a scenario: a team member is killed, but there are still some un-collected crystals assigned to it. Since the owner tank is dead, no one from the team will collect these crystals. What should we do in such situations? Yes, the leader needs to re-assign those crystals. Please implement this idea in function <span class="variablenamebold">ackTankDead</span>.
+  </p>
+  <p>
+    <b>Exercise 2: </b>Make a new release of your bot code and play a few games in teams. See how effectively your tanks communicate and collaborate with each other. Adjust your rules for attacking opponent tanks. 
+  </p>
+  <p>
+    If you have any questions, please post them in our forum under <a href="TOBEUPDATED" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

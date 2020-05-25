@@ -1,0 +1,595 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+let dangerScores = null;
+let graph = null;
+
+function isShellBlockedAtPos(col, row, color) {
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackOpponent() { 
+  // rule #1: The health level of my tank has to be greater than 2000.  
+  if (MyTank.health &lt;= 2000) return ""; 
+  
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal. 
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return ""; 
+  
+  // get all opponent tanks 
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+  if (opponents.length == 0) return ""; 
+  
+  // go through all opponent tanks 
+  for (let i = 0; i &lt; opponents.length; i += 1) { 
+    const target = opponents[i]; 
+    // rule #3: Either my tank's health regeneration is greater than the target tank,  
+    // or my tank has higher health level at the begin of the battle. 
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) { 
+      return attackTank(target); 
+    } 
+  } 
+  return ""; 
+}
+ 
+function getNewCommand() {  
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+}
+
+function attackTank(target) { 
+  if (!target) return ""; 
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ''; 
+} 
+
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  return attackTank(target); 
+}
+ 
+ 
+function weaponIsBetter(weaponType1, weaponType2) {  
+  const rankings = {}; 
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1; 
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2; 
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3; 
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4; 
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5; 
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6; 
+  rankings[0] = 7; // no weapon 
+  
+  return rankings[weaponType1] &lt; rankings[weaponType2]; 
+} 
+ 
+ 
+function getSpecialWeapon() {  
+  let bestType = MyTank.specialWeapon.type;  
+    
+  for (let i = 0; i &lt; Weapons.length; i += 1) {  
+    const weapon = Weapons[i];  
+    if (weaponIsBetter(weapon.type, bestType)) {  
+      bestType = weapon.type;  
+    }  
+  }  
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);  
+  const closeBestWeapon = getClosestItem(bestWeapons);  
+  if (closeBestWeapon == null) return [];  
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);  
+} 
+ 
+ 
+function getRandomCommand() {   
+  // random command   
+  const r = Math.random() * 100;   
+  if (r > 10) return "S";   
+  if (r > 8) return "U";   
+  if (r > 6) return "D";   
+  if (r > 4) return "L";   
+  if (r > 2) return "R";   
+  return "";   
+}  
+ 
+function createGraph() {  
+  // create a new Set to hold blocking tile types  
+  const blockingTileTypes = ['R', 'M', 'T'];  
+  // create a new graph  
+  graph = createNewGraph();  
+    
+  // set values of graph, 1 = pass and 0 = blockage  
+  for (let i = 0; i &lt; graph.length; i += 1) {  
+    for (let j = 0; j &lt; graph[i].length; j += 1) {  
+      // tile type  
+      const tile = Maze[i][j];  
+      // check if it is a blockage  
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;  
+      else graph[i][j] = 1 + dangerScores[i][j];  
+    }  
+  }  
+  return graph;  
+}  
+
+function getClosestItem(items) {  
+  // initialize variables to hold shortest distance and target  
+  let shortDis = 1000;  
+  let target = null;  
+    
+  // loop through all items  
+  for (let i = 0; i &lt; items.length; i += 1) {  
+    const pos = items[i];  
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;  
+    // calculate the absolute distance  
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);  
+    // update shortDis   
+    if (dis &lt; shortDis) {  
+      shortDis = dis;  
+      target = pos;  
+    }  
+  }  
+  return target;  
+}  
+
+function getCrystal() {  
+  const target = getClosestItem(Crystals);  
+  if (!target) return [];  
+  return getShortestPathCmd(graph, MyTank, target);  
+}  
+ 
+function upgradeSpecialPowers() {  
+  let cmd = "";  
+  // if no power point, return blank command cmd  
+  if (MyTank.powerPoint == 0 ) return cmd;  
+  const sp = MyTank.specialPower;  
+    
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3"; 
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3";  
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";  
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";  
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";  
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+    
+  return cmd;  
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial we calculated the danger score for every position in the battlefield. We used these scores to artificially increase the "length" of the dangerous positions so that they are unlikely to be selected as part of the shortest path for your tank.  
+  </p>
+  <p>
+    In this lesson we'll use danger scores to escape when your tank is already in a dangerous position. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    As illustrated below, the blue tank is threatened by four white tanks facing upwards in its column. Assuming that each white tank has a damage value of 1, that means the blue tank's position has a danger score of <b>(1+1)*4 = 8</b>. 
+  </p>
+  <p>
+    Does this danger score mean that the blue tank is in danger? Well, <b>it depends</b>. If the blue tank is super strong (for example, having a high health level or health-regen power), the white tanks may not be a big threat. But if the blue tank is relatively weak, (for example, having a low health level or health-regen power), then it may be in danger and probably should move to a safer place. 
+  </p>
+  <p>
+    <img src="/images/dangersituation.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    In order to implement this idea, we need to take two steps: 1) Define a new function <span class="variablenamebold">escapeFromDanger</span> to move your tank to a safer position; 2) Implement the logic to determine whether your tank is in sufficient danger at its current position to require a move (and if so, call <span class="variablenamebold">escapeFromDanger</span>). This logic will be added into the <span class="variablenamebold">getNewCommand</span> function. 
+  </p>
+</element>
+
+<element elementid="125" elementType="Info">
+  <p>
+    First, we are going to create a really simple version of the <span class="variablenamebold">escapeFromDanger</span> function, which always returns "L" (causing the blue tank to simply escape leftwards). 
+    
+    <!-- Then we will define some simple rules to decide whether the tank is in danger based on the danger score of its current position.  -->
+    <!-- Of course you may have your own rules based on your experience in manual games. I will use my rules as an example.  -->
+  </p>
+  <p>
+    So now the question is <b>how do we determine whether your tank needs to escape?</b>
+  </p>
+</element>
+
+<element elementid="128" elementType="Info">
+  <p>
+    We know that the damage from each hit is calculated as: 180 * (1 + damage value). We also know that (1 + damage value) is the danger score contributed from each enemy tank. So <b>180 * danger score</b> is the total damage to your tank if it is hit by all tanks facing towards it. If your tank's health level is not high enough to bear two rounds of attacks from all these enemy tanks, it should probably move away from its position. 
+  </p>
+  <p>
+    Now let's implement this simple logic in your code. You can improve upon it over time.
+  </p>
+</element>
+
+<element elementid="130" elementType="Coding" condition="TestFinishedPassOr_0_6_4">
+  <p>
+    <b>Challenge: </b>Define a new function named <span class="variablenamebold">escapeFromDanger</span>, which, for now, always returns "L", for moving left. Call this new function in <span class="variablenamebold">getNewCommand</span> if your tank's health level is less than the total damage from two rounds of attacks. 
+  </p>
+  <code isHidden="false">
+//TODO
+//add new function "escapeFromDanger" that always returns "L"
+//h0::function escapeFromDanger() {  return "L"; }
+?
+
+function getNewCommand() {
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+
+  // check if my tank needs to escape from danger
+
+  // calculate total potential damage from one round of attack using the danger score
+  //h1::total damage is 180 * danger score at this position::totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];
+  const totalDamage = ?;
+
+  // escape if MyTank's health level is less than 2 times of totalDamage
+  //h2::compare MyTank.health against 2 * totalDamage
+  if ( ? ) {
+    cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal
+  let path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  ......
+
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function escapeFromDanger() {
+  return "L";
+}
+
+function getNewCommand() {
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // check if my tank needs to escape from danger
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];
+  if (MyTank.health &lt; 2 * totalDamage) {
+    cmd = escapeFromDanger();
+    if (cmd.length > 0) return cmd;
+  }
+
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+} 
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Great. Now your tank can evaluate its position and try to escape if it is at risk. Now let's improve our <span class="variablenamebold">escapeFromDanger</span> function so that your tank can choose the best way out. 
+  </p>
+</element>
+
+<element elementid="142" elementType="Info">
+  <p>
+    From any position in the battlefield, a tank may be able to move in any of the four directions: up, down, left or right. To start simply, <b>let's look first to the right</b> and determine whether it is safer than the current position. If so, we'll move our tank to the right.
+  </p>
+  <p>
+    <img src="/images/escapeoptions.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="145" elementType="Coding" condition="TestFinishedPassOr_0_8_4">
+  <p>
+    <b>Challenge: </b>Check the tile to the right of your tank and determine whether it is safer than your tank's current position. Note that we also need to make sure the new position satisfies the following two conditions:
+  </p>
+  <p>
+    <ul>
+      <li>It is within the 4 rock walls surrounding the battlefield.</li>
+      <li>It is not a mud, rock, or tree tile.</li>
+    </ul>
+  </p>
+  <code isHidden="false">
+//TODO
+function escapeFromDanger() {
+  // the danger score of current position
+  //h0::read from dangerScores using MyTank.r and MyTank.c
+  ::let myDS = dangerScores[MyTank.r][MyTank.c];
+  ::let myDS = dangerScores[MyTank.c][MyTank.r];
+  let myDS = ? ;
+  
+  // column number of the tile to my right
+  //h1::the column number of the new position::MyTank.c + 1
+  const newc = ? ;
+
+  // row number of the tile to my right
+  //h2::the row number of the new position::MyTank.r
+  const newr = ? ;
+
+  // make sure the new position within the battlefield borders.
+  let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+  valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+
+  // add the test that the new position is not a mud, rock, or tree tile
+  //h3::check if Maze[newr][newc] is 'M', 'R', or 'T'::define an array to hold 'M', 'R', and 'T' and check with function 'includes'
+  ::valid = valid &amp;&amp; ['M', 'R', 'T'].includes(Maze[newr][newc]);
+  ::valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+  ::valid = valid || ['M', 'R', 'T'].includes(Maze[newr][newc]);
+  valid = valid ? ;
+
+  if (valid &amp;&amp; dangerScores[newr][newc] &lt; myDS) {
+    return "R";
+  }
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function escapeFromDanger() {
+  // the danger score of current position
+  let myDS = dangerScores[MyTank.r][MyTank.c];
+  
+  const newc = MyTank.c + 1;
+  const newr = MyTank.r;
+
+  // make sure the new position within the battlefield borders.
+  let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+  valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+
+  // make sure the new position is not a muddy puddle, a rock, or a tree tile
+  valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+
+  if (valid &amp;&amp; dangerScores[newr][newc] &lt; myDS) {
+    return "R";
+  }
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    Good job! Now let's improve this function to check all four directions. 
+  </p>
+  <p>
+    Since there are only four directions, our code could just check each direction separately by repeating the same process (code) three more times. But it is always preferable not have the same code repeated in multiple places in our programs. The solution will be much simpler (and easier to improve) if we use a <span class="keyword">for-loop</span> to loop through the same block of code for each of the four directions.
+  </p>
+  <p>
+    Can you think about how to do that?
+  </p>
+</element>
+
+<element elementid="152" elementType="Info">
+  <p>
+    How can we identify the four possible moves for our tank in order to check them for danger? Let's define an object <span class="variablenamebold">delta</span> that holds four directions along with the adjustments required to move your tank to an adjacent tile in that direction, like this: 
+  </p>
+  <p>
+    <pre class="brush: js">
+const delta = {
+  U: [0, -1],
+  D: [0, 1],
+  L: [-1, 0],
+  R: [1, 0],
+};
+    </pre>
+  </p>
+</element>
+
+<element elementid="156" elementType="Info">
+  <p>
+    For example, <span class="variablename">delta["U"]</span> is the array [0, -1], which means that in order to move up, we stay in the same column, but we decrease our row by 1.
+  </p>
+  <p>
+    <img src="/images/delta.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Now we can loop through the list of property names of <span class="variablenamebold">delta</span> (given by <span class="variablename">Object.keys(delta)</span>) to find which direction leads to the adjacent tile with the lowest danger score. 
+  </p>
+  <p>
+    But what should your tank do if it is discovered that multiple directions share the lowest danger score? Well, it depends on your preference. For now let's always choose to move in the first direction with the lowest danger score. 
+  </p>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedPassOr_0_6_4_8_4">
+  <p>
+    <b>Challenge: </b>Define the variable <span class="variablenamebold">delta</span>, and loop through its properties to find the safest direction to escape.
+  </p>
+  <code isHidden="false">
+//TODO
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+
+  // initial lowestDS to the danger score of current position
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+
+    // new column number
+    //h0::calculate from current column number and delta
+    ::const newc = MyTank.c + delta[dir][1];
+    ::const newc = MyTank.c + delta.dir[0];
+    ::const newc = MyTank.c + delta.dir[1];
+    ::const newc = MyTank.c + delta[dir][0];
+    const newc = ? ;
+
+    // new row number
+    //h1::calculate from current row number and delta
+    ::const newr = MyTank.r + delta.dir[0];
+    ::const newr = MyTank.r + delta[dir][1];
+    ::const newr = MyTank.r + delta[dir][0];
+    ::const newr = MyTank.r + delta.dir[1];
+    const newr = ? ;
+
+    // make sure the new position within the battlefield borders.
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+
+    // make sure the new position is not a muddy puddle, a rock, or a tree tile
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      // update lowestDS and bestDir
+      //h2::lowestDS holds the lowest danger score so far, bestDir holds the corresponding direction::lowestDS = dangerScores[newr][newc]; bestDir = dir
+      lowestDS = ? ;
+      bestDir = ? ;
+    }
+  }
+  return bestDir;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function escapeFromDanger() {
+  const delta = {
+    U: [0, -1],
+    D: [0, 1],
+    L: [-1, 0],
+    R: [1, 0],
+  };
+  const dirs = Object.keys(delta);
+  let bestDir = "";
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];
+
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const dir = dirs[i];
+    const newc = MyTank.c + delta[dir][0];
+    const newr = MyTank.r + delta[dir][1];
+
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);
+
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {
+      lowestDS = dangerScores[newr][newc];
+      bestDir = dir;
+    }
+  }
+  return bestDir;  
+}  
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>In this tutorial, your tank has been "taught" to escape from dangerous positions using the danger scores and some simple rules. Please make a new release and try it out in Smart Tank games.
+  </p>
+  <p>
+    <b>Exercise 1: </b>Define your own rules for determining dangerous positions from which your tank should escape (for example, when health level is less than <b>3</b> times the total attack damage). Try different rules and test them in games.
+  </p>
+  <p>
+    <b>Exercise 2: </b>If there are multiple directions with the lowest danger score, randomly pick one direction. You might need to use an array to hold these competing directions and then to generate a random index number to read from that array. If the current facing direction is included in the array, however, you should choose it, otherwise your tank might just turn around without ever making a move.
+  </p>
+  <p>
+    Share your ideas in our forum under <a href="https://forum.tgame.ai/t/lesson-16-escape-from-danger/425" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

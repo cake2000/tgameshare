@@ -1,0 +1,123 @@
+.factoryPage{
+  &__AIcode{
+    flex: 1;
+    height: 100%;
+    &__CodeMirror{
+      @include flexbox();
+      height: calc(100% - 45px);
+      font-size: $tg-fs-body + 1px;
+      &__groups{
+        flex: 1;
+        border: 1px solid #383737;
+        overflow: overlay;
+      }
+      &__header{
+        display: none;
+        background-color: #555;
+        color: #fff;
+        border: 1px solid #383737;
+        // display: flex;
+        padding: 10px 15px;
+        align-items: center;
+        &__action{
+          flex: 1;
+          text-align: right;
+          button{
+            border-radius: 0;
+          }
+          .tg-icon-expand{
+            color: #fff;
+            cursor: pointer;
+            margin-left: 25px;
+          }
+          .tg-icon-refesh2{
+            color: #fff;
+            cursor: pointer;
+            margin-left: 25px;
+          }
+        }
+      }
+      .CodeMirror {
+        height: 100%;
+      }
+    }
+    &__Tabs{
+      display: inline-block;
+      width: 100%;
+      span{
+        display: inline-block;
+        padding: 12px 4px 12px 4px;
+        color: white; //$tg-col-x-grey;
+        margin-right: 15px;
+        cursor: pointer;
+        position: relative;
+        border-radius: 5px 5px 0px 0px;
+        border: 1px solid transparent;
+        top: 1px ;
+        &.active{
+          border: 1px solid #b0a9a9;
+          font-weight: bold;
+          border-bottom: 1px solid yellow;
+          color: white; //$tg-col-light;
+        }
+        &.hover {
+          color: $tg-col-hover-a;
+        }
+      }
+      &__Action{
+        display: inline-block;
+        float: right;
+        .btn{
+          border-radius: 0px;
+        }
+      }
+    }
+  }
+}
+.ReactCodeMirror {
+  height: 100%;
+}
+.ReactModalPortal{
+  position: relative;
+  z-index: 999;
+  #gameDiv {
+    width: 100%;
+    height: 100%;
+  }
+}
+@media (max-width: 768px){
+  .factoryPage{
+    &__AIcode{
+      &__CodeMirror{
+        flex-direction :column;
+        &__groups{
+          margin-bottom: 20px;
+          width: 100%;
+
+          &:first-child{
+            margin-right: 0px;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+.factoryPage__AIcode__CodeMirror__groups .CodeMirror-gutters {
+  background-color: #1e4a39;
+}
+.factoryPage__AIcode__CodeMirror__groups .CodeMirror-linenumber {
+  color: white;
+}
+
+.cm-s-neat span.cm-number, .cm-s-neat span.cm-atom {
+  color: #491c62 !important; // #207220
+}
+
+.cm-s-neat span.cm-comment {
+  color: #207220  !important; // #608B4E
+}
+
+

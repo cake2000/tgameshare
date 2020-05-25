@@ -1,0 +1,21 @@
+.t-input {
+  &--error {
+    margin-top: 5px;
+    color: red;
+  }
+}
+
+input {
+  &.disable {
+    pointer-events: none;
+    background-color: #e9e9e9;
+  }
+}
+
+.Select-menu-outer {
+  max-height: 120px;
+}
+
+.Select-menu {
+  max-height: 120px;
+}

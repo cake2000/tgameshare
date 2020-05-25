@@ -1,0 +1,16 @@
+.tg-page{
+  &--signin,
+  &--signup,
+  &--forgotpassword{
+    background-image: url(images/signup-bg.png);
+    background-size: cover;
+    background-position: center;
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+  }
+  &__content{
+    &--signin{
+    }
+  }
+}

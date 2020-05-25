@@ -1,0 +1,384 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+RemoveAllTanks();
+ClearMaze();  
+
+PlaceTile('R', 5, 2);
+PlaceTank('blue', 5, 5, 0);
+PlaceTank('white', 10, 5, null, false);
+PlaceTank('white', 5, 10, null, false);
+
+PlaceTile('M', 6, 5);
+PlaceTile('T', 5, 4);
+PlaceTile('R', 4, 5);
+
+await SetupTickUpdates(500);
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial, we introduced the commands you can use to create a test scenario. In this tutorial, you  will practice working with the test script by designing a nice-looking battlefield. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The battlefield for beginner-level games is a <b>15 x 15 grid</b>, which means it has 15 rows and 15 columns. By default, the battlefield is a grassland with the four borders sealed by rocks. The rock borders occupy rows 0 and 14 and columns 0 and 14. You can place non-grass tiles within the four rock borders by calling the <span class="variablenamebold">PlaceTile(tileType, columnNumber, rowNumber)</span> function. Possible values for <span class="variablenamebold">columnNumber</span> and <span class="variablenamebold">rowNumber</span> will be integers between 1 and 13.
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    The picture below shows the battlefield that we are going to build. 
+  </p>
+  <p>
+    <img src="/images/smilingface.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    For the purpose of this exercise, I have cleaned up the test script by removing all statements except the following two lines. You can click the "Test Script" tab to confirm.
+  </p>
+  <code isHidden="false">
+ClearMaze();    
+ReportEndOfTest(); 
+  </code>
+</element>
+
+<element elementid="132" elementType="Info">
+  <p>
+    In order to place these tiles on the battlefield, first, we need to identify the coordinates of each tile and save them in a variable. Such that later we can read the position from the variable and place a proper tile on it.  
+  </p>
+  <p>
+    Note that each position has two coordinates: one is a column number and the other is a row number. There are two ways to store this pair of numbers in a variable: as an object or as an array. Let's try with an object first.
+  </p>
+</element>
+
+<element elementid="134" elementType="Info">
+  <p>
+    If we define an object to store one position, it will be like the code below. 
+  </p>
+  <pre class="brush: js">
+const pos1 = {c: 3, r: 4};
+  </pre>
+  <p>
+    Now we have many positions, but we don't have to give a name to each of them. So we can use an array to store them altogether. For example, an array is defined to save the positions of four rocks below. 
+  </p>
+  <pre class="brush: js">
+const rocks = [{c: 3, r: 3}, {c: 3, r: 4}, {c: 4, r: 3}, {c: 4, r: 4}];
+  </pre>
+</element>
+
+<element elementid="136" elementType="Coding" condition="TestFinishedBattleField_6">
+  <p>
+    After we defined an array with all the positions of rocks, now we can write a <span class="variablename">for</span> loop to go through this array and place those rocks on the battlefield.  
+  </p>
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, place <b>rock</b> tiles on the battlefield. 
+  </p>
+  <code isHidden="false">
+ClearMaze();  
+
+//TODO: replace ? with correct row numbers
+//h0::fill in row numbers of rocks in column 10 and 11::{c: 10, r: 3}, {c: 10, r: 4}, {c: 11, r: 3}, {c: 11, r: 4}
+const rocks = [
+  {c: 3, r: 3}, {c: 3, r: 4}, {c: 4, r: 3}, {c: 4, r: 4}, 
+  {c: 10, r: ?}, {c: 10, r: ?}, {c: 11, r: ?}, {c: 11, r: ?}
+];
+
+// place rocks
+//h1::loop through items in the rocks array
+::for (let i = 0; i &lt;= rocks.length; i = 1) {
+::for (let i = 0; i &lt;= rocks.length; i += 1) {
+::for (let i = 0; i &lt; rocks.length; i += 1) {
+for (?; ?; ?) {
+  // read position of a rock
+  //h2::the position of i-th rock::rocks[i]
+  const pos = ?;
+  //h3::read column and row number from pos::the two numbers are pos.c and pos.r
+  PlaceTile('R', ?, ?);
+}
+//ENDTODO
+
+ReportEndOfTest();   
+  </code>
+  <cleancode>
+ClearMaze();  
+
+const rocks = [
+  {c: 3, r: 3}, {c: 3, r: 4}, {c: 4, r: 3}, {c: 4, r: 4}, 
+  {c: 10, r: 3}, {c: 10, r: 4}, {c: 11, r: 3}, {c: 11, r: 4}
+];
+
+// place rocks
+for (let i = 0; i &lt; rocks.length; i += 1) {
+  const pos = rocks[i];
+  PlaceTile('R', pos.c, pos.r);
+}
+
+ReportEndOfTest(); 
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Good job! You should see the eight rock tiles are placed on the battlefield now. 
+  </p>
+  <p>
+    Let's look back at the array <span class="variablename">rocks</span>. To create an object for each array item, we had to type in the property names (i.e. <span class="variablename">c</span> and <span class="variablename">r</span>) and colons. It is extra work and can be reduced by defining each array item (position) as a small array that has two numbers. In such a way, <span class="variablename">rocks</span> will be an array of arrays, called <b>two-dimensional (2D) arrays</b>.
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+     As illustrated below, <span class="variablename">rocks</span> is a 2D array that stores column and row numbers for each rock tile. Each item in <span class="variablename">rocks</span>, such as <span class="variablename">rocks[0]</span>, is a 1D array of two numbers. These two numbers together specify the column and row for one rock. For example, <span class="variablename">rocks[0]</span> is the array [4, 2], which means that the first rock is positioned at column 4, row 2. 
+  </p>
+  <p>
+    To access the content of a 2D array, we use two sets of square brackets, "[]", side-by-side. For example, we can get the column number for the second rock using <span class="variablenamebold">rocks[1][0]</span>, and we can read the row number for the third rock using <span class="variablenamebold">rocks[2][1]</span>. 
+  </p>
+  <p>
+    <img src="/images/twoDArray.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    2D arrays are very easy to initialize. For example, the line below specifies the positions of six rocks in a 2D array <span class="variablename">rocks</span>. The first rock's position is [4, 2] (column 4 and row 2), and the second rock's position is [9, 3] (column 9 and row 3), etc. 
+  </p>
+  <pre class="brush: js">
+const rocks = [[4, 2], [9, 3], [5, 7], [6, 7], [8, 7], [8, 8]];
+  </pre>
+</element>
+
+<element elementid="170" elementType="Quiz" answerKey="B" answerReason="rocks[2] is the third item in the rocks array, which is [5, 7], and rocks[2][1] points to the second item in this position array, which is 7.">
+  <p>
+    <b>Quiz:</b> Of the four choices (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton">C</a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton">D</a>) which is the value of <span class="variablename">rocks[2][1]</span>? Please type or click the letter of your chosen answer.
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 3
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 7
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 5
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 9
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedBattleField_6">
+  <p>
+    <b>Challenge:</b> In your test script, please add three new variables <span class="variablename">rocks</span>, <span class="variablename">puddles</span>, and <span class="variablename">trees</span> to hold the field positions of each set of tiles. You must replace the "?" with the correct coordinate values based on the picture below. Then, change the statements in the <span class="variablename">for</span> loop to get the position from the new 2D array <span class="variablename">rocks</span>. 
+  </p>
+  <p>
+    <img src="/images/smilingface.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <code isHidden="false">
+ClearMaze();     
+//TODO: replace ? with correct row or column number
+const rocks = [[3, 3], [3, 4], [4, 3], [4, 4], [10, ?], [10, ?], [11, ?], [11, ?]];
+//h0::fill in row numbers of rocks in column 7::[7, 5], [7, 6], [7, 7]
+const puddles = [[7, ?], [7, ?], [6, 7], [7, ?], [8, 7]];
+//h1::fill in column numbers of trees in row 12::[6, 12], [7, 12], [8, 12]
+const trees = [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+                [4, 11], [5, 11], [?, 12], [?, 12], [?, 12], [9, 11], [10, 11]];
+
+for (let i = 0; i &lt; rocks.length; i += 1) {
+  const pos = rocks[i];
+  //h2::read column and row number from pos::the two numbers are pos[0] and pos[1]
+  PlaceTile('R', ?, ?);
+}
+//ENDTODO
+
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze();  
+
+const rocks = [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]];
+const puddles = [[7, 5], [7, 6], [6, 7], [7, 7], [8, 7]];
+const trees = [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+                [4, 11], [5, 11], [6, 12], [7, 12], [8, 12], [9, 11], [10, 11]];
+
+for (let i = 0; i &lt; rocks.length; i += 1) {
+  const pos = rocks[i];
+  //h2::read column and row number from pos::the two numbers are pos[0] and pos[1]
+  PlaceTile('R', pos[0], pos[1]);
+}
+
+ReportEndOfTest();     
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Coding" condition="TestFinishedBattleField_5">
+  <p>
+    Well done! Now let's complete the battlefield by placing the other two types of tiles. 
+  </p>
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, place puddle and tree tiles on the battlefield. 
+  </p>
+  <code isHidden="false">
+ClearMaze();  
+
+const rocks = [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]];
+const puddles = [[7, 5], [7, 6], [6, 7], [7, 7], [8, 7]];
+const trees = [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+                [4, 11], [5, 11], [6, 12], [7, 12], [8, 12], [9, 11], [10, 11]];
+
+// place rocks
+for (let i = 0; i &lt; rocks.length; i += 1) {
+  const pos = rocks[i];
+  PlaceTile('R', pos[0], pos[1]);
+}
+
+//TODO: place mud puddle and tree tiles
+
+// place mud puddles
+//h0::for loop to loop through items in puddles
+::for (let i = 0; i &lt;= puddles.length; i = 1) {
+::for (let i = 0; i &lt;= puddles.length; i += 1) {
+::for (let i = 0; i &lt; puddles.length; i += 1) {
+for (?) {
+  //h1::the position of i-th puddles::puddles[i]
+  const pos = ?;
+  //h2::column and row number::the two numbers stored in pos::pos[0], pos[1]
+  PlaceTile('M', ?, ?);
+}
+
+// place trees
+//h3::for loop to loop through items in trees
+::for (let i = 0; i &lt;= trees.length; i = 1) {
+::for (let i = 0; i &lt;= trees.length; i += 1) {
+::for (let i = 0; i &lt; trees.length; i += 1) {
+for (?) {
+  //h4::the position of i-th trees::trees[i]
+  const pos = ?;
+  //h5::column and row number::the two numbers stored in pos::pos[0], pos[1]
+  PlaceTile('T', ?, ?);
+}
+//ENDTODO
+
+ReportEndOfTest();   
+  </code>
+  <cleancode>
+ClearMaze();  
+
+const rocks = [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]];
+const puddles = [[7, 5], [7, 6], [6, 7], [7, 7], [8, 7]];
+const trees = [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+                [4, 11], [5, 11], [6, 12], [7, 12], [8, 12], [9, 11], [10, 11]];
+
+// place rocks
+for (let i = 0; i &lt; rocks.length; i += 1) {
+  const pos = rocks[i];
+  PlaceTile('R', pos[0], pos[1]);
+}
+// place muddy puddles
+for (let i = 0; i &lt; puddles.length; i += 1) {
+  const pos = puddles[i];
+  PlaceTile('M', pos[0], pos[1]);
+}
+// place short trees
+for (let i = 0; i &lt; trees.length; i += 1) {
+  const pos = trees[i];
+  PlaceTile('T', pos[0], pos[1]);
+}
+
+ReportEndOfTest(); 
+  </cleancode>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Good job! Now you see the same battlefield in your test window as in the picture. 
+  </p>
+  <p>
+    However, the code is not optimal. You might have noticed that we used three for-loops and they look very similar. <b>How can we get rid of the duplicate code?</b> Usually there are two common ways to remove duplicate code: <b>1) define a function; 2) create another level of for-loop.</b> We will leave the first option for exercise. For this challenge, let's try the second option: create another level of for-loop. 
+  </p>
+  <p>
+    We are going to create an object to hold all three tile position arrays as its properties, and then we can have another <b>for-loop</b> to walk through these properties. 
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedBattleField_5">
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, place rock, mud and tree tiles on the battlefield. You can use an object to store all tile positions, with tile types as the property names and the 2D array as property values. Note that you can use <span class="variablenamebold">Object.keys(objectName)</span> to get a list of property names for the given object.  
+  </p>
+  <code isHidden="false">
+ClearMaze();  
+//TODO: use another loop to remove duplicate code
+// create an object to hold all positions
+//h0::the other 2 properties should be "M" and "T"
+const tiles = {
+  R: [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]],
+  ?,
+  ?
+};
+// get all property names
+const tileTypes = Object.keys(tiles);
+//h1::loop through tileTypes::use j as the loop index variable::for (let j = 0; j &lt; keys.length; j=j+1)
+for ( ? ) {
+  const tileType = tileTypes[j];
+  //h2::get the 2D array of positions from tiles::use property name to get property value::const positions = tiles[tileType];
+  const positions = ?;
+  for (let i = 0; i &lt; positions.length; i += 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+//ENDTODO
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze();  
+
+const tiles = {
+  R: [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]],
+  M: [[7, 5], [7, 6], [6, 7], [7, 7], [8, 7]],
+  T: [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+     [4, 11], [5, 11], [6, 12], [7, 12], [8, 12], [9, 11], [10, 11]],
+};
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j += 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i += 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest(); 
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>Bravo! This version of the script is much more elegant!</p>
+  <p>
+    <b>Summary:</b> In this tutorial, we learned how to use two-dimensional arrays to store our tile positioning plan. We also learned how to use a two-level nested <span class="variablename">for-loop</span> to walk through all these arrays and place tiles on the battlefield.
+  </p>
+  <p>
+    <b>Exercise 1:</b> Can you modify your script to build a new battlefield as shown in the picture below?
+  </p>
+  <p>
+    <img src="/images/designbattlefield.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  
+  <p>
+    <b>Exercise 2:</b> Design and build your own battlefield. 
+  </p>
+  <p>
+    Don't forget to share a screnshot of your battlefields in the forum under <a href="https://forum.tgame.ai/t/lesson-5-designing-a-nice-battlefield/402" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

@@ -1,0 +1,493 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackOpponent() { 
+  if (MyTank.health &lt;= 2000) return ""; 
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return ""; 
+  
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+  if (opponents.length == 0) return ""; 
+  
+  for (let i = 0; i &lt; opponents.length; i += 1) { 
+    const target = opponents[i]; 
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) { 
+      return attackTank(target); 
+    } 
+  } 
+  return ""; 
+}
+ 
+function getNewCommand() {  
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+}
+ 
+function attackTank(target) { 
+  if (!target) return ""; 
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+  
+  const graph = createGraph(); 
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ""; 
+} 
+ 
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == "white" &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  return attackTank(target); 
+}
+ 
+function weaponIsBetter(weaponType1, weaponType2) {  
+  const rankings = {}; 
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1; 
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2; 
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3; 
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4; 
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5; 
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6; 
+  rankings[0] = 7; // no weapon 
+  
+  return rankings[weaponType1] &lt; rankings[weaponType2]; 
+} 
+
+function getSpecialWeapon() {  
+  let bestType = MyTank.specialWeapon.type;  
+    
+  for (let i = 0; i &lt; Weapons.length; i += 1) {  
+    const weapon = Weapons[i];  
+    if (weaponIsBetter(weapon.type, bestType)) {  
+      bestType = weapon.type;  
+    }  
+  }  
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);  
+  const closeBestWeapon = getClosestItem(bestWeapons);  
+  if (closeBestWeapon == null) return [];  
+    
+  const graph = createGraph();  
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);  
+} 
+
+function getRandomCommand() {   
+  // random command   
+  const r = Math.random() * 100;   
+  if (r > 10) return "S";   
+  if (r > 8) return "U";   
+  if (r > 6) return "D";   
+  if (r > 4) return "L";   
+  if (r > 2) return "R";   
+  return "";   
+}  
+
+function createGraph() {  
+  const blockingTileTypes = ["R", "M", "T"];  
+  const graph = createNewGraph();  
+    
+  for (let i = 0; i &lt; graph.length; i += 1) {  
+    for (let j = 0; j &lt; graph[i].length; j += 1) {  
+      const tile = Maze[i][j];  
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;  
+      else graph[i][j] = 1;  
+    }  
+  }  
+  return graph;  
+}  
+
+function getClosestItem(items) {  
+  let shortDis = 1000;  
+  let target = null;  
+    
+  for (let i = 0; i &lt; items.length; i += 1) {  
+    const pos = items[i];  
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;  
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);  
+    if (dis &lt; shortDis) {  
+      shortDis = dis;  
+      target = pos;  
+    }  
+  }  
+  return target;  
+}  
+
+function getCrystal() {  
+  const target = getClosestItem(Crystals);  
+  if (!target) return [];  
+  const graph = createGraph();  
+  return getShortestPathCmd(graph, MyTank, target);  
+}  
+
+function upgradeSpecialPowers() {  
+  let cmd = "";  
+  // if no power point, return blank command cmd  
+  if (MyTank.powerPoint == 0 ) return cmd;  
+  const sp = MyTank.specialPower;  
+    
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3"; 
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";  
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";  
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";  
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+    
+  return cmd;  
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hi! For our first lesson in the intermediate course, you will learn more about two-dimensional arrays. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    You should be fairly familiar with the concept of arrays. We use arrays to hold a collection of similar items (or elements), such as balls, pockets, tanks, etc. These items could be numbers, strings, or objects. They can also be arrays themselves. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    As shown in the figure below, the <span class="variablenamebold">Tanks</span> array is an array of tank objects; and the <span class="variablenamebold">Array2D</span> is an array of arrays, which is called a two-dimensional array, or 2D array. 
+  </p>
+  <p>
+    <img src="/images/2darrayexp1.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    There are a few ways to create a 2D array. You can directly list all elements as below.
+  </p>
+  <p>
+    <pre class="brush: js">
+const Array2D = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+    </pre>
+  </p>
+  <p>
+    Or in a better format:
+  </p>
+  <p>
+    <pre class="brush: js">
+const Array2D = [
+  [0, 1, 2], 
+  [3, 4, 5], 
+  [6, 7, 8]
+];
+    </pre>
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    You can also define an empty array and then populate it with array elements later, such as:
+  </p>
+  <p>
+    <pre class="brush: js">
+const Array2D = [];
+Array2D.push([0, 1, 2]);
+Array2D.push([3, 4, 5]);
+Array2D[2] = [6, 7, 8];
+    </pre>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    The most common use of 2D array is to represent a two-dimensional grid, a matrix, or a data table. 
+  </p>
+  <p>
+    For example, if you are writing a program to play the game of GO, you can represent the board using a 2D array: the top level is an array of 19 rows, and then each row is another array of 19 positions in that row. 
+  </p>
+  <p>
+    <img src="/images/goboard.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    To create a 2D array to represent the grid below, we use a 1D array to represent each row (such as [0, 1, 2, 3]), and then put three such rows into another higher level array. 
+  </p>
+  <p>
+    <img src="/images/2dgrid1.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    If <span class="variablenamebold">Array2D</span> is written in the pretty format, it will look very similar to the grid. 
+  </p>
+  <p>
+    <img src="/images/grid2arr.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="180" elementType="Quiz" answerKey="D" answerReason="Each row is represnted as a 1D array, so twoDArray.length is the number of rows; the length of each 1D array is the number of columns.">
+  <p>
+    <b>Quiz:</b> Out of the four choices below, which one contains the number of rows in the grid, followed by the number of columns?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> Array2D, Array2D[0]
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> Array2D[0], Array2D[1]
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> Array2D[0].length, Array2D[1].length
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> Array2D.length, Array2D[1].length
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    The elements in a 2D array are indexed by two subscripts, such as <span class="variablenamebold">Array2D[i][j]</span>. <span class="variablenamebold">i</span> is the first level index, corresponding to the <b>row number</b> in the grid; <span class="variablenamebold">j</span> is the second level index, corresponding to the <b>column number</b> in the grid. So <span class="variablenamebold">Array2D[i][j]</span> is the <span class="variablenamebold">j</span>th element on the <span class="variablenamebold">i</span>th row, or at the intersection of row <span class="variablenamebold">i</span> and column <span class="variablenamebold">j</span>. 
+  </p>
+</element>
+
+<element elementid="200" elementType="Quiz" answerKey="A" answerReason="Row 2 is [6, 7, 8], and on this row, element 1 is 7.">
+  <p>
+    <b>Quiz:</b> For this 2D array <span class="variablenamebold">Array2D</span> defined below, what's the value of <span class="variablenamebold">Array2D[ 2 ][ 1 ]</span>?
+  </p>
+  <p>
+    <pre class="brush:js">
+const Array2D = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 7
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 6
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 5
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 4
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="210" elementType="Quiz" answerKey="D" answerReason="The row number of 3 is 1 and the column number is 0.">
+  <p>
+    <b>Quiz:</b> For this 2D array defined below, to make <span class="variablename">Array2D[i][j]</span> equal 3, what should be the values of <span class="variablename">i</span> and <span class="variablename">j</span>?
+  </p>
+  <p>
+    <pre class="brush:js">
+const Array2D = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> i = 2, j = 1
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> i = 1, j = 1
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> i = 0, j = 1
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> i = 1, j = 0
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    In our tank game, we are using a predefined 2D array, <span class="variablenamebold">Maze</span>, to represent the battlefield, and each item in this array is the type of that tile (e.g. 'R', 'M', 'T'). 
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    <img src="/images/2dbattlefield.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    The picture above shows the left top corner of an example battlefield. The grid in the middle shows the tile type of all tiles, and the corresponding <span class="variablename">Maze</span> array is shown on the right. 
+  </p>
+</element>
+
+<element elementid="240" elementType="Info">
+  <p>
+    To iterate through every item in a 2D array, we need to use a <b>nested for loop</b>. The top level <span class="variablename">for loop</span> will go through each row, and the inner level <span class="variablename">for loop</span> will check each item in that row. 
+  </p>
+</element>
+
+<element elementid="250" elementType="Info">
+  <p>
+    Read the code below and try to write down the expected output. 
+  </p>
+  <p>
+    <pre class="brush: js">
+const M = [[12, 3, -1], [2, 5, 4]];
+for (let i = 0; i &lt; M.length; i += 1) {
+  const row = M[i];
+  for (let j = 0; j &lt; row.length; j += 1) {
+    console.log("M[" + i + "][" + j + "] is " + row[j]);
+  }
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="260" elementType="Info">
+  <p>
+    The output of the above code is as below. 
+  </p>
+  <p>
+    <pre class="brush: js">
+M[0][0] is 12
+M[0][1] is 3
+M[0][2] is -1
+M[1][0] is 2
+M[1][1] is 5
+M[1][2] is 4
+    </pre>
+  </p>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    When you get more familiar with such nested loops, you can use the simplified notation shown below, which doesn't define a variable to represent each row. The output is the same. 
+  </p>
+  <p>
+    <pre class="brush: js">
+const M = [[12, 3, -1], [2, 5, 4]];
+for (let i = 0; i &lt; M.length; i += 1) {
+  for (let j = 0; j &lt; M[i].length; j += 1) {
+    console.log("M[" + i + "][" + j + "] is " + M[i][j]);
+  }
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="280" elementType="Info">
+  <p>
+    Since a 2D array is an array of 1D arrays, each of these children arrays (rows) can have a different length. Such 2D arrays are often called a "ragged array" or a "jagged array". For example, this is a valid 2D array: 
+  </p>
+  <p>
+    <pre class="brush: js">
+const raggedArray = [
+      [3, 5, 7, 9],
+      [4, 2],
+      [5, 7, 8, 6],
+      [6]
+];
+    </pre>
+  </p>
+  <p>
+    We still can use the same nested for loop to iterate through a ragged 2D array, because for each row <span class="variablenamebold">i</span> we limit the iterator j to be less than the length of that row (<span class="variablenamebold">raggedArray[i].length</span>). 
+  </p>
+</element>
+
+<element elementid="290" elementType="Quiz" answerKey="C" answerReason="Row 3 have only one element at column 0.">
+  <p>
+    <b>Quiz:</b> Given the ragged 2D array below, which choice has an <b>undefined</b> value?
+  </p>
+  <p>
+    <pre class="brush: js">
+const raggedArray = [
+      [3, 5, 7, 9],
+      [4, 2],
+      [5, 7, 8, 6],
+      [6]
+];
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> raggedArray[0][3]
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> raggedArray[2][0]
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> raggedArray[3][1]
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> raggedArray[1][1]
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial we have discussed how to define a 2D array, how to access a specific element in the array, how to use a 2D array to represent a grid, and how to iterate through a 2D array with a nested for-loop. As we use 2D arrays a lot in later tutorials, you will get more chance to practice using them. 
+  </p>
+  <p>
+    <b>Exercise 1: </b>Write some code to calcualte <b>the average value</b> of all elements in the <span class="variablenamebold">raggedArray</span> defined below.
+  </p>
+  <p>
+    <pre class="brush: js">
+const raggedArray = [
+      [3, 5, 7, 9],
+      [4, 2],
+      [5, 7, 8, 6],
+      [6]
+];
+    </pre>
+  </p>
+  <p>
+    <b>Exercise 2: </b>Write some code to create the "Multiplication Table" below and store it in a 2D array.  
+  </p>
+    <p>
+    <img src="/images/99multitable.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="https://forum.tgame.ai/t/lesson-15-2d-array/429" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

@@ -1,0 +1,155 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Turn Around Obstacles</h5> 
+    <p>By the last tutorial, your robot turns right when it is blocked by an obstacle. That can be counter-productive when your robot wants to go somewhere forward.</p>
+    <p>In this tutorial, we'll improve that to have the robot turns the car left or right to avoid the obstacle.</p>
+    <p>Are you ready to get started?</p>
+</element>
+
+<element elementid="102"  elementType="Coding" condition="TestDBCarTopHalfAndTurnRight"  conditionind="760">
+    <h5 class="elementheader">Always Turn Right</h5> 
+    <p>Let's start by changing the <b>update</b> function of <b>GoForwardState</b> to always transit to the <b>TurnRightState</b> when it sees obstacle in front of it. Please also fine tune the range of rows and columns it scans so that it doesn't turn right too early or too late.</p>
+    <p>In addition, please remove the random transition between <b>TurnLeftState</b> and <b>TurnRightState</b> as we are going to make more informed decision on turning.</p>
+    <p>Click <b>TEST</b> to check if your car will drive forward through the 2 silos in the middle and then turn right when it is blocked by the amber silo in front of it.</p>
+
+    <code isHidden='true'>
+this.isForwardPathBlocked = function(data) {
+    var myCarColor = GameInfo.RED_CAR_COLOR_IND;
+    var myBallColor = GameInfo.RED_BALL_COLOR_IND;
+    if (GameInfo.myColor == "blue") {
+        myCarColor = GameInfo.BLUE_CAR_COLOR_IND;
+        myBallColor = GameInfo.BLUE_BALL_COLOR_IND;    
+    }
+    // change isBlocked by testing for obstacles
+    for (var row=29; row&lt;=40; row++) {
+        for (var col=29; col&lt;=35; col++) {
+            var pixel = data.frontView[row*64+col];
+            if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != myBallColor &amp;&amp; pixel != myCarColor) {
+                return true;
+            }            
+        }
+    }
+    return false;
+};     
+this.initialize = function() {
+    var robot = this;
+    robot.TurnLeftState = {
+        update: function(data) {
+            sendCommand("F");
+            sendCommand("L");
+        }
+    };
+    robot.TurnRightState = {
+        update: function(data) {
+            sendCommand("F");
+            sendCommand("R");
+        }
+    };
+    robot.GoForwardState = {
+        update: function(data) {
+            if (GameInfo.mySpeed &lt; 10) {
+                sendCommand("F");
+            } else {
+                sendCommand("NF");
+            }
+            sendCommand("NR");
+            sendCommand("NL");
+            if (robot.isForwardPathBlocked(data)) {
+                robot.state = robot.TurnRightState;
+            }
+        }
+    };
+    robot.BackOffState = {
+        update: function(data) {
+            sendCommand("B");
+            sendCommand("NR");
+            sendCommand("NL");
+        }
+    };
+    robot.state = robot.GoForwardState;
+};
+this.update = function(info) {
+    this.state.update(data);
+};                  
+    </code>
+</element>
+
+
+
+<element elementid="103"  elementType="Coding" condition="TestDBPickUpBall"  conditionind="800">
+    <h5 class="elementheader">Stop Turning When Path is Clear</h5> 
+    <p>Currently the car keeps on turning right. Obviously you want the robot to drive the car forward when it is no longer blocked. Please the <b>update</b> function of <b>TurnRightState</b> to check if it is no longer blocked, and transit to <b>GoForwardState</b> when that's the case.</p>
+    <p>Click <b>TEST</b> when you are done to check if your car resumes driving forward after it has avoided the amber silo. It should be able to pick up a red ball if so.</p>
+    <code isHidden='true'>
+this.isForwardPathBlocked = function(data) {
+    var myCarColor = GameInfo.RED_CAR_COLOR_IND;
+    var myBallColor = GameInfo.RED_BALL_COLOR_IND;
+    if (GameInfo.myColor == "blue") {
+        myCarColor = GameInfo.BLUE_CAR_COLOR_IND;
+        myBallColor = GameInfo.BLUE_BALL_COLOR_IND;    
+    }
+    // change isBlocked by testing for obstacles
+    for (var row=29; row&lt;=40; row++) {
+        for (var col=29; col&lt;=35; col++) {
+            var pixel = data.frontView[row*64+col];
+            if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != myBallColor &amp;&amp; pixel != myCarColor) {
+                return true;
+            }            
+        }
+    }
+    return false;
+};     
+this.initialize = function() {
+    var robot = this;
+    robot.TurnLeftState = {
+        update: function(data) {
+            sendCommand("F");
+            sendCommand("L");
+        }
+    };
+    robot.TurnRightState = {
+        update: function(data) {
+            sendCommand("F");
+            sendCommand("R");
+            if (!robot.isForwardPathBlocked(data)) {
+                robot.state = robot.GoForwardState;
+            }
+        }
+    };
+    robot.GoForwardState = {
+        update: function(data) {
+            if (GameInfo.mySpeed &lt; 10) {
+                sendCommand("F");
+            } else {
+                sendCommand("NF");
+            }
+            sendCommand("NR");
+            sendCommand("NL");
+            if (robot.isForwardPathBlocked(data)) {
+                robot.state = robot.TurnRightState;
+            }
+        }
+    };
+    robot.BackOffState = {
+        update: function(data) {
+            sendCommand("B");
+            sendCommand("NR");
+            sendCommand("NL");
+        }
+    };
+    robot.state = robot.GoForwardState;
+};
+this.update = function(info) {
+    this.state.update(data);
+};                  
+    </code>
+</element>
+
+
+<element elementid="140" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations! Now your robot should be able to drive freely around the maze without hitting the wall or silos.</p>
+    <p>
+        For more exercise, please try to change your car so it doesn't always turn right when the forward path is blocked. For example, you can use a random number to decide whether to turn right or left, or, for more advanced players, scan the camera image to decide which side has less obstacles.
+    </p>
+</element>
+

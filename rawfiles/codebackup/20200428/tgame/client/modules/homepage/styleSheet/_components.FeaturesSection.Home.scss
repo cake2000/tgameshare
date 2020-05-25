@@ -1,0 +1,114 @@
+.deactivated-section {
+  width: 50%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  margin-top: 50px;
+  margin: auto;
+}
+
+.deactivated-heading {
+  font-size: 25px;
+}
+
+.deactivated-block {
+  text-align: center;
+  font-size: 17px;
+  margin-top: 10px;
+
+  &__message{
+    margin-bottom: 5px;
+  }
+
+  &__active{
+    a{
+      color: #0a73bc;
+      cursor: pointer;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__time {
+    color: #0a73bc;
+    font-weight: bold;
+  }
+}
+
+.features-section{
+  padding-top: 38px;
+  align-items: flex-start;
+  &__block{
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+    img {
+      width: 180px;
+      height: 185px;
+      object-fit: cover;
+      display: inline-block;
+    }
+    .text{
+      margin-top: 30px;
+      color: $tg-col-basic-dark-blue;
+      font-size: $tg-fs-body;
+      line-height: 24px;
+      text-align: center;
+      &__bold{
+        color: $tg-col-basic-dark-grey;
+        font-size: $tg-fs-heading4;
+        font-weight: 600;
+        letter-spacing: 0.7px;
+        text-indent: 0px;
+        text-transform: uppercase;
+      }
+      &__normal {
+        color: $tg-col-basic-dark-grey;
+        font-family: $tg-ff-body;
+        font-size: $tg-fs-heading4;
+        font-weight: 500;
+      }
+    }
+  }
+
+}
+@media (max-width: 768px) {
+  .features-section{
+    align-items: center;
+    &__block{
+      img{
+        width: 180px;
+      }
+      .text{
+        font-size: $tg-fs-body;
+        line-height: 20px;
+        &__bold{
+          font-size: $tg-fs-body;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+        }
+        &__normal{
+          font-size: $tg-fs-body + 2px;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+@media (max-width: 480px) {
+
+  .features-section{
+    flex-direction: column;
+    align-items: center;
+    &__block{
+      margin-bottom: 30px;
+      max-width: 200px;
+      width: 100%;
+    }
+  }
+}

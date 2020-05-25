@@ -1,0 +1,314 @@
+<element elementid="100" elementType="Info">
+  <p>
+    In this tutorial, we'll implement one more tactic to accelerate your getCallShot function, which is to <b>skip the balls with wide angles to side pockets</b>. 
+  </p>
+  <p>
+    For example, current test setup, the angle between ball 2 and pocket 1 is pretty wide (about 60°), which makes it almost impossible to shoot ball 2 into pocket 1. So in order to speed up getCallShot function, we should skip pocket 1 when reviewing ball 2.
+  </p>
+  <p>
+    <img src="/images/wideAngleToSidePocket.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+</element>
+  
+<element elementid="102" elementType="Info">
+  <p>
+    Another helper function <b>getAngleToSidePocket</b> has been pre-defined for you to calculate a ball's angle to a side pocket. As shown below, this function takes the ball position (with x and y properties) and side pocket ID (pocket 1 or 4) as input, and returns an angle betwen -90° and 90°.
+  </p>
+  <p>
+  <pre class="brush: js">
+const angle = getAngleToSidePocket(ballPosition, sidePocketID);
+  </pre>
+  </p>
+</element>
+
+<element elementid="105" elementType="Coding" condition="TestFinishedNoProbabilityInquiry_2_1">
+  <p>
+    <b>Challenge:</b> as shown below, in the getCallShot function, can you use <b>getAngleToSidePocket</b> to calculate the angle to side pockets for each ball, and <b>skip a side pocket if its angle is too wide</b>? Let's use <b>45°</b> as the threshold, which means if the absolute value of the angle to a side pocket is greater than <b>45°</b>, you will not check the success probability for that (pocketID, ballID) combination. 
+  </p>
+  <b>
+    Note that to check if the pocketID is 1 or 4, we are using the OR operator "||" to combine 2 test conditions together: if (pocketID == 1 || pocketID == 4). This way, either pocketID is 1 or 4, the condition will evaluate to be true. Also, you need to use Math.abs() again to compare the angle against a threshold, since the angle can be less than 0.
+  </b>
+  <code isHidden="false">
+...
+for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+  if (isBlocked2) {
+    continue;
+  }
+        
+  const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+  if (Math.abs(cutAngle) >= 90) {
+    continue;
+  }
+  
+  //TODO: check if ball has wide angle to side pockets 
+  // Only Pocket 1 and 4 are side pockets
+  if (pocketID == 1 || pocketID == 4) { 
+    //h0::to calculate angle, call getAngleToSidePocket on ball position and side pocket ID
+    ::const angle = getAngleToSidePocket(ballID, pocketID);
+    ::const angle = getAngleToSidePocket(Balls[ballID], pocketID);
+    ::const angle = getAngleToSidePocket(ballID);
+    const angle = ? ;
+    //h1::check if angle's absolute value is greater than 45°::use function Math.abs() to get absolute value
+    ::if (Math.abs(angle) &lt; 45) {
+    ::if (angle &lt; 45) {
+    ::if (Math.abs(angle) > 45) {      
+    if (?) {
+      continue ;
+    }      
+    //ENDTODO  
+  }
+
+  const cmd = { 
+    aimx: aimPoint.x, 
+    aimy: aimPoint.y, 
+    strength: 30, 
+    targetBallID: ballID, 
+    targetPocketID: pocketID 
+  };
+  console.log("BallID = " + ballID + " pocketID = " + pocketID );
+  const prob = await calculateProbability(cmd);
+
+  if (prob > highestProb) {
+    bestCommand = cmd; highestProb = prob;
+  }
+}
+...
+  </code>    
+<cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+      if (isBlocked2) {
+        continue;
+      }
+            
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) >= 90) {
+        continue;
+      }
+      
+      // Only Pocket 1 and 4 are side pockets 
+      if (pocketID == 1 || pocketID == 4) {  
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) {
+          continue ; 
+        }
+      }
+
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}  
+  </cleancode> 
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Good job! We are done with all the optimizations, but you might have noticed that the getCallShot function is getting quite long with all the newly added checks. Let's <b>refactor</b> the code by moving some of the checking code out, making the getCallShot function shorter and more readable. 
+  </p>
+</element>
+
+<element elementid="130" elementType="Coding" condition="TestFinishedNoProbabilityInquiry_2_1">
+  <p>
+    <b>Challenge:</b> please complete the new function shouldSkipPocketForBall(pocketID, ballID) as shown below, which should return <b>true</b> if a ball-pocket pair should be skipped. You will also need to modify the getCallShot function to use this new function.
+  </p>
+  <code isHidden="false">
+//TODO:put your checking here. In each one, return a boolean instead of 'continue'
+function shouldSkipPocketForBall(pocketID, ballID) {
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]); 
+  if (isBlocked2) { 
+    // should skip, so return true
+    return true; 
+  }
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]); 
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]);
+  if (Math.abs(cutAngle) > 90) {
+    // should skip, so return true
+    return true;
+  }
+  if (pocketID == 1 || pocketID == 4) {
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID);
+    if (Math.abs(angle) > 45) {
+      //h0::return true or false?::should return true
+      ? ;
+    }
+  }
+  //h1::return true or false?::should return false since all checks have passed
+  ? ;
+}
+
+async function getCallShot() {
+ ...
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      //use shouldSkipPocketForBall to check if this pocketID should be skipped 
+      //h2::call shouldSkipPocketForBall 
+      ::if (shouldSkipPocketForBall(pocketID, ballID)) {
+      ::if (shouldSkipPocketForBall(ballID, pocketID)) {
+      if (?) { 
+          continue ;    
+      }
+      //ENDTODO  
+      // note we still need aimPoint to calculate cmd
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  ...
+}
+  </code> 
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+      
+function shouldSkipPocketForBall(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+
+      if (shouldSkipPocketForBall(pocketID, ballID)) {
+        continue;
+      }
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}  
+
+
+  </cleancode>   
+</element>  
+
+<element elementid="200" elementType="Conclusion">
+  <p>Excellent work! </p>
+  <p><b>Summary:</b> in this tutorial, you've accelerated the getCallShot function further by skipping balls having wide angles to side pockets, and you did another refactor to make the getCallShot function simpler again.</p>
+  <p>
+    <b>Exercise:</b> try to refine the threshold of 45° by experiments. For example, you can change the test script to place ball 2 and ball 6 at different angles to pockket 1, and find the optimal threshold to use. Feel free to discuss your opinion in our forum, under <a href="https://forum.tgame.ai/t/skipping-balls-with-wide-angles-to-side-pockets/52" target="_blank">this lesson's topic</a>.
+  </p>
+  <p>
+    <b>Note</b>: this might be a good time to make a new release of your robot code if you haven't done so. Make sure you give it a good version label.
+  </p>
+</element>
+

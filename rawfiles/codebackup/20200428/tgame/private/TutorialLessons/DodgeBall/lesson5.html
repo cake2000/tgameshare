@@ -1,0 +1,490 @@
+<element elementid="100" elementType="Info">
+  <h5 class="elementheader">Seeking Opponents to Shoot</h5> 
+  <p>Now your robot can drive the car to pick up a ball, it's time for it to look for opponent cars to shoot at.</p>
+  <p>Seeking opponent cars is very similar to looking for balls. The key difference is that when you drive towards an opponent car, you can shoot at it when you are close enough. </p>
+  <p>Can't wait to get started right?</p>
+</element>
+
+<element elementid="103"  elementType="Coding" condition="TestDBDriveTowardsBlueCar"  conditionind="360">
+<h5 class="elementheader">Scanning for opponent car</h5>
+<p>For first step, let's add a new state <b>TURNTOCAR</b> to drive our car towards the opponent car. This should be very similar to the <b>TURNTOBALL</b> state added in the previous tutorial. Specifically, the following changes are needed:</p>
+<p>
+  <ul>
+    <li>
+      A new function <b>getCarPosition</b> has been added. Please update it to return the column of the car in the camera image, or return <b>null</b> if none is found..
+    </li>
+    <li>
+        Second, you need to call the getCarPosition in the "GOFORWARD" state, and transit to the new <b>TURNTOCAR</b> state when the car is found at either side of the camera image. Note that you should comment out the ball detection logic for now to focus on car detection.
+    </li>
+    <li>
+      Thrid, a new <b>TURNTOCAR</b> state has been added for you, which is very similar to the <b>TURNTOBALL</b> state, except that it calls <b>getCarPosition</b> instead. 
+    </li>
+  </ul>
+</p>
+<p>When you click the <b>TEST</b> button, I expect your car to turn left and then run towards the blue car. As always, you can ask me for <b>help</b> if you get really stuck, but I hope you can give it a good try first.</p>
+  <code isHidden='false'>
+// new function to scan for opponent car
+this.getCarPosition = function(info) {
+  //TODO: scan for opponent using MyInfo.opponentCarColor
+  //h0::iterate through rows in the middle::use for-loop on row decreasingly
+  for(let row=37;row>=10;row--) {
+    //h1::iterate through columns::use for-loop on col
+  	for(let col=0;col&lt;=63;col++) {
+      //h2::read pixel value at row/col
+  	  let pixel = info.frontView[row*64+col];
+      //h3::check if pixel is MyInfo.opponentCarColor
+      if (pixel == MyInfo.opponentCarColor) {
+        //h4::return col
+        return col;
+      //h5::close h3 block with }
+      }            
+    //h6::close h1 block with }
+    }
+  //h7::close h0 block with }
+  }  
+  return null;
+};
+
+this.initialize = function(info) {  
+  this.state = "GOFORWARD";  
+};             
+
+
+this.getBallColumn = function(info) { 
+  for(let row=37;row>=10;row--) {
+  	for(let col=0;col&lt;=63;col++) {
+  	  let pixel = info.frontView[row*64+col];
+      if (pixel == MyInfo.myBallColor) {
+        return col;
+      }
+    }
+  }  
+  return null; 
+};   
+                      
+    
+this.isForwardPathBlocked = function(info) {
+  for (let row=27; row&lt;=40; row++) {
+      for (let col=22; col&lt;=41; col++) {
+          let pixel = info.frontView[row*64+col];     
+          if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+              return true;
+          }            
+      }
+  }
+  return false;
+};  
+  
+this.initialize = function(info) {  
+  this.state = "GOFORWARD";  
+};                                
+
+this.update = function(info) {  
+  if (this.state == "TURNLEFT") { 
+    sendCommand("L"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R"); 
+    if (!this.isForwardPathBlocked(info)) 
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") {  
+    sendCommand("NR");  
+    sendCommand("NL");  
+      
+    if (this.isForwardPathBlocked(info)) { 
+      if (Math.random() > 0.5) 
+        this.state = "TURNRIGHT";  
+      else 
+        this.state = "TURNLEFT"; 
+    } else { 
+      //TODO: search for opponent car
+      //h8::get column of car::call this.getCarPosition
+      let carCol = this.getCarPosition(info); 
+      //h9::check if car is on either side::check if column is small or large
+      ::if (carCol &lt;= 26 || carCol >= 37) 
+      ::if (carCol &lt;= 26 &amp;&amp; carCol >= 37) 
+      ::if (carCol &gt;= 26 || carCol &lt;= 37) 
+      if (carCol &lt;= 26 || carCol >= 37) 
+        //h10::if so, transit to "TURNTOCAR" state::change this.state
+        this.state = "TURNTOCAR";
+      
+      // new: comment out for now
+      //let col = this.getBallColumn(info); 
+      //if (col &lt;= 26 || col >= 37) 
+        //this.state = "TURNTOBALL";
+    } 
+  } else if (this.state == "TURNTOBALL") { 
+    let col = this.getBallColumn(info); 
+    if (col != null) {
+      const targetAngle = (31.5 - col) / 60;
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) {
+        if (MyInfo.mySteering &lt; targetAngle) {
+          console.log("send L");
+        } else {
+          console.log("send R");
+        }        
+      } else {
+        this.state = "GOFORWARD";
+      }
+    } else {
+      this.state = "GOFORWARD";
+    }
+  } else if (this.state == "TURNTOCAR") { 
+    let col = this.getCarPosition(info); 
+    if (col != null) {
+      //TODO: turn to car based on col
+      //h11::copy code from "TURNTOBALL" section above
+
+    }
+  } 
+  if (MyInfo.mySpeed &lt; 10) 
+    sendCommand("F");   
+  else  
+    sendCommand("NF"); 
+};
+    </code>
+</element>
+  
+    
+
+<!-- 
+
+<element elementid="104"  elementType="Coding" condition="TestDBDriveTowardsBlueCar"  conditionind="480">
+  <h5 class="elementheader">Implementing <b>getCarPosition</b></h5>
+  <p>Now we have a basic framework setup, let's implement getCarPosition to actually scan the camera image for opponent's car. It should be similar to <b>getMyBallDirection</b>. Note that I have removed the original line "return 1;".</p>
+  <p>I have marked the <b>TODO</b> area in the example code below for your reference. To test your code, click the <b>TEST</b> button, and I expect your car to run towards the blue car. Ask me for <b>help</b> if you get stuck.</p>
+  <code isHidden='false'>
+this.getCarPosition = function(data) {
+  //TODO: scan image for opponent car
+  //h0::iterate through relavant rows::add a for-loop from row 40 to 20
+  ::for (let row=40; row&gt;=20; row--) {
+  ::for (let row=40; row&gt;=20) {
+  ::for (let row=40; row&lt;=20; row++) {
+  for (let row=40; row&gt;=20; row--) {
+  //h1::iterate through relavant columns::add a for-loop from column 0 to 63
+  ::for (let col=0, col&lt;=63, col++) {
+  ::for (let col=0; col&lt;=63; col--) {
+  ::for (let col=0; col&lt;=63; col++) {
+  for (let col=0; col&lt;=63; col++) {
+    //h2::read pixel's value for this row/col::index into the array data.frontView
+    ::const pixel = data.frontView[row*64+col];
+    ::const pixel = data.frontView[col*64+row];
+    ::const pixel = data.frontView[row+col];
+    const pixel = data.frontView[row*64+col];
+    //h3::compare pixel with opponent's car's color::check if pixel equals GameInfo.opponentCarColor
+    ::if (pixel = GameInfo.opponentCarColor) { 
+    ::if (pixel == GameInfo.opponentCarColor) {
+    ::while (pixel == GameInfo.opponentCarColor) {
+    if (pixel == GameInfo.opponentCarColor) {
+    //h4::if column is on left part of image, return 1::check if col is &lt;= 28
+    ::when (col &lt;= 28) return 1; 
+    ::if (col &lt;= 28) return; 
+    ::if (col &lt;= 28) return 1; 
+    if (col &lt;= 28) return 1;
+    //h5::if column is on right part of image, return 3::check if col is >= 36
+    ::if (row &lt;= 36) return 3; 
+    ::if (col &lt;= 36) return 3; 
+    ::if (col >= 36) return 3; 
+    if (col &gt;= 36) return 3;
+    //h6::otherwise, simply return 2::return value of 2
+    return 2;
+    //h7::close h3 block
+    }            
+  //h8::close h1 block
+  }
+  //h9::close h0 block
+  }
+  //h10::no car found so simply return 0::return value of 0
+  return 0;
+}
+  </code>
+</element>
+   -->
+
+
+
+<element elementid="106"  elementType="Coding" condition="TestDBScorePoint"  conditionind="600">
+  <h5 class="elementheader">Pick up ball and shoot</h5>
+  <p>Now it's time for your robot to pick up a ball and shoot at the opponent for real. You have 2 tasks at hand:</p>
+<p>
+  <ul>
+    <li>
+      First, your robot needs to behave differently based on whether it has captured a ball (check <b>MyInfo.hasCapturedBall</b>). If not, it should scan for balls and transit to <b>TURNTOBALL</b> state when a ball is spotted; if it is already carrying a ball, it should scan for opponent cars and transit to the new <b>TURNTOCAR</b> state when necessary. This has been done for you in the reference code below. 
+    </li>
+    <li>
+      Second, in the <b>TURNTOCAR</b> state, when the opponent car is at the center, you need to shoot the ball out if the car is close. So you ask, "how do you know the distance of the car?". Again, you can either do some sick calculations to triangulate the car's location, or, you can just use another heuristic: look at the row number. To do that, you need to change the <b>getCarPosition</b> function to return a simple object that contains both the row and the column of the car in the camera image. Then if the car's row number is large enough, that means it is close enough for us to shoot at it!
+    </li>
+  </ul>
+</p>
+
+  <p>When testing your code, I expect your car to pick up the ball, turn towards the blue car and then shoot the ball at it.</p>
+<code isHidden='false'>
+// new function to scan for opponent car
+this.getCarPosition = function(info) {
+  for(let row=37;row>=10;row--) {
+    for(let col=0;col&lt;=63;col++) {
+      let pixel = info.frontView[row*64+col];
+      if (pixel == MyInfo.opponentCarColor) {
+        //TODO: return both col and row as an object
+        //h0::use an object literal with keys "column" and "row"
+        ::return {column: col, row: row};
+        ::return (column: col, row: row);
+        ::return [column: col, row: row];
+        return {column: col, row: row};
+      }            
+    }
+  }  
+  return null;
+};
+    
+this.getBallColumn = function(info) { 
+  for(let row=37;row>=10;row--) {
+  	for(let col=0;col&lt;=63;col++) {
+  	  let pixel = info.frontView[row*64+col];
+      if (pixel == MyInfo.myBallColor) {
+        console.log("ball col is " + col + " row " + row);
+        return col;
+      }
+    }
+  }  
+  return null; 
+};   
+                      
+    
+this.isForwardPathBlocked = function(info) {
+  for (let row=27; row&lt;=40; row++) {
+      for (let col=22; col&lt;=41; col++) {
+          let pixel = info.frontView[row*64+col];     
+          if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+              return true;
+          }            
+      }
+  }
+  return false;
+};  
+  
+this.initialize = function(info) {  
+  this.state = "GOFORWARD";  
+};                                
+
+this.update = function(info) {  
+  if (this.state == "TURNLEFT") { 
+    sendCommand("L"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R"); 
+    if (!this.isForwardPathBlocked(info)) 
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") {  
+    sendCommand("NR");  
+    sendCommand("NL");  
+      
+    if (this.isForwardPathBlocked(info)) { 
+      if (Math.random() > 0.5) 
+        this.state = "TURNRIGHT";  
+      else 
+        this.state = "TURNLEFT"; 
+    } else { 
+      //new: toggle behavior based on has ball or not
+      if (MyInfo.hasCapturedBall) {
+        let carPos = this.getCarPosition(info); 
+        if (carPos != null) {
+          if (carPos.column &lt;= 26 || carPos.column >= 37) 
+            this.state = "TURNTOCAR";
+        }
+      } else {
+        let col = this.getBallColumn(info); 
+        if (col &lt;= 26 || col >= 37) 
+          this.state = "TURNTOBALL";
+      }
+    } 
+  } else if (this.state == "TURNTOBALL") { 
+    let col = this.getBallColumn(info); 
+    if (col != null) {
+      const targetAngle = (31.5 - col) / 60;
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) {
+        if (MyInfo.mySteering &lt; targetAngle) {
+          sendCommand("L");
+        } else {
+          sendCommand("R");
+        }        
+      } else {
+        this.state = "GOFORWARD";
+      }
+    }  else {
+      this.state = "GOFORWARD";
+    }
+  } else if (this.state == "TURNTOCAR") { 
+    let carPos = this.getCarPosition(info); 
+    if (carPos != null) {
+      const targetAngle = (31.5 - carPos.col) / 60;
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) {
+        if (MyInfo.mySteering &lt; targetAngle) {
+          sendCommand("L");
+        } else {
+          sendCommand("R");
+        }        
+      } else {
+        //TODO: shoot if car is close
+        //h1::check if row is large and angle is small::check carPos.row and targetAngle
+        ::if (carPos.row >= 15 &amp;&amp; Math.abs(targetAngle) &lt; 0.03)
+        ::if (carPos.row >= 30 &amp;&amp; Math.abs(targetAngle) &lt; 0.03)
+        ::if (carPos.row >= 15 &amp;&amp; targetAngle &lt; 0.03)
+        if (carPos.row >= 15 &amp;&amp; Math.abs(targetAngle) &lt; 0.03)
+          //h2::send command "S"
+          sendCommand("S");
+          
+        this.state = "GOFORWARD";
+      }
+    } else {
+      this.state = "GOFORWARD";
+    }
+  } 
+  if (MyInfo.mySpeed &lt; 10) 
+    sendCommand("F");   
+  else  
+    sendCommand("NF"); 
+};
+
+     
+  </code>
+</element>
+  
+
+
+
+<element elementid="140" elementType="Conclusion">
+  <h5 class="elementheader">Tutorial Completed!</h5> 
+  <p>Congratulations! Now your robot is ready for its first release! Please go back to the <a href=`/tutorialLinks`>tutorial list</a> and release a first version of your robot code so it can play against other human or robot players.</p>
+  <p>
+    For more exercise, think about how you can improve the car positioning accuracy. Currently, in getCarPosition function, we scan from left to right on each row, and return on first pixel that has MyInfo.opponentCarColor. If the blue car occupies 5 pixels, then we should have returned the column of the third pixel of the car. Can you think of a way to fix this so the returned column is really the center of the car?
+  </p>
+</element>
+
+  
+<!-- 
+
+// new function to scan for opponent car 
+this.getCarPosition = function(info) { 
+  for(let row=37;row>=10;row--) { 
+    for(let col=0;col<=63;col++) { 
+      let pixel = info.frontView[row*64+col]; 
+      if (pixel == MyInfo.opponentCarColor) { 
+        //TODO: return both col and row as an object 
+        return {column: col, row: row};
+      }             
+    } 
+  }   
+  return null; 
+}; 
+      
+this.getBallColumn = function(info) {  
+  for(let row=37;row>=10;row--) { 
+    for(let col=0;col<=63;col++) { 
+      let pixel = info.frontView[row*64+col]; 
+      if (pixel == MyInfo.myBallColor) { 
+        console.log("ball col is " + col + " row " + row); 
+        return col; 
+      } 
+    } 
+  }   
+  return null;  
+};    
+                        
+      
+this.isForwardPathBlocked = function(info) { 
+  for (let row=27; row<=40; row++) { 
+      for (let col=22; col<=41; col++) { 
+          let pixel = info.frontView[row*64+col];      
+          if (pixel != GameInfo.GROUND_COLOR_IND && pixel != MyInfo.myBallColor && pixel != MyInfo.myCarColor) { 
+              return true; 
+          }             
+      } 
+  } 
+  return false; 
+};   
+    
+this.initialize = function(info) {   
+  this.state = "GOFORWARD";   
+};                                 
+  
+this.update = function(info) {   
+  if (this.state == "TURNLEFT") {  
+    sendCommand("L");  
+    if (!this.isForwardPathBlocked(info)) 
+      this.state = "GOFORWARD"; 
+  } else if (this.state == "TURNRIGHT" ) { 
+    sendCommand("R");  
+    if (!this.isForwardPathBlocked(info))  
+      this.state = "GOFORWARD"; 
+  } else if (this.state == "GOFORWARD") {   
+    sendCommand("NR");   
+    sendCommand("NL");   
+    console.log("MyInfo.hasCapturedBall " + MyInfo.hasCapturedBall);
+        
+    if (this.isForwardPathBlocked(info)) {  
+      if (Math.random() > 0.5)  
+        this.state = "TURNRIGHT";   
+      else  
+        this.state = "TURNLEFT";  
+    } else {  
+      //new: toggle behavior based on has ball or not 
+      if (MyInfo.hasCapturedBall) {       
+        let carPos = this.getCarPosition(info);  
+        if (carPos != null) { 
+          if (carPos.column <= 26 || carPos.column >= 37)  
+            this.state = "TURNTOCAR"; 
+        } 
+      } else { 
+        let col = this.getBallColumn(info);  
+        if (col <= 26 || col >= 37)  
+          this.state = "TURNTOBALL"; 
+      } 
+    }  
+  } else if (this.state == "TURNTOBALL") {  
+    let col = this.getBallColumn(info);  
+    if (col != null) { 
+      const targetAngle = (31.5 - col) / 60; 
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) { 
+        if (MyInfo.mySteering < targetAngle) { 
+          sendCommand("L"); 
+        } else { 
+          sendCommand("R"); 
+        }         
+      } else { 
+        this.state = "GOFORWARD"; 
+      } 
+    } else {
+      this.state = "GOFORWARD";
+    }
+  } else if (this.state == "TURNTOCAR") {  
+    let carPos = this.getCarPosition(info);  
+    if (carPos != null) {       
+      const targetAngle = (31.5 - carPos.column) / 60; 
+      console.log("in turn to car: " + targetAngle);
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) { 
+        if (MyInfo.mySteering < targetAngle) { 
+          sendCommand("L"); 
+        } else { 
+          sendCommand("R"); 
+        }         
+      } else { 
+        //TODO: shoot if car is close 
+        console.log("car row " + carPos.row + " angle " + targetAngle);
+        if (carPos.row >= 15 && Math.abs(targetAngle) < 0.03)
+          sendCommand("S");
+        this.state = "GOFORWARD"; 
+      } 
+    } else { 
+      this.state = "GOFORWARD"; 
+    } 
+  }  
+  if (MyInfo.mySpeed < 10)  
+    sendCommand("F");    
+  else   
+    sendCommand("NF");  
+};
+ -->
+

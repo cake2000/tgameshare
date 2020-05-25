@@ -1,0 +1,433 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white") {
+      if (MyTank.r == curTank.r) {
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+        } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+          return "L";
+        } else {
+          return "S";
+        }
+      } else if (MyTank.c == curTank.c) {
+        if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+          return "D";
+        } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+          return "U";
+        } else {
+          return "S";
+        }
+      } // end of column check
+    } // end of color check
+  } // end of for loop
+  return "";
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! We introduced the A* algorithm in the previous tutorial, and in this one I'll show you how to use it in your robot code. 
+  </p>
+  <p>
+    For most tasks in the game, such as collecting crystals or attacking other tanks, you would want your tank to take the shortest path. For this lesson, let's calculate the shortest path so we can collect crystals as quickly as possible.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    To make things easier for you, I've pre-defined a helper function, <span class="variablenamebold">getShortestPathCmd</span>, that implements the A* algorithm. You can use the function as shown below:
+  </p>
+  <p>
+    <pre class="brush: js">
+const path = getShortestPathCmd(graphArray, startPos, endPos);
+    </pre>
+  </p>
+  <p>
+    The input arguments <span class="variablenamebold">startPos</span> and <span class="variablenamebold">endPos</span> are the starting and ending positions. Each has two properties: <span class="variablenamebold">r</span> for row number and <span class="variablenamebold">c</span> for column number. 
+  </p>
+  <p>
+    The output of this function is an array of commands, such as <b>[U", "R", "R", "D", "D"]</b>, that specifies how to go from the starting position to the ending position.  
+  </p>
+
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    The input argument <span class="variablenamebold">graphArray</span> is a 2D array of integers that encodes the battlefield. Each integer in the array represents one tile in the battlefield. <b>A value of 1 represents an open space (one that can be passed through), and a value of 0 represents an obstacle</b> (such as a rock, tree or mud puddle). 
+  </p>
+  <p>
+    <img src='/images/grapharray.png' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    The picture above shows the array representation of a battlefield with some obstacle tiles. All empty tiles in the battlefield are represented by 1's in the array, and the rock wall in middle is represented by a column of 0's. FYI, initialization/specification of this 2D array in JavaScript is done by this code below:
+  </p>
+  <p>
+      <code isHidden="false">
+const graphArray = [
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1]
+];        
+    </code>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    For our tank game, the input <span class="variablenamebold">startPos</span> is the blue tank's current position, and <span class="variablenamebold">endPos</span> is the position of the target crystal (the end of the path). You can use a pre-defined array <span class="variablenamebold">Crystals</span> to retrieve the positions of crystals. For example, <b>Crystals[0]</b> tells you the first crystal's position.
+  </p>
+  <p>
+    The input <span class="variablenamebold">graphArray</span> must be specified based on the tiles placed in the battlefield.
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Before we add any new functionality to your robot, let's define a new function <span class="variablenamebold">attackWhiteTank</span> and relocate the existing code related to attacking white tanks into this new function. It's always better to move a block of code for a specific goal into a separate function in order to keep our main function short and clean.
+  </p>
+  <p>
+    The process of restructuring existing code without changing its behavior is called <b>code refactoring</b>. In general, refactoring helps to improve code readability and reduce complexity.
+  </p>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedCodeIncludes_attackWhiteTank_getRandomCommand;TestFinishedAnyResult">
+  <p>
+    <b>Challenge:</b> Replace your gamebot code with the code below. When you finish, click <b>TEST</b> to make sure there are no errors.
+  </p>
+  <p>
+    <pre class="brush:js">
+function attackWhiteTank() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+
+function getRandomCommand() {
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}
+
+function getNewCommand() {
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+  
+  return getRandomCommand();
+} 
+    </pre>
+  </p>
+  <cleancode>
+function attackWhiteTank() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+
+function getRandomCommand() {
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}
+
+function getNewCommand() {
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+  
+  return getRandomCommand();
+}    
+  </cleancode>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Great! Now the function <span class="variablename">getNewCommand</span> is shorter and cleaner. In addition, some random commands have been added at the end of the function so that your tank will "fool around" randomly when no specific action is needed. 
+  </p>
+  <p>
+    Next, let's write a function to collect crystals.
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    In order to search for the shortest path to an object, we need to create a 2D array <span class="variablenamebold">graph</span> to represent the battle field. Recall that we used a <span class="keyword">for-loop</span> to walk through 1D arrays before. For 2D arrays, we will need to use two <span class="keyword">for-loops</span>, one inside the other. (Remember, we refer to such structures as <b>nested for-loops</b>.) The outer <span class="keyword">for-loop</span> will iterate through each row in the graph array, and the inner <span class="keyword">for-loop</span> will iterate through each tile in that row. Check out the example code below, which defines and then prints a small 2D array.
+  </p>
+  <p>
+    <pre class="brush:js">
+// create a 2D array of 3 rows, 2 items on each row      
+const twoDArray = [[0, 1], [2, 3], [4, 5]];
+
+// print out array
+for (let i = 0; i &lt; twoDArray.length; i ++) {
+  for (let j = 0; j &lt; twoDArray[i].length; j ++) {
+    console.log(twoDArray[i][j]);
+  }
+}
+
+// output: 
+// 0 1 
+// 2 3 
+// 4 5
+    </pre>
+  </p>
+</element>
+
+<element elementid="200" elementType="Coding" condition="TestFinishedPowerPointOne">
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, call the helper function <span class="variablename">getShortestPathCmd</span> to find the shortest path from the blue tank to the crystal. The tiles in the battlefield are stored in the 2D array <span class="variablenamebold">Maze</span>. 
+  </p>
+  <p>
+    Don't forget to call the new function <span class="variablename">getCrystal</span> in the <span class="variablename">getNewCommand</span> function.
+  </p>
+  <code isHidden="false">
+//TODO: find the shortest path to a crystal
+function getCrystal() { 
+  // if there are no crystals, return an empty array
+  //h0::check whether the array Crystals has any items
+  ::if (Crystals.length > 0)
+  ::if (Crystals.length >= 0)
+  ::if (Crystals.length == 0)
+  if ( Crystals.length ? 0 ) return [];
+
+  // read position of the first crystal in the array
+  const crystal = Crystals[0];
+
+  // create a new array to hold all 3 blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set value of each node in graph, 1 = empty and 0 = blocked
+
+  // loop through all rows in the graph using index "i"
+  //h1::loop through all rows in graph::for (let i = 0; i &lt; graph.length; i += 1)
+  for ( ? ) {
+
+    // loop through all items in this row using index "j"
+    //h2::loop through items in graph[i]::for (let j = 0; j &lt; graph[i].length; j += 1)
+    for ( ? ) {
+      // read this tile's type
+      //h3::get tile type from Maze::Maze[i][j]
+      const tileType = ? ;
+      // check if it is a blocking tile
+      if (blockingTileTypes.includes(tileType)) 
+        graph[i][j] = 0;
+      else 
+        graph[i][j] = 1;
+    }
+  }
+
+  // get the shortest path
+  return getShortestPathCmd(graph, MyTank, crystal);
+}
+
+function getNewCommand() {
+  // check if we can get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+  
+  return getRandomCommand();
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function attackWhiteTank() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+
+function getCrystal() { 
+  // if no crystals, return blank array
+  if (Crystals.length == 0) return [];
+
+  // crystal position and my tank position
+  const crystal = Crystals[0];
+
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tileType = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tileType)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+
+  return getShortestPathCmd(graph, MyTank, crystal);
+}
+
+function getRandomCommand() {
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}
+
+function getNewCommand() {
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand();
+} 
+  </cleancode>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Great job! Let's read through the code again. There are a few things we need to discuss further. 
+  </p>
+  <p>
+    First, a helper function <span class="variablenamebold">createNewGraph()</span> has been predefined for you to create a new 2D array of zeros, which has 15 rows and 15 columns. 
+  </p>
+  <p>
+    <img src='/images/zeroarray.png' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p> 
+    In case you are curious, here is the implementation of that function. 
+  </p>
+  <p>
+    <pre class="brush: js">
+// create 2D array filled with zeros
+function createNewGraph() {
+  return Array(world.TileRows).fill().map(() => Array(world.TileCols).fill(0));
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    After we update the <span class="variablename">graph</span> array according to the tiles in the battlefield, the <span class="variablename">graph</span> array becomes the following: 
+  </p>
+  <p>
+    <img src='/images/searchgraph.png' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    The array <span class="variablename">blockingTileTypes</span> is used to store the blocking tile types (rock, tree, puddle). And the statement <span class="variablename">blockingTileTypes.includes(tile)</span> returns <span class="variablename">true</span> if the given tile type is in the array. 
+  </p>
+  <p>
+    <pre class="brush: js">
+const blockingTileTypes = ['R', 'M', 'T'];
+    </pre>
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial, we discussed how to use the shortest path to get to and collect crystals. 
+  </p>
+  <p>
+    <b>Exercise 1:</b> Place one more crystal in the maze by adding this line in your test script: "<span class="variablename">PlaceCrystal(10, 10);</span>". Then test your robot to see if it collects both crystals.
+  </p>
+  <p>
+    <b>Exercise 2:</b> Place some rocks on the shortest path your tank is taking, and test whether your tank is able to find a new path by-passing these new rocks.
+  </p>
+  <p>
+    If you have any questions, feel free to post them on our forum, under <a href="https://forum.tgame.ai/t/lesson-8-picking-up-a-crystal/405" target="_blank">this lesson's topic</a>. 
+  </p>
+</element>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=7477750&js=1"></script><script type="text/javascript">AC_VHost_Embed(7477750,300,400,'',1,0, 2691718, 0,1,0,'d44e34cbf4b78ddc2c83fba6633d654c',0);</script> -->
+
+    <script>
+
+        window.onmessage = function (e) {
+            if (e.data && typeof(e.data) == "object") return;
+            console.log("received message " + e.data.substr(0, 100));
+
+            try {
+                if (e.data.indexOf("PlaySilent") == 0) {
+                    const parts = e.data.split("_");
+                    // if (setFacialExpression) setFacialExpression("OpenSmile", 0.8, 5);
+                    if (saySilent) saySilent(parts[1]);
+                    return;
+                }
+
+                if (e.data.indexOf("StopSpeech") == 0) {
+                    if (stopSpeech) stopSpeech();
+                    return;
+                }
+            } catch (e) {}
+
+        }
+
+    </script>
+
+  </head>
+
+  <body>
+
+    <!-- <div id='divVHSS'></div><script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=7477750&js=1"></script><script type="text/javascript">AC_VHost_Embed(7477750,250, 400, '', 1,0, 2691718, 0, 1, 0, '8c742eeba29855d3ab7795613cda30cd', 0, '400|300|15|-9|L|B|false|0|0|0|0|vhss.oddcast.com/ccs2/vhss/user/0a6/7477750/thumbs/show_2691718.jpg|Double%20click%20to%20play%20me|0|C|0|0|0|875');</script> -->
+    <div id='divVHSS'></div><script type="text/javascript" src="//vhss-d.oddcast.com/vhost_embed_functions_v2.php?acc=7477750&js=1"></script><script type="text/javascript">AC_VHost_Embed(7477750,300, 400, '', 1,0, 2691719, 0, 1, 0, '1cc006309f2030f417f555c4b8300bab', 0, '400|300|15|-9|L|B|false|0|0|0|0|vhss.oddcast.com/ccs2/vhss/user/0a6/7477750/thumbs/show_2691719.jpg|Double%20click%20to%20play%20me|0|C|0|0|0|875');</script>
+
+  </body>
+</html>
+
+

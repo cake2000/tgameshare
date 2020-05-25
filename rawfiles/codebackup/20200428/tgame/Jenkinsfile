@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+  stages {
+    stage('Build npm') {
+      steps {
+        sh 'meteor npm install'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh './devops/scripts/test.sh'
+      }
+    }
+    stage('Deliver for production') {
+      when {
+        branch 'master'
+      }
+      steps {
+	sh 'meteor deploy www.tgame.ai --settings settings.json --owner upliftingtechnologyinc'
+      }
+    }
+  }
+  environment {
+    CI = 'true'
+    METEOR_ALLOW_SUPERUSER = 'true'
+    METEOR_SESSION_FILE = '/var/lib/jenkins/storage/cube-galaxy-token/meteor-login.json'
+    DEPLOY_HOSTNAME = 'us-east-1.galaxy-deploy.meteor.com'
+  }
+}

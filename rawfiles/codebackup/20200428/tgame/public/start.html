@@ -1,0 +1,868 @@
+<html>
+  <head>
+    <title>TuringGame - Game AI Coding</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
+      :root {
+        --theme-color-blue: #2793ff;
+        --theme-color-green: #3ec9b2;
+        --theme-color-pinkish: #F26060;
+        --theme-color-yellow: #ffdd3d;
+        --theme-color-deepblue: #0A2635;
+        --theme-color-white: #fff;
+        --theme-color-black: #000;
+        --accent-color-gray: #9b9b9b;
+        --accent-color-light: #e5e5e5;
+        --accent-color-graylight: #f3f3f3;
+        --accent-color-blue: #3572f1;
+        --accent-color-green: #18bb5a;
+      }
+      body{
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        color: var(--theme-color-black);
+        padding: 0;
+      }
+      
+      *{
+        box-sizing: border-box;
+      }
+      a{
+        box-sizing: border-box;
+      }
+      a:focus,
+      a:active{
+        outline: none
+      }
+      img{
+        vertical-align: middle;
+      }
+      h1, h2, h3, h4, p, span{
+        text-align: center;
+        font-weight: 500;
+        margin: 0;
+      }
+      h1{
+        font-size: 24px;
+        line-height: 44px;
+      }
+      h2{
+        font-size: 20px;
+        line-height: 36px;
+      }
+      h3{
+        font-size: 18px;
+        line-height: 30px;
+      }
+      h4{
+        font-size: 16px;
+        line-height: 30px;
+      }
+      .GreenHeader {
+        color: rgb(55, 85, 43)
+      }
+
+      .down-arrow {
+        margin-top: 50px;
+      }
+      
+      .teacher-top-navbar{
+        display: flex;
+        height: 70px;
+        position: fixed;
+        top: 0px;
+        z-index: 100;
+        width: 100%;
+        background-color: var(--theme-color-black);
+        background-image: url(images/bg-p-500.png);
+        background-position: 0px 0px;
+        background-size: cover;
+      }
+      @media(max-width: 1024px){
+        .teacher-top-navbar{
+          height: 50px;
+        }
+        .open #menuMobileOpen{
+          right: 0px;
+        }
+      }
+      .teacher-top-navbar-group{
+        background: var(--theme-color-blue);
+        margin: 0px auto;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+      .teacher-menu-list{
+        flex: 1;
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+      }
+      .teacher-menu-list a{
+        padding: 0 35px;
+        text-decoration: none;
+        color: var(--theme-color-white);
+        font-size: 14px;
+        flex: 1;
+        text-transform: uppercase;
+        font-weight: 500;
+        letter-spacing: 1px;
+        flex: 1;
+        position: relative;
+        text-align: center;
+      }
+      .teacher-menu-list a:last-child{
+        padding-right: 0px;
+      }
+      .teacher-menu-list a:hover{
+        color: #002535
+      }
+      .teacher-menu-list a:after{
+        height: 22px;
+        content: '';
+        position: absolute;
+        top: calc(50% - 11px);
+        right: 0px;
+        width: 1px;
+        background-color: var(--theme-color-white);
+      }
+      .teacher-menu-list a:last-child::after{
+        display: none;
+      }
+      @media (max-width: 1680px){
+        .teacher-menu-list a{
+          padding: 0 30px;
+        }
+      }
+      @media (max-width: 1550px){
+        .teacher-menu-list a{
+          padding: 0 25px;
+        }       
+      }
+      @media (max-width: 1440px){
+        .teacher-menu-list a{
+          padding: 0 20px;
+          font-size: 13px;
+        }       
+      }      
+      @media (max-width: 1280px){
+        .teacher-menu-list a{
+          font-size: 12px;
+          padding: 0 15px;
+        }       
+        .teacher-menu-list a:after{
+          height: 16px;
+          top: calc(50% - 8px);
+        }
+      }
+      @media (max-width: 1170px){
+        .teacher-menu-list a{
+          font-size: 11px;
+          padding: 0 12px;
+        }
+        .teacher-menu-list a:after{
+          height: 12px;
+          top: calc(50% - 6px);
+        }
+        .menu-item {
+          padding-left: 0px;
+        }
+      }
+      @media (max-width: 1170px){
+        .teacher-menu-list a{
+          font-size: 10px;
+          padding: 0 8px;
+        }
+      }
+      @media (max-width: 940px){
+        .teacher-menu-list{
+          display: inline-block;
+          position: absolute;
+          max-width: 100%;
+          background: #000000d6;
+          height: 100vh;
+          top: 0px;
+          right: -100%;
+          width: 100%;
+          transition: right 400ms ease;
+          z-index: 9;
+        }
+        .teacher-menu-list a{
+          width: 100%;
+          display: inline-block;
+          margin-bottom: 25px;
+        }
+        .teacher-menu-list a::after{
+          display: none;
+        }
+        .teacher-menu-list a:hover{
+          color: var(--theme-color-pinkish);
+        }
+      }
+      .teacher-container{
+        background-color: var(--theme-color-white);
+        background-image: url(images/dark-geometric-copy.png);
+        background-position: 50% 50%;
+        background-size: 35px;
+        font-family: 'Montserrat', sans-serif;
+        color: var(--accent-color-gray);
+      }
+      .teacher-container-wrapper{
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding-top: 70px;
+      }
+      @media(max-width: 1024px){
+        .teacher-container-wrapper{
+          padding-top: 50px;
+        }
+      }
+      .teacher-footer{
+        height: 35px;
+        position: fixed;
+        width: 100%;
+        bottom: 0px;
+        background-color: var(--theme-color-black);
+      }
+      .teacher-footer-wrapper{
+        border-top: 1px solid var(--accent-color-gray);
+        text-align: center;
+        font-size: 12px;
+        padding: 8px 0px;
+        line-height: 20px;
+        color: var(--theme-color-white);
+      }
+      .landing-logo{
+        flex: 0 0 200px;
+        height: 100%;
+        align-items: center;
+        display: flex;
+      }
+      .landing-logo a{
+        padding: 0 20px 0px 10px;
+        height: 100%;
+        background: #002535;
+      }
+      .landing-logo img{
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: contain;
+      }
+      @media(max-width: 1280px){
+        .landing-logo {
+          flex: 0 0 165px;
+        }
+      }
+      @media(max-width: 1024px){
+        .landing-logo a{
+          padding: 0 15px 0px 10px;
+          width: 160px;
+        }
+      }
+      @media(max-width: 940px){
+        .landing-logo{
+          flex: 1
+        }
+      }
+      .teacher-top-content{
+        display: flex;
+        background-image: url('images/laughtingstudent2.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: calc(100vh - 95px);
+        position: relative;
+      }
+      .program-ai{
+        display: flex;
+        align-items: center;
+        width: calc(100% - 75px);
+        margin: 0 auto;
+        position: relative;
+      }
+      .program-content{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .program-items{
+        margin: 20px 0px 40px 0px;
+        color: var(--theme-color-white);
+      }
+      .program-items h1{
+        font-size: 50px;
+        margin-bottom: 15px;
+      }
+      .program-items h4{
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+      .program-action{
+        margin-top: 50px;
+        width: 250px;
+        padding: 15px 0;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--theme-color-white);
+        background: var(--theme-color-green);
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+      }
+      .program-action:hover{
+        background:  var(--theme-color-green);
+      }
+      .space-wrapper{
+        max-width: 1025px;
+        width: calc(100% - 30px);
+        margin: 0px auto;
+      }
+      .learning-experience{
+        padding: 35px 0px 50px;
+      }
+      .learning-slideshow{
+        max-width: 1024px;
+        max-height: 512px;
+        position: relative;
+      }
+      .learning-slideshow img{
+        width: 100%;
+        height: 100%;
+      }
+      img{
+        vertical-align: middle;
+      }
+      .learning-group-content{
+        display: flex;
+        justify-content: center;
+        padding-top: 40px;
+      }
+      .learning-content{
+        box-shadow: 0px 0px 15px 0px #6c6c6c;
+        border-radius: 5px 5px 0px 0px;
+        max-width: 1024px;
+        overflow: hidden;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .perfect-choice-content{
+        box-shadow: 0px 0px 15px -2px #f0f0f0;
+        border-radius: 5px 5px 0px 0px;
+        max-width: 1024px;
+        overflow: hidden;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .learning-menubar{
+        width: 100%;
+      }
+      .learning-items p{
+        text-align: left;
+      }
+      .learning-items ul{
+        margin-top: 0px;
+      }
+      .learning-items li, .teacher-resource-items li{
+        line-height: 24px;
+        font-size: 14px;
+      }
+      .teacher-resource{
+        background-color: #236bc2;
+        background-image: url(images/checkered-pattern.png);
+        background-position: 50% 50%;
+        background-repeat: repeat;
+        color: var(--theme-color-white);
+        padding: 35px 0px 50px;
+      }
+      .teacher-resource-items{
+        flex: 1;
+        margin-right: 30px;
+      }
+      .learning-code{
+        padding: 50px 0px;
+      }
+      .learning-code-items{
+        display: flex;
+        justify-content: center;
+        padding: 38px 15px 0px 15px;
+      }
+      .learning-code-section{
+        flex: 1;
+        text-align: center;
+        padding: 0 10px;
+      }
+      .animated{
+        width: 180px;
+        height: 185px;
+        object-fit: cover;
+        display: inline-block;
+      }
+      .learning-code-text{
+        margin-top: 30px;
+        color: #236bc2;
+        font-size: 14px;
+        line-height: 24px;
+        text-align: center;
+      }
+      .learning-code-text h3{
+        color: black;
+      }
+      .teacher-social{
+        background-color: #5e5e5e;
+        background-image: url(images/checkered-pattern.png);
+        background-position: 50% 50%;
+        background-repeat: repeat;
+        padding: 20px 0 40px;
+      }
+      .teacher-social-group{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .whyto-learning{
+        padding: 35px 0px;
+      }
+      .whyto-learning-content{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 15px;
+      }
+      .whyto-learning-items{
+        padding: 0 10px;
+      }
+      .user-right{
+        position: relative;
+        padding: 0 40px;
+      }
+      @media(max-width: 1440px){
+        .user-right{
+          padding: 0 25px;
+        }
+      }
+      .user-right span{
+        color: var(--theme-color-white);
+      }
+      @media(max-width: 1170px){
+        .user-right span{
+          font-size: 12px;
+        }
+      }
+      .teacher-menu-right{
+        height: 69px;
+        align-items: center;
+        display: flex;
+        background: var(--accent-color-blue);
+        cursor: pointer;
+      }
+      @media(max-width: 1024px){
+        .teacher-menu-right{
+          height: 49px;
+        }
+      }
+      .user-right > number{
+        position: absolute;
+        top: -15px;
+        right: 17px;
+        color: var(--theme-color-white);
+        width: 20px;
+        height: 20px;
+        background: var(--theme-color-pinkish);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+        font-size: 12px;
+        line-height: 10px;
+      }
+      .user-right span img{
+        width: 20px;
+        margin-right: 5px;
+      }
+      @media(max-width: 1170px){
+        .user-right span img{
+          width: 18px;
+          margin-right: 2px;
+        }
+      }
+      .list-sub-menu{
+        background: var(--theme-color-white);
+      }
+      .sub-menu-right{
+        position: absolute;
+        width: 280px;
+        top: 45px;
+        right: 0px;
+        background: var(--theme-color-pinkish);
+        padding: 15px 0px 0px;
+      }
+      @media(max-width: 1024px){
+        .sub-menu-right{
+          top: 35px;
+        }
+      }
+      .sub-menu-right a{
+        text-decoration: none;
+        font-size: 13px;
+        margin: 15px 0px 0px 15px;
+        display: flex;
+        color: var(--theme-color-deepblue);
+        width: calc(100% - 30px);
+        border-bottom: 1px solid var(--theme-color-deepblue);
+        padding-bottom: 10px;
+        font-weight: 500;
+      }
+      .sub-menu-right a:hover span{
+        color: var(--accent-color-gray);
+      }
+      .sub-menu-right a:first-child{
+        padding-top: 20px;
+      }
+      .sub-menu-right a span{
+        color: var(--theme-color-deepblue);
+        flex: 1;
+        text-align: left;
+      }
+      .sub-menu-right a number{
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        color: var(--theme-color-white);
+        border-radius: 100%;
+        background: var(--theme-color-pinkish);
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+      }
+      .sub-menu-right a:nth-last-child(2){
+        border: none;
+      }
+      .sub-menu-right a.log-out{
+        border: none;
+        color: var(--theme-color-white);
+        display: inline-block;
+        padding: 15px;
+        margin: 0px;
+        background: var(--accent-color-gray);
+        width: 100%;
+        text-align: center;
+        align-items: center;
+      }
+      .sub-menu-right a.log-out:hover{
+        background-color: var(--accent-color-graylight);
+        color: var(--accent-color-gay);
+      }
+      .menu-icon-mobile{
+        display: flex;
+        cursor: pointer;
+        width: 55px;
+        display: none;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .menu-icon-mobile:hover{
+        background: var(--accent-color-blue);
+      }
+      @media(max-width: 940px){
+        .menu-icon-mobile{
+          display: flex;
+        }       
+      }
+      .menu-icon-mobile span{
+        display: inline-block;
+        width: 32px;
+        height: 3px;
+        margin-bottom: 5px;
+        background-color: var(--theme-color-white);
+      }
+      .menu-icon-mobile span:last-child{
+        margin: 0px;
+      }
+      .teacher-menu-list  .closebtn{
+        font-size: 45px;
+        text-align: left;
+        padding-left: 10px;
+        margin-top: 10px;
+        display: none;
+      }
+      @media (max-width: 940px){
+        .teacher-menu-list  .closebtn{
+          display: inline-block
+        }
+      }
+      
+      
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const loggedIn = localStorage.getItem('Meteor.userId');
+        if (loggedIn) {
+          document.getElementById("program-action").outerHTML = '';
+          document.getElementById("signUpSubButton2").outerHTML = '';
+          document.getElementById("signUpSubButton").outerHTML = '<a class="join-tournament-button" onclick="handleLogout()">Log out</a>';
+        }
+      });
+
+      function handleLogout() {
+        window.location.href = "/logout";
+      }
+      function openNav() {
+        document.getElementById("teacher-top-navbar").classList.add("open");
+      }
+
+      function closeNav() {
+        document.getElementById("teacher-top-navbar").className = 'teacher-top-navbar';
+      }
+    </script>
+  </head>
+  <body>
+    <div class="teacher-container">
+      <div class="teacher-top-navbar" id="teacher-top-navbar">
+        <div class="teacher-top-navbar-group">
+          <div class="landing-logo">
+            <a href="/"><img src="images/white-logo.png"/></a>
+          </div>
+          <div class="menu-icon-mobile" onclick="openNav()">
+            <span class="icon-1"></span>
+            <span class="icon-2"></span>
+            <span class="icon-3"></span>
+          </div>
+          <div id="menuMobileOpen" class="teacher-menu-list">
+            <a id="menuMobileClose" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="/gamesBoard">Games</a>
+            <a href="/courses">Courses</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="https://forum.tgame.ai/">Forum</a>
+            <a href="/about">About</a>
+            <a href="/contact-us">Contact</a>
+            <a id="signUpSubButton2" href="/signup">Free Sign Up</a>
+            <a id="signUpSubButton" href="/signin">Login</a>
+          </div>
+          <!-- <div class="teacher-menu-right" id="userDropdown">
+              <div class="user-right">
+                <span>
+                  <img alt="man user" src="/images/man-user.svg">
+                  Mike
+                </span>
+                <number>5</number>
+                <div class="sub-menu-right">
+                  <div class="list-sub-menu">
+                    <a href="/"><span>Class Notice </span><number>1</number></a>
+                    <a href="/"><span>Q & A Update </span> <number>2</number></a>
+                    <a href="/"><span>Tournament Invitation</span>  <number>2</number></a>
+                    <a class="log-out" href="/">Log Out</a>
+                  </div>
+                </div>
+              </div>
+          </div> -->
+        </div>
+      </div>
+      <div class="teacher-container-wrapper">
+        <div class="teacher-top-content">
+          <div class="program-ai">
+            <div class="program-content">
+              <div class="program-items">
+                <h1>TuringGame - Game AI Coding</h1>
+                <h4>Educational Games + Coding Lessons + Online Competitions</h4>
+              </div>
+
+              <div>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/TspjPLOB448" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+
+              <a class="program-action" id="program-action" href="/signup">Free Sign Up</a>
+
+              <div class="down-arrow">
+                <a href="#down-arrow"  id="down-arrow">
+                  <img alt="down arrow" src="images/arrow_down.png">
+                </a>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+        <div id="teacher-main-content" class="teacher-main-content">
+          <div class="learning-experience">
+            <div class="space-wrapper">
+              <h1 class="GreenHeader">Game Bot Coding is Fun!</h1>
+              <br />
+              <p>
+                Learn to play a game manually, then follow tutorials to build a game bot that <i style="color: orange">automatically</i> plays the game.
+              </p>
+              <div class="learning-group-content">
+                <div class="learning-content">
+                  <div class="learning-macmenu">
+                    <img class="learning-menubar" src="images/macmenu.png"/>
+                  </div>
+                  <div class="learning-slideshow" id="slide-images">
+                    <img class="learning-myslides fade" src="https://cdn.jsdelivr.net/gh/cake2000/tgameshare/images/backspinexample.gif">
+                    <img class="learning-myslides fade" src="https://cdn.jsdelivr.net/gh/cake2000/tgameshare/images/autosearch.gif">
+                    <img class="learning-myslides fade" src="https://cdn.jsdelivr.net/gh/cake2000/tgameshare/images/tankwardemo1.gif">
+                  </div>
+                </div>
+                <div class="learning-items">
+                  <!-- <h3>A Unique Learning Experience</h3> -->
+                  <!-- <p>
+                    Learn to play our games manually, then build your game bot to automatically play the game for you.
+                  </p> -->
+                  <!-- <ul>
+                    <li>Follow interactive tutorials at your own pace</li>
+                    <li>Learn algorithms and logic design besides coding syntax</li>
+                    <li>Automate smart game strategies using your game bot program</li>
+                    <li>Compete in tournaments for national leaderboard and cash awards</li>
+                  </ul> -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="teacher-resource">
+            <div class="space-wrapper">
+              <h1>Perfect for After-School Class and Coding Clubs</h1>
+              <br />
+              <p>
+                Our chat-bot gives instructions and checks results automatically, so teachers are freed up to provide individualized coaching.
+              </p>
+              <div class="learning-group-content">
+                <!-- <div class="teacher-resource-items">
+                  <ul>
+                    <li>Systematic course proven to motivate student interests and encourage hands-on practive</li>
+                    <li>Teacher tools for monitoring student progress and organizing class activities</li>
+                    <li>Support for educators of all backgrounds with detailed course guides and training materials</li>
+                  </ul>
+                </div> -->
+                <div class="perfect-choice-content">
+                  <div class="learning-macmenu">
+                    <img class="learning-menubar" src="images/macmenu.png"/>
+                  </div>
+                  <div class="learning-slideshow">
+                    <!-- <img class="teacher-resource-myslides fade" src="images/studenttutorialdemo1.gif"> -->
+                    <img class="teacher-resource-myslides fade" src="https://cdn.jsdelivr.net/gh/cake2000/tgameshare/images/teachermanageclass4.gif">
+                    <!-- <img class="teacher-resource-myslides fade" src="images/teachermanageclass2.gif"> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="learning-code">
+            <div class="space-wrapper">
+              <h1 class="GreenHeader">Why Learn to Code?</h1>
+              <div class="learning-code-content">
+                <div class="learning-code-items">
+                  <div class="learning-code-section">
+                    <img class="animated" src="images/tg_have_fun.png">
+                    <div class="learning-code-text">
+                      <h3>To Experience Magic</h3>
+                      <p>It’s magical to watch your creation takes on a life of its own</p>
+                    </div>
+                  </div>
+                  <div class="learning-code-section">
+                    <img class="animated" src="images/tg_practice_computational_thinking_small.png">
+                    <div class="learning-code-text">
+                      <h3>To Train Computational Thinking</h3>
+                      <p>Analyze a problem, build a digital model, and solve it efficiently</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="learning-code-items">
+                  <div class="learning-code-section">
+                    <img class="animated" src="images/tg_AI_power.png">
+                    <div class="learning-code-text">
+                      <h3>To Become a Power User of AI</h3>
+                      <p>Understand basic concepts and algorithms of AI</p>
+                    </div>
+                  </div>
+                  <div class="learning-code-section">
+                    <img class="animated" src="images/tg_explore_career_option.png">
+                    <div class="learning-code-text">
+                      <h3>To Explore A New Career Option</h3>
+                      <p>Programmers are changing the world, and you can be one of them</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="whyto-learning">
+            <div class="space-wrapper">
+              <h1 class="GreenHeader">Why Learn with TuringGame?</h1>
+              <div class="whyto-learning-content">
+                <div class="learning-code-section">
+                  <img class="animated" src="images/tg_convinient_online_tutorials.png">
+                  <div class="learning-code-text">
+                    <h3>Play and Learn Online</h3>
+                    <p>No need for system installation, hardware purchase or tournament travels</p>
+                  </div>
+                </div>
+                <div class="learning-code-section">
+                  <img class="animated" src="images/tg_fun_and_challenge.png">
+                  <div class="learning-code-text">
+                    <h3>Educational Games</h3>
+                    <p>Our games are designed to be fun and challenging for both human and robots</p>
+                  </div>
+                </div>
+                <div class="learning-code-section">
+                  <img class="animated" src="images/tg_official_world_ranking.png">
+                  <div class="learning-code-text">
+                    <h3>National Ranking</h3>
+                    <p>Your game bot will be rated based on battle results against other bots</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="teacher-social">
+            <div class="space-wrapper">
+              <div class="teacher-social-group">
+                <a href="https://www.facebook.com/TuringGameOfficial/" target="_blank">
+                  <img src="images/facebook.png" />
+                </a>
+                <a href="https://www.youtube.com/channel/UCfhS7OcAPAla7rf_l-PzFEg" target="_blank">
+                  <img src="images/youtube.png">
+                </a>
+                <a href="https://twitter.com/TuringGame" target="_blank">
+                  <img src="images/twitter.png" />
+                </a>
+                <a href="/contact-us" target="_blank">
+                  <img src="images/email.png" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="teacher-footer">
+        <div class="teacher-footer-wrapper">
+          Copyright © 2018 Uplifting Technology Inc. All Rights Reserved.
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    window.onload = () => {
+      carousel("learning-myslides" , 0, [5100, 5100, 5100]);
+      carousel("teacher-resource-myslides" , 0, [15480]);
+    }
+
+    function carousel(className, currentIndex, timeouts) {
+      var element = document.getElementsByClassName(className);
+      if(element){
+        for (let i = 0; i < element.length; i++) {
+          element[i].style.display = "none";  
+        }
+        const nextIndex = (currentIndex + 1) % element.length;
+        element[currentIndex].style.display = "block";  
+        setTimeout(() => carousel(className, nextIndex, timeouts), timeouts[currentIndex]);
+      }
+    }   
+  </script>
+</html>

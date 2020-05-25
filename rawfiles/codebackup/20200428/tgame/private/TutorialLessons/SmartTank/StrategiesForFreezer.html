@@ -1,0 +1,767 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+let dangerScores = null;
+let graph = null;
+
+function escapeFromDanger() { 
+  const delta = { 
+    U: [0, -1], 
+    D: [0, 1], 
+    L: [-1, 0], 
+    R: [1, 0], 
+  }; 
+  const dirs = Object.keys(delta); 
+  let bestDir = ""; 
+  let lowestDS = dangerScores[MyTank.r][MyTank.c]; 
+  
+  for (let i = 0; i &lt; dirs.length; i += 1) { 
+    const dir = dirs[i]; 
+    const newc = MyTank.c + delta[dir][0]; 
+    const newr = MyTank.r + delta[dir][1]; 
+  
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length; 
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length; 
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]); 
+  
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) { 
+      lowestDS = dangerScores[newr][newc]; 
+      bestDir = dir; 
+    } 
+  } 
+  return bestDir;   
+}
+ 
+ 
+function getNewCommand() { 
+  dangerScores = getDangerScores(); 
+  graph = createGraph(); 
+  
+  let cmd = upgradeSpecialPowers(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // escape from danger 
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c]; 
+  if (MyTank.health &lt; 2 * totalDamage) { 
+    cmd = escapeFromDanger(); 
+    if (cmd.length > 0) return cmd; 
+  } 
+  
+  // get a crystal   
+  let path = getCrystal();   
+  if (path.length > 0) return path[0];   
+      
+  // get a weapon   
+  path = getSpecialWeapon();   
+  if (path.length > 0) return path[0];   
+      
+  // attack opponent tank  
+  cmd = attackOpponent();  
+  if (cmd.length > 0) return cmd;   
+    
+  // attack white tank   
+  cmd = attackWhiteTank();   
+  if (cmd.length > 0) return cmd;   
+      
+  // random command   
+  return getRandomCommand();  
+}
+ 
+ 
+function isShellBlockedAtPos(col, row, color) {
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');
+}
+ 
+ 
+function getDangerScores() { 
+  const scores = createNewGraph(); 
+    
+  for (let i = 0; i &lt; Tanks.length; i += 1) { 
+    const t = Tanks[i]; 
+    if (t.color == MyTank.color) continue; 
+    const dscore = 1 + t.specialPower.damage; 
+      
+    // tank facing upward 
+    if (t.dir == 'U') { 
+      for (let j = t.r - 1; j >= 0; j -= 1) { 
+        scores[j][t.c] += dscore; 
+        if (isShellBlockedAtPos(t.c, j, t.color)) break; 
+      } 
+    } else if (t.dir == 'D') { // facing downward 
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) { 
+        scores[j][t.c] += dscore; 
+        if (isShellBlockedAtPos(t.c, j, t.color)) break; 
+      } 
+    } else if (t.dir === 'L') { // facing to the left 
+      for (let j = t.c - 1; j >= 0; j -= 1) { 
+        scores[t.r][j] += dscore; 
+        if (isShellBlockedAtPos(j, t.r, t.color)) break; 
+      } 
+    } else if (t.dir === 'R') { // facing to the right 
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) { 
+        scores[t.r][j] += dscore; 
+        if (isShellBlockedAtPos(j, t.r, t.color)) break; 
+      } 
+    } 
+  } 
+  return scores; 
+} 
+ 
+ 
+function attackOpponent() {  
+  // rule #1: The health level of my tank has to be greater than 2000.   
+  if (MyTank.health &lt;= 2000) return "";  
+    
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal.  
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";  
+    
+  // get all opponent tanks  
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");  
+  if (opponents.length == 0) return "";  
+    
+  // go through all opponent tanks  
+  for (let i = 0; i &lt; opponents.length; i += 1) {  
+    const target = opponents[i];  
+    // rule #3: Either my tank's health regeneration is greater than the target tank,   
+    // or my tank has higher health level at the begin of the battle.  
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {  
+      return attackTank(target);  
+    }  
+  }  
+  return "";  
+} 
+ 
+ 
+function attackTank(target) {  
+  if (!target) return "";  
+    
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {  
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {  
+      return "R";  
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {  
+      return "L";  
+    } else {  
+      return "S";  
+    }  
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {  
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {  
+      return "D";  
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {  
+      return "U";  
+    } else {  
+      return "S";  
+    }  
+  }  
+  
+  const path = getShortestPathCmd(graph, MyTank, target);  
+  if (path.length > 0) return path[0];  
+  return '';  
+}  
+ 
+ 
+function attackWhiteTank() {  
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;   
+  (MyTank.r != tank.r || MyTank.c != tank.c));  
+  const target = getClosestItem(whiteTanks);  
+  return attackTank(target);  
+} 
+ 
+ 
+function weaponIsBetter(weaponType1, weaponType2) {   
+  const rankings = {};  
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;  
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;  
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;  
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;  
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;  
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;  
+  rankings[0] = 7; // no weapon  
+    
+  return rankings[weaponType1] &lt; rankings[weaponType2];  
+}  
+ 
+ 
+function getSpecialWeapon() {   
+  let bestType = MyTank.specialWeapon.type;   
+      
+  for (let i = 0; i &lt; Weapons.length; i += 1) {   
+    const weapon = Weapons[i];   
+    if (weaponIsBetter(weapon.type, bestType)) {   
+      bestType = weapon.type;   
+    }   
+  }   
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);   
+  const closeBestWeapon = getClosestItem(bestWeapons);   
+  if (closeBestWeapon == null) return [];   
+  
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);   
+}  
+ 
+ 
+function getRandomCommand() {    
+  // random command    
+  const r = Math.random() * 100;    
+  if (r > 10) return "S";    
+  if (r > 8) return "U";    
+  if (r > 6) return "D";    
+  if (r > 4) return "L";    
+  if (r > 2) return "R";    
+  return "";    
+}   
+ 
+ 
+function createGraph() {   
+  // create a new Set to hold blocking tile types   
+  const blockingTileTypes = ['R', 'M', 'T'];   
+  // create a new graph   
+  graph = createNewGraph();   
+      
+  // set values of graph, 1 = pass and 0 = blockage   
+  for (let i = 0; i &lt; graph.length; i += 1) {   
+    for (let j = 0; j &lt; graph[i].length; j += 1) {   
+      // tile type   
+      const tile = Maze[i][j];   
+      // check if it is a blockage   
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;   
+      else graph[i][j] = 1 + dangerScores[i][j];   
+    }   
+  }   
+  return graph;   
+}   
+ 
+ 
+function getClosestItem(items) {   
+  // initialize variables to hold shortest distance and target   
+  let shortDis = 1000;   
+  let target = null;   
+      
+  // loop through all items   
+  for (let i = 0; i &lt; items.length; i += 1) {   
+    const pos = items[i];   
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;   
+    // calculate the absolute distance   
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);   
+    // update shortDis    
+    if (dis &lt; shortDis) {   
+      shortDis = dis;   
+      target = pos;   
+    }   
+  }   
+  return target;   
+}   
+ 
+ 
+function getCrystal() {   
+  const target = getClosestItem(Crystals);   
+  if (!target) return [];   
+  return getShortestPathCmd(graph, MyTank, target);   
+}   
+ 
+ 
+function upgradeSpecialPowers() {   
+  let cmd = "";   
+  // if no power point, return blank command cmd   
+  if (MyTank.powerPoint == 0 ) return cmd;   
+  const sp = MyTank.specialPower;   
+      
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3";  
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";   
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";   
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";   
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";   
+      
+  return cmd;   
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back! In the next few tutorials, we are going to introduce some new strategies for using the special weapons. 
+  </p>
+  <p>
+    <img src="/images/specialweapons.jpg" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    In this tutorial, we will focus on how to make full use of the <b>Freezer</b> weapon.
+  </p>
+  <p>
+    When you play the game manually, what strategies do you use if your tank is equipped with the Freezer weapon?
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    A Freezer freezes a tank for 6 seconds, and that tank can't move or shoot while frozen. However, the Freezer doesn't have any effect on a tank that's <b>already</b> frozen. It would be a waste of time and firepower, therefore, to fire at a frozen tank using the Freezer.
+  </p>
+  <p>
+    Can you think about how to add to your code that will prevent this wasted action?
+  </p>
+</element>
+<!--element elementid="112" elementType="Info">
+  <p>
+    Now let's take a close look at the six types of special weapons. 
+  </p>
+  <p>
+    <img src="/images/specialweapons.jpg" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    <ul>
+      <li>
+        <b>Freezer</b>: will freeze a tank for six seconds on the first hit, but won't hurt the same tank on the second or more hits. So if our tank is equipped with a Freezer, it should not attack a tank that is already frozen.
+      </li>
+      <li>
+        <b>Missile</b>: will attack opponent tanks through the shortest path. So if our tank is holding a Missile, it cannot attack a white tank father than two tiles away. In such a case, the best strategy might be to stand at a safe position and shoot continuously. 
+      </li>
+      <li>
+        <b>Nova</b>: will hurt white and opponent tanks within a radius of 2.5 tiles. So if our tank is holding a Nova, we'd like to fire among more tanks. However, if the opponent tank is holding a Nova, we'd better be far from it at least three tiles away.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    <ul>
+      <li>
+        <b>Laser</b>: will shoot a laser beam and hurt the target continuously. So if our tank is holding a Laser, it should follow the target tank and attack it all the way until the target tank is dead. If a Laser is held by the opponent tank, our tank should run to a different row or column quickly. 
+      </li>
+      <li>
+        <b>3-Splitter</b>: will split into three shells when hitting a rock. So if our tank is holding a 3-Splitter, it should shoot to a rock if possible. 
+      </li>
+      <li>
+        <b>4-Way</b>: will fire shells in all four directions. So if our tank is hold a 4-way, we should move it to a position with more other tanks around and fire (similiar to the strategy for Nova). On the other hand, it might also be dangerous to stand among other tanks. So, a group of two or three white tanks might be perfect to attack together. 
+      </li>
+    </ul>
+  </p>
+</element-->
+
+<element elementid="130" elementType="Coding" condition="TestFinishedAllFrozen_white">
+  <p>
+    <b>Challenge: </b>Change the function <span class="variablenamebold">attackWhiteTank</span> to skip frozen tanks when your tank is equipped with a Freezer. If a white tank is frozen, its property <span class="variablenamebold">isFrozen</span> is <span class="variablenamebold">true</span>.
+  </p>
+  <p>
+    Try to complete the challenge without any hints. You can follow the steps suggested below.
+  </p>
+  <p>
+    <ul>
+      <li>
+        Change the variable type of <span class="variablenamebold">whiteTanks</span> from "const" to "let" so that we can reassign it.
+      </li>
+      <li>
+        If <span class="variablename">MyTank.specialWeapon.type</span> is <span class="variablename">SPECIAL_WEAPON_TYPES.FREEZER</span>, use the <span class="variablename">filter</span> function to remove the frozen tanks from the <span class="variablename">whiteTanks</span> array.
+      </li>
+    </ul>
+  </p>
+  <p>
+    Click "?" if you need more hints.
+  </p>
+  <code isHidden="true">
+//TODO
+function attackWhiteTank() {
+  // note this is changed from "const" to "let" 
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+
+  // if MyTank is equipped with a Freezer
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    //h0::filter out all frozen tanks::whiteTanks.filter(tank => ? );
+    ::whiteTanks.filter(tank => tank.isFrozen);
+    ::whiteTanks.filter(tank => !tank.isFrozen);
+    whiteTanks = ? ;
+  }
+
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}  
+//ENDTODO
+  </code>
+  <cleancode>
+function attackWhiteTank() {
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+
+  // if MyTank is equipped with a Freezer
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);
+  }
+
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+} 
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Good! Your tank moved around and froze all the white tanks. After observing, you might wonder whether your tank should attack any white tank at all when it's carrying the Freezer, because it cannot kill any of them (unless its damage power is sufficiently increased). Or you may doubt whether freezing white tanks is really advantageous. After all, it makes the white tanks easy targets for your opponents! 
+  </p>
+</element>
+
+<element elementid="145" elementType="Info">
+  <p>
+    There are two real advantages to freezing white tanks, however: 1) It prevents those white tanks from attacking your tank; 2) If you are playing in team mode, your team members can easily kill the frozen white tanks for rewards. 
+  </p>
+  <p>
+    So I'll leave the decision as to whether to freeze the white tanks to you. If you like, you can experiment with both strategies. 
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Next question: If your tank is equipped with a Freezer, should you try to freeze all the opponent tanks? 
+  </p>
+  <p>
+    I think you should. Even if you cannot kill an opponent tank with a Freezer shell (unless that tank is only one hit away from dying), you can still prevent your opponent from getting stronger by picking up weapons or crystals. Let's add this strategy to your gamebot code.
+  </p>
+</element>
+
+<element elementid="166" elementType="Info">
+  <p>
+    What's the priority of freezing opponent tanks compared with other tasks? Currently in <span class="variablename">getNewCommand</span>, the order of different tasks is: 1) update special powers, 2) escape from danger, 3) collect crystals, 4) pick a better weapon, 5) attack an opponent, and 6) attack a white tank. 
+  </p>
+  <p>
+    The first task can be completed instantly, and the second task is definitely critical. So we should insert the new task of freezing opponents after escaping danger and before collecting crystals and weapons: when your opponents are frozen, they can't compete with you for crystals and weapons!
+  </p>
+</element>
+
+<element elementid="168" elementType="Info">
+  <p>
+    Before working on the next challenge, please update the test script to the following:
+  </p>
+  <p>
+    <pre class="brush:js">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7);
+PlaceTank('red', 10, 3, false);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.FREEZER, 3, 3);
+
+await SetupTickUpdates(300);
+ReportEndOfTest();
+    </pre>
+  </p>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedAllFrozen_red">
+  <p>
+    <b>Challenge: </b>Now let's create a new function <span class="variablenamebold">freezeOpponent</span> so that if your tank is equipped with a Freezer, it will try to freeze all the opponent tanks if possible. Call the new function in <span class="variablenamebold">getNewCommand</span>. 
+  </p>
+  <p>
+    In the new function, if <span class="variablename">MyTank</span> has a Freezer, retrieve the opponent list, find the nearest opponent tank and attack it. 
+  </p>
+  <p>Try to implement this idea on your own. </p>
+  <code isHidden="true">
+//TODO
+function freezeOpponent() {
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    //h0::get all opponent tanks::tank color is neither white nor MyTank's color::t => t.color != MyTank.color &amp;&amp; t.color != "white"
+    const opponents = Tanks.filter( ? ); 
+    //h1::find the closest one::call getClosestItem
+    const target = ? ;
+    return attackTank(target);
+  }
+  return "";
+}
+
+function getNewCommand() { 
+  dangerScores = getDangerScores(); 
+  graph = createGraph(); 
+  
+  let cmd = upgradeSpecialPowers(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // escape from danger 
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c]; 
+  if (MyTank.health &lt; 2 * totalDamage) { 
+    cmd = escapeFromDanger(); 
+    if (cmd.length > 0) return cmd; 
+  } 
+
+  // new code starts
+
+  // freeze opponents
+  cmd = freezeOpponent();
+  //h2::if cmd is not blank, return::check the length of cmd::if (cmd.length > 0) return cmd;
+  ?
+  // new code ends
+  
+  // get a crystal   
+  ......
+
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function freezeOpponent() {
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+    const target = getClosestItem(opponents);
+    return attackTank(target);
+  }
+  return "";
+}
+
+function getNewCommand() { 
+  dangerScores = getDangerScores(); 
+  graph = createGraph(); 
+  
+  let cmd = upgradeSpecialPowers(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // escape from danger 
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c]; 
+  if (MyTank.health &lt; 2 * totalDamage) { 
+    cmd = escapeFromDanger(); 
+    if (cmd.length > 0) return cmd; 
+  } 
+
+  // freeze opponents
+  cmd = freezeOpponent();
+  if (cmd.length > 0) return cmd; 
+
+  // get a crystal   
+  let path = getCrystal();   
+  if (path.length > 0) return path[0];   
+      
+  // get a weapon   
+  path = getSpecialWeapon();   
+  if (path.length > 0) return path[0];   
+      
+  // attack opponent tank  
+  cmd = attackOpponent();  
+  if (cmd.length > 0) return cmd;   
+    
+  // attack white tank   
+  cmd = attackWhiteTank();   
+  if (cmd.length > 0) return cmd;   
+      
+  // random command   
+  return getRandomCommand();  
+}
+  </cleancode>
+</element>
+
+<element elementid="172" elementType="Info">
+  <p>
+    For your next challenge, please first update your test script to the following, which adds an additional red tank. Click "Test" to see what happens.
+  </p>
+  <p>
+    <pre class="brush:js">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7);
+PlaceTank('red', 10, 5, false);
+PlaceTank('red', 8, 9, false);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.FREEZER, 3, 3);
+
+await SetupTickUpdates(450);
+ReportEndOfTest();
+    </pre>
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedAllFrozen_red">
+  <p>
+    You might have noticed that your tank kept trying to freeze the frozen red tank even though your tank couldn't reduce the red tank's health. Since this is a waste of time, we should improve our logic to prevent it.
+  </p>  
+  <p>
+    <b>Challenge: </b>Change function <span class="variablenamebold">freezeOpponent</span> to skip frozen opponent tanks when our tank is equipped with a Freezer. 
+  </p>
+  <p>
+    Can you try to make the change before looking at the hints?
+  </p>
+  <code isHidden="true">
+//TODO
+function freezeOpponent() {
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    //h0::filter out frozen tanks
+    ::t.isFrozen &amp;&amp;
+    ::t.isFrozen ||
+    ::!t.isFrozen &amp;&amp;
+    const opponents = Tanks.filter(t => ? t.color != MyTank.color &amp;&amp; t.color != "white"); 
+    const target = getClosestItem(opponents);
+    return attackTank(target);
+  }
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function freezeOpponent() {
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white"); 
+    const target = getClosestItem(opponents);
+    return attackTank(target);
+  }
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Great! Your tank is now much smarter in its use of the Freezer weapon, so the Freezer weapon is more powerful to you. Let's look back at our rankings of different special weapons in function <span class="variablename">weaponIsBetter</span> and see if we need to change the ranking for the Freezer. 
+  </p>
+  <pre class="brush: js">
+function weaponIsBetter(weaponType1, weaponType2) {   
+  const rankings = {};  
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;  
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;  
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;  
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;  
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;  
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;  
+  rankings[0] = 7; // no weapon  
+    
+  return rankings[weaponType1] &lt; rankings[weaponType2];  
+}  
+  </pre>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Right now, we rank the Freezer lowest among all special weapons. Should we increase its ranking? 
+  </p>
+  <p>
+    We'd like to freeze the opponents and get more crystals without competition. But your Freezer-equipped tank cannot kill any white tank when your tank's damage value is less than 2. Furthermore, if your tank's special powers are at the maximal level, there is no need to collect more crystals. 
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    Based on the above analysis, we should rank the Freezer highest if:
+  </p>
+  <p>
+    <ul>
+      <li>
+        MyTank's special powers are not at maximum, AND
+      </li>
+      <li>
+        MyTank's damage power is at least 2
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    Change your test script to the following. With the current rankings, your tank would pick up the Laser Gun in this scenario. 
+  </p>
+  <pre class="brush: js">
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7);
+SetTankProperties(0, {specialPower: { damage: 2}});
+PlaceTank('red', 10, 5, false);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.FREEZER, 3, 3);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.LASER_GUN, 5, 12);
+PlaceTank('white', 2, 2, false);
+PlaceTank('white', 3, 2, false);
+PlaceTank('white', 4, 2, false);
+
+await SetupTickUpdates(1000);
+ReportEndOfTest();
+  </pre>
+</element>
+
+<element elementid="240" elementType="Coding" condition="TestFinishedAllFrozen_red">
+  <p>
+    <b>Challenge: </b>Change the function <span class="variablenamebold">weaponIsBetter</span> to prefer the Freezer if:
+    <ul>
+      <li>
+        MyTank's special powers &lt; maximum, AND
+      </li>
+      <li>
+        MyTank's damage power >= 2 
+      </li>
+    </ul>
+  </p>
+  <p>
+    Please use the code below as a template.
+  </p>
+  <code isHidden="false">
+//TODO
+function weaponIsBetter(weaponType1, weaponType2) {   
+  const rankings = {};  
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;  
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;  
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;  
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;  
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;  
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;  
+  rankings[0] = 7; // no weapon  
+  
+  // new code starts
+  // get all values of special powers
+  const values = Object.values(MyTank.specialPower);
+  //h0::calculate the sum of all special power values::use array function reduce
+  ::values.reduce((a, b) => a + b, 0);
+  ::values.reduce(a => a + b, b);
+  const allPowers = ? ;
+  
+  //h1::(1) MyTank's special powers &lt; maximal, AND (2) MyTank's damage power >= 2::maximal power value is 4 * MAX_POWER
+  ::if (allPowers &lt; 4 * MAX_POWER &amp;&amp; MyTank.specialPower.damage >= 2 ) {
+  ::if (allPowers &lt; 4 * MAX_POWER || MyTank.specialPower.damage >= 2 ) {
+  if ( ? ) {
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0; 
+  }
+
+  // new code ends
+
+  return rankings[weaponType1] &lt; rankings[weaponType2];  
+} 
+//ENDTODO 
+  </code>
+  <cleancode>
+function weaponIsBetter(weaponType1, weaponType2) {   
+  const rankings = {};  
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;  
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;  
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;  
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;  
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;  
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;  
+  rankings[0] = 7; // no weapon  
+  
+  const values = Object.values(MyTank.specialPower);
+  const allPowers = values.reduce((a, b) => a + b, 0);
+  
+  if (allPowers &lt; 4 * MAX_POWER &amp;&amp; MyTank.specialPower.damage >= 2) {
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0; 
+  }
+
+  return rankings[weaponType1] &lt; rankings[weaponType2];  
+} 
+  </cleancode>
+</element>
+
+<element elementid="250" elementType="Info">
+  <p>
+    Good job! Note that you can get all values of special powers by calling <span class="variablename">Object.values(MyTank.specialPower);</span>.
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>Now your tank is able to freeze the white tanks and opponent tanks one by one with a Freezer. 
+  </p>
+  <p>
+    <b>Exercise: </b>Implement the following logic in your code: if your tank is equipped with a Freezer and your tank's damage value is less than 2, then don't attack white tanks, since you are not able to kill them off with the fist shot. Try the new idea in games and evaluate its pros and cons. 
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="https://forum.tgame.ai/t/lesson-17-strategies-for-using-the-freezer/426" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

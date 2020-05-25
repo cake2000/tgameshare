@@ -1,0 +1,464 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getBreakShot() {
+  return { // table center
+    aimx: 0,
+    aimy: 0 
+  };
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <!-- <p>
+    <img src="/images/animatedhi.gif" style="width: 10%; height: auto; margin-left: 0%; vertical-align: top;"/>
+  </p> -->
+  <p>
+    Hi! My name is <b class="reallyhighlight">TBot</b>, and I'm here to show you how to create your own game bot for the pool game. You can think of me as a <b>live workbook</b> for coding.
+  </p>
+  <p>
+    Shall we start? Click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to continue.
+  </p>
+</element>
+
+<element elementid="101" elementType="Info">
+  <p>
+    Feel free to check out the discussions in <a href="https://forum.tgame.ai" target="_blank">our forum</a> and ask questions. The topic for this lesson is <a href="https://forum.tgame.ai/t/a-simple-break-shot/20" target="_blank">here</a>.
+  </p>
+  <p>
+    Again, click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to continue.
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>If you have not played the pool game yet, please <a target="_blank" href="/gamesBoard">go play a few practice games</a>.
+  </p>    
+  <p>
+    The better you play the game manually, the smarter the game bot you can create.
+  </p>
+  <!-- <p>If you know how to play the game, click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to continue.</p>  -->
+  <!-- </p> -->
+</element>
+
+
+<element elementid="103" elementType="Info">
+    <p>
+      <!-- Before starting our journey, let's clarify our two primary goals: <b>first, you are going to learn a new programming language, called JavaScript; second, you will use JavaScript to create your game bot</b>. -->
+      To create your game bot, we'll be using a <b>programming language called JavaScript</b>.
+    </p>
+      A programming language is just like any other language that you use, except that it is used to "talk" to computers. 
+    </p>
+    
+    <p>
+      <img src="/images/talktocomputer.gif" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+    </p>
+    <p>
+      Each programming language has its own <b>syntax rules</b> that you have to follow, just like grammar rules in English. There are only a few rules in JavaScript, and I'll go over each of them with you over time.
+      <!-- <b>Sometimes, even if you miss a bracket or a colon, the computer will no longer understand your code.</b> -->
+    </p>
+    <!-- <p>
+      In the lessons to come, we will be using these <b>keywords</b>:
+    </p>
+    <p>
+      <b class="keyword">function, return, if, else, for, continue, break, const, let, async, await</b>
+    </p>
+    <p>
+      We will learn to use the following symbols as well:
+    </p>
+    <p>
+      <b class="keyword">. ; ' " : , () [] {} + - = == += -= != || &amp;&amp; &lt; > &lt;= >= ++</b>
+    </p> -->
+    <!-- <p>
+      If you are curious about what we'll be learning, you can click on <a href="#" onclick="ClickToSendChat(event, 'JavaScript keywords')" class="inlinebutton">JavaScript keywords</a> or <a href="#" onclick="ClickToSendChat(event, 'JavaScript symbols')" class="inlinebutton">JavaScript symbols</a> to take a peek. 
+    </p> -->
+  </element>
+  
+  
+
+<element elementid="103.2" elementType="UserOKWithScratch" answerKey="AB">
+  <p>
+    In case you already know how to program in <a href="https://scratch.mit.edu/" target="_blank">Scratch</a>, I can show you how the JavaScript code maps to Scratch blocks. Please make a choice below by typing or clicking on <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a> or <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>?
+  </p>
+  <p>
+      <ul>
+        <li>
+          <b><a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a></b>: Sure, please use Scratch examples to help explain JavaScript.
+        </li>
+        <li>
+          <b><a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a></b>: No, I don't think Scratch examples would help me learn JavaScript.
+        </li>
+      </ul>
+  </p>
+</element>
+
+<element elementid="103.5" elementType="Info">
+  <p>
+    When you play the pool game, there is a <b>game engine</b> that carries out shots and simulates ball movement. The game engine is like a game console (e.g. Nintendo Switch), and your game bot program is like an <b>automated controller</b> that controls the cue stick.
+  </p>
+  <p>
+    <img src="/images/gameEngine.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    During a pool game, when it is your bot's turn to make a shot, the game engine will tell your bot the current ball positions, and your bot will reply with its shot command. 
+    <!-- And such communication between them continues throughout a game. -->
+<!--     
+    Such communication is carried out using three <b>interface functions (i.e., commands)</b> that we will introduce over time: <b class="variablename">getBreakShot, getCallShot, getCueBallPlacement</b>. -->
+  <!-- <p>
+    Now that you know our mission, let's get our hands dirty and write some code! -->
+  </p>
+</element>
+
+<element elementid="103.6" elementType="Info">
+  <p>
+    <!-- Before you start writing your own game bot, I'd like to show you the layout of this webpage.  -->
+    There are three sub-windows on this page. On the left side of the page, is our <b>chat room</b>; the top right window is your <b>code editor</b>; and the bottom right window is where you watch the game engine test your bot code, after you click the "<b>TEST</b>" button on top right. 
+  </p>
+  <p>
+    <img src='/images/webpagewindows.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+
+
+<element elementid="104" elementType="Info">
+  <p>
+    When a pool game starts, the game engine will ask your bot "<b>how do you want to take the break shot?</b>", and your robot will reply with a <b>shot command</b> like "<b>let's aim at the point X on the table</b>."
+  </p>
+  <p>
+    Here, your robot is specifying an <b>aiming point</b>, and the game engine will shoot the white cue ball towards this point. The aiming point is represented by a pink dot <img src='/images/pinkdot.png' style='width: 18px; height: auto; vertical-align: bottom; margin-bottom: 2px'/> on the table, and you can change the aiming point manually by clicking on the pool table in the test window. <b>Try it now!</b> 
+  </p>
+  <p>
+    <img src="/images/aimingpointclick.gif" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="106" elementType="Info">
+  <p>
+    So, how does your robot specify a point on the pool table using JavaScript? To locate a house on a street, we use a number to specify the house's <b>address</b>, such as <b>1200 main street</b>. Similarly, to locate a point on the pool table, we use <b>coordinates</b>: 2 numbers to specify the horizontal and vertical position of this point. 
+  </p>
+  <p>
+    <img src="/images/xycoordinates.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <p>
+    As you move the aiming point by clicking on the pool table, you see a pair of numbers above it, such as (-187, 22). These 2 numbers are the x and y coordinates of the aiming point. The <b>x-coordinate</b> tells us the horizontal (left-to-right) position of any given point (0 at the table center), and the <b>y-coordinate</b> tells us the vertical (top-to-bottom) position of that same point (0 at the table center). Note that <b>the y-coordinate increases as the aiming point moves down the table</b>.
+  </p>
+</element>
+
+<element elementid="106.2" elementType="Info">
+  <p>
+    <img src="/images/draggingaimpoint.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    As shown above, while the aiming point moves down, its x-coordinate (first number in the pair) remains mostly unchanged around 29, but its y-coordinate (second number in the pair) increases from 11 to 290. When the aiming point moves left, its y-coordinate remains mostly unchaged around 299, while its x-coordinate decreases from 32 to -325. Using coordinates, <b>every point on the table has a unique "address" that you can use to pinpoint to it</b>.
+  </p>
+  <!-- <p AScratchExample>
+    In Scratch, the x-coordinate is given by the X Position block <img src='/images/scratch_xposition.png' style='width: auto; height: 25px; vertical-align: bottom;'/> and the y-coordinate is given by the Y Position block <img src='/images/scratch_yposition.png' style='width: auto; height: 25px; vertical-align: bottom;'/>. But the Y Position increases as you move up the screen, which is <b>opposite to how the y coordinate works in our pool Game</b>.
+  </p> -->
+  <p>
+    <b>Please click on a few points on the table and observe their coordinates.</b>
+  </p>
+</element>
+
+<element elementid="108" elementType="Quiz" answerKey="C" answerReason="x > 0 means the point is on the right half of the table, and y &lt; 0 means the point is on the top half of the table. ">
+  <p>
+    <img src="/images/PathPoolTableDimension4.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <p>
+    The table is 2,000 by 1,000 units overall, so the x-coordinate of any point on the table is between -1000 and 1000, and the y-coordinate is between -500 and 500. The table center's coordinates are (0, 0).
+  </p>  
+  <p>
+    <b class="reallyhighlight">Quiz:</b> Out of the 4 points (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton">C</a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton">D</a>) in the picture above, <b>which one is most likely to be addressed by the coordinates (630, -300)</b>? Please type or click the letter of your chosen answer.
+  </p>
+  <p>
+    For a hint, you can click on different points on the table in the test window to help you find which point has an address of (630, -300). 
+  </p>
+  <!-- <p>
+    For a hint, the x-coordinate is positive to the right of the table center, and the y-coordinate is negative above the table center.
+  </p> -->
+</element>
+
+
+<element elementid="109" elementType="Info">
+  <p>
+    Now we are finally ready to write some code. First, we need to define a <b>function</b> to tell the game engine how your game bot wants to take the break shot. 
+  </p>
+  <p>
+    So what is a function? A <b>function</b> is a group of code to perform a task. 
+  </p>
+  <p>
+    <img src='/images/dogfetchball2.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    For example, if you want a dog to fetch a ball, you would need to give it 3 commands: run to the ball, pick up the ball, then run back. <b>To avoid repeating these commands many times, you can train the dog to do all 3 things together whenver you shout "fetch".</b> 
+  </p>
+  <p>
+    In this example, <b>you have defined a new function "fetch"</b>, and <b>you "call" this function</b> to ask the dog to perform all 3 commands as a group.
+  </p>
+</element>
+
+<element elementid="111" elementType="Info">
+  <p>
+    Similarly, we can define a function named "getBreakShot", in which your game bot performs only one task: return a shot command to the game engine. 
+  </p>
+  <p>
+    <img src='/images/addNewFunction.gif' style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+  <p>
+    To define the function, we need to <b>1)</b> write the keyword "function", <b>2)</b> specify the function name "getBreakShot", <b>3)</b> add a pair of "()", and <b>4)</b> add a pair of "{}".  
+  </p>
+  <p>
+    Note that the pair of parentheses "( )" is used to specify inputs to the function, and the pair of brackets "{ }" is used to enclose the content of the function. In this example, this function is not taking any inputs, and its content is empty.
+  </p>
+  <p>
+    <b>Please add the getBreakShot function in your code editor now. </b>
+  </p>
+</element>
+
+<element elementid="111.2" elementType="Info">
+  <p>
+    Now let's add some code to specify a break shot command into the empty function body. 
+  </p>
+  <p>
+    <img src='/images/addNewReturn.gif' style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+  <p>
+    You need to <b>use the keyword "return" to specify the output of the function</b>, and a pair of "{}" to initialize an empty command object. The ";" at the end specifies the end of this return command.
+  </p>
+  <p>
+    Then you need to add 2 properties "aimx" and "aimy" into this object, representing the x and y coordinates of the aiming point at table center. <b>Both properties are assigned a value of 0 using the ":" operator, and we use a comma to seperate between these 2 properties.</b> 
+  </p>
+</element>
+
+<element elementid="111.3" elementType="Info">
+  <p>
+    As you type, you might notice that I will be showing potential error warnings about your code. You can ignore them if you haven't completed your code, since most of these warnings will be gone after you finish coding.  
+  </p>
+  <p>
+    If you still see these error warnings after you are done, then <b>you need to mouse over each warning to find out what is the issue with your code, and correct all the issues in your code</b>. 
+  </p>
+  <p>
+    <img src="/images/errorexample.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="111.4" elementType="Info">
+  <!-- <p>
+    As shown in your robot code editor on right, I have already defined this function for you.
+  </p> -->
+  <p>
+    As stated before, you have to follow syntax rules precisely to write computer code. Please review the robot code and observe how these symbols are used:
+  </p>
+  <p>
+    <img src='/images/getBreakFunctionSymbols.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    Note that the green lines starting with "//" are comments, which are ignored by the computer. You can add such comments to help you remember what the code below the comment is doing.
+  </p>
+</element>
+
+<!-- 
+
+
+
+<element elementid="110" elementType="Language" languageSkills="JavaScript:Function|Python:Function">
+</element>
+
+<element elementid="111" elementType="Info">
+  <p>
+    As shown in your robot code editor on right, I have added a <span class="variablename">getBreakShot</span> function for you that <b>returns a shot command object with two properties: <span class="variablenamebold">aimx</span> of 0 and <span class="variablenamebold">aimy</span> of 0</b>.
+  </p>
+</element>
+
+<element elementid="111.5" elementType="Language" languageSkills="JavaScript:Object|Python:Dictionary">
+</element>
+
+<element elementid="111.8" elementType="Info">
+  <p>
+    A few notes about the <span class="variablename">getBreakShot</span> function:
+    <ul>
+      <li>
+        The keyword <b class="keyword">return</b> here means <b>"give this object to the caller of the function,"</b> in this case, the game engine.
+      </li>
+      <li>
+        The returned object starts with "{" and ends with "}", with commas in between properties. 
+      </li>
+      <li>
+        <p>
+          The two spaces before "<span class="keyword">return</span>" is called <b>indentation</b>. It is a very important feature in programming. An indent style is a convention that conveys program structure to the readers. For example, all code statements inside the <span class="variablename">getBreakShot</span> function start with two spaces (at least), so that the readers know where the function starts and ends, and which statements belong to this function. And the properties in the returned object require another level of indentation, which means we add two additional spaces (4 in total) at the beginning of line 3 and line 4. 
+        </p> 
+        <p>
+          <img src='/images/indentation.jpg' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+        </p>
+        <p>
+          To make your code comply with the standard indent style, you can click the "<b>BEAUTIFY</b>" button on the top right after you finish coding.
+        </p>
+      </li>
+    </ul>
+  </p>
+</element> -->
+
+<element elementid="112" elementType="Coding" condition="TestFinishedAnyResultAimXY">    
+  <p>
+     Congratulations! Now you have the first function for your robot to talk to the game engine. Please click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button on top right to see your game bot in action! 
+  </p>
+  <p>
+    Behind the scenes, when you click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button, the game engine asks your game bot how it wants to take the break shot by calling its getBreakShot function, your game bot returns the command to aim at the point (0, 0), and the game engine carries out that command.
+  </p>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, 
+    aimy: 0 // table center
+  }; 
+}            
+    </cleancode>  
+</element>
+
+<element elementid="115" elementType="Coding" condition="TestFinishedAimY35">
+  <p>
+    Now can you <b>change <span class="variablename">aimy</span> from 0 to 35 in your robot code as is illustrated below?</b>. Note that all your changes to the robot code will be automatically saved in real-time.
+  </p> 
+  <p>
+    <img src="/images/changingaimyto35.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+    <p>
+      Now, can you guess which ball the cue ball will hit first? Click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> to find out whether you guessed correctly. 
+    </p>
+    <!-- <p>Below is a baseline code for your reference.</p> -->
+    <code isHidden="true">
+function getBreakShot() {
+  //TODO: change aimy to 35
+  return { 
+    aimx: 0, 
+    aimy: 35
+  }; 
+  //ENDTODO
+}      
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 35
+  };
+}           
+    </cleancode>
+</element>
+
+<!-- <element elementid="116" elementType="Quiz" answerKey="code" answerReason=""> -->
+<element elementid="116" elementType="Info">  
+  <p>
+    For your reference, you can check out the latest working code from the previous test by chatting "<b>code</b>". Please try it now as shown below.
+  </p>
+  <p>
+    <img src="/images/trycode.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedFirstTouchBall_11">
+  <p>That was easy, right? Now, here's a task that will be a little bit more challenging for you: can you <b>change <span class="variablename">aimx</span> and/or <span class="variablename">aimy</span> so that the cue ball would first hit ball 11 (the yellow ball on the right) before any other ball</b>? You can try different aiming point on the table, like this, in order to find a good aiming point:
+  </p>
+  <p>
+      <img src="/images/changingaimyforball11.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <!-- <p>
+      <img src="/images/ballidsfor11.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>   -->
+  <p>
+    <b>You need to change the robot code to use the new aiming point you discovered.</b> Click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button when you are done making the code change. Type "<b>hint</b>" or <b>click</b> <img src='/images/icon-hint.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/> if you need some help.
+  </p>
+  
+  <code isHidden="true">
+//TODO: change aimy to hit ball 11
+function getBreakShot() {
+  return { 
+    //h0::rebound cue ball off bottom cushion then right cushion::with aimx as 0, aimy is a number between 250 and 310.
+    ::aimx:0, aimy: 250
+    ::aimx:0, aimy: 285
+    ::aimx:0, aimy: 310
+    aimx: 0, aimy: ?
+  }; 
+}      
+//ENDTODO
+  </code>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    // bound off bottom cushion then right cushion
+    aimx: 0, 
+    aimy: 285 
+  }; 
+}            
+  </cleancode>  
+</element>
+
+
+<element elementid="190" elementType="Coding" condition="TestFinishedAnyResultAimXYStrength">
+  <p>
+    For the last challenge of this lesson, can you <b>add a new property "<span class="variablenamebold">strength</span>" to the shot command</b> in the getBreakShot function? The <span class="variablenamebold">strength</span> property should take a value between 1 and 100. <b>Please set "<span class="variablenamebold">strength</span>" to 80 for now, and reset the <span class="variablenamebold">aimx</span> and <span class="variablenamebold">aimy</span> to 0</b>. 
+  </p>
+  <p>
+    Click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button when you have finished, or follow the animation below if you don't know how to do it.
+  </p>
+  <p>
+    <img src="/images/addstrengthproperty2.gif" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+  <!-- <code isHidden="false">
+function getBreakShot() {
+  //TODO: add the strength property
+  return { 
+    //h0::add a comma first, then the word strength
+    ::add ", strength: 80"
+    ::add ", strength 80"
+    ::add ", strength = 80"
+    aimx: 0, aimy: 0 ?
+  }; 
+  //ENDTODO
+}      
+    </code> -->
+    <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}           
+    </cleancode>  
+</element>
+
+
+<element elementid="195" elementType="Info">
+  <p>
+    Function is a very important concept in programming. If you are new to the concept of function, please review the syntax of function definition in more details.
+  </p>
+</element>
+
+<element elementid="196" elementType="Language" languageSkills="JavaScript:Function|Python:Function">
+</element>
+  
+
+<element elementid="200" elementType="Conclusion">
+  <p>That's all for your first lesson! </p>
+  <p>
+    <b>Summary:</b> You have learned <b>how to specify an aiming point on the table using its x and y coordinates</b>, and you have also started learning two key concepts in JavaScript: <b>function</b> and <b>object</b>.
+  </p>
+  <!-- <p>
+    You can go back to the <a href="/courses">tutorial list</a> for the next tutorial, which has been unlocked for you. But if you are looking for some more fun, below is an extra challenge:
+  </p> -->
+  <!-- <p>
+    <b>Exercise:</b> try to pick another ball, and see if you can have the cue ball hit that ball before any other ball.
+  </p> -->
+  <p>
+    <b>Exercise 1:</b> try to change the aiming point so that the cue ball will fall into pocket 2 (top right) after hitting at least one ball. Since the game engine adds some random error to your shot direction (in order to simulate the random conditions of real-life pool games), you may need to run the test a few times even if you are aiming perfectly. 
+  </p>
+  <p>
+    <b>Exercise 2:</b> try to change the aiming point and strength of the break shot so that it's more likely to pocket a red or yellow ball. That way, your game bot will be able to continue to take a call shot after the break.
+  </p>
+  <p>
+    <b>Exercise 3:</b> try to add a 4th property "spin" to your break command. It can take any value between -1 and 1, with -1 representing a full backspin, and 1 representing a full top spin. Try to break up the ball pack more using a top spin.
+  </p>
+</element>
+
+<!-- even more fun answer: aimx: 515, aimy: 32.5 -->
+

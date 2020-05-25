@@ -1,0 +1,88 @@
+.replaycontroltable td {
+  text-align: center;
+  padding: 5px;
+}
+
+.replaytable {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.replaytable td {
+  text-align: center;
+  padding-top: 1px;
+  vertical-align: middle;
+}
+
+.replaytable thead tr{
+  display:block;
+  padding-bottom: 12px;
+  color: #00fff5;
+  font-size: 18px
+}
+
+.replaytable tbody {
+  display:block;
+  overflow-y: scroll;
+  width: 100%;
+  /* height: 600px; */
+  height: calc(100vh - 340px);
+  /* margin-bottom: 200px; */
+}
+
+.replaycontroltable2 {
+  /* width: 60%; */
+  /* min-width: 300px;
+  margin-left: 20%; */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.replaycontroltable2 td {
+  text-align: center;
+  padding: 5px;
+}
+
+
+
+.usertesttable {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+.usertesttable tr {
+  height: 44px;
+}
+
+.usertesttable button {
+  padding: 8px;
+}
+
+.usertestcasename {
+  color: orange;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.swal-wide {
+  width: 450px;
+}
+
+.usertesttable tr {
+  display: flex;
+  align-items: center;
+}
+
+.usertesttable tr > td {}
+
+.usertesttable tr > td.row-label {
+  width: 100px;
+}
+.usertesttable tr > td.row-input {
+  flex: auto;
+}
+.usertesttable tr > td.row-button {
+  display: flex;
+  width: 175px;
+}

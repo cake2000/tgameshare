@@ -1,0 +1,397 @@
+<element elementid="100" elementType="Info">
+  <h5 class="elementheader">Detect Obstacles Using Camera Image</h5>
+  <p>In our Dodge Ball game, the camera image is the only way for players to see where the balls are, and it can also help locate opponents more accurately compared to the low precision gps map.</p>
+  <p>In this tutorial, we'll start using the camera image to identify obstacles (walls, opponent cars and opponent balls) and turn around them. By the end of this tutorial, your car should be able to run without hitting any obstacles in the field.</p>
+  <p>Are you ready to get started?</p>
+</element>
+
+<element elementid="102" elementType="Coding" condition="TestDBDrivingForwardNoTurning" conditionind="300">
+  <h5 class="elementheader"> A New <b>GOFORWARD</b> state</h5> <p>Let's start by adding a new state in the <b>update</b> function: <b>GOFORWARD</b>. </p>
+  <p>In the <b>GOFORWARD</b> state, your robot drives the car forward using the "F" command. Note that you also need to stop turning the car left or right. This can be done by sending <b>NR</b> and <b>NL</b> commands. </p>
+  <p>In addition, please change the <b>initialize</b> function to set the initial state to "GOFORWARD".</p>
+  <p>Note that I also removed the random state transitions between TURNRIGHT and TURNLEFT for you in the reference code below since we will add more meaningful transitions later.</p>
+  <p>To pass the test, your car should be driving forward straight.</p>
+  <code isHidden='false'>
+this.initialize = function(info) { 
+  //TODO: change initial state to "GOFORWARD"
+  //h0::replace "TURNLEFT" with "GOFORWARD"
+
+  this.state = "TURNLEFT"; 
+};                               
+this.update = function(info) { 
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R");
+  }
+  //TODO: add new state GOFORWARD
+  //h1::new else-if clause for GOFORWARD::add another else-if
+  else if (this.state == "GOFORWARD") {
+    //h2::send command "NR"::call sendCommand
+    sendCommand("NR");
+    //h3::send command "NL"::call sendCommand
+    sendCommand("NL");
+  //h4::close h1 block with }
+  }
+  sendCommand("F"); 
+}; 
+  </code>
+</element>
+
+
+<element elementid="103" elementType="Coding" condition="TestDBDrivingForwardSpeedLimit" conditionind="400">
+  <h5 class="elementheader"> Limiting Forward Speed</h5>
+  <p>As you can see, if the robot keeps sending the forward command, the car's speed can pick up pretty quickly. That is not
+    good when you need to back off or take a turn.</p>
+  <p>Please change the
+    <b>update</b> function to check the car's speed using
+    <b>MyInfo.mySpeed</b>, and whenever it is running faster than 10 units/second, send the command <b>NF</b> instead of <b>F</b>
+    so it stops accelerating. </p>
+  <p>When you are done, click
+    <b>TEST</b> to check that your car is no longer running too fast.</p>
+  <code isHidden='false'>
+this.initialize = function(info) { 
+  this.state = "TURNLEFT"; 
+};                               
+this.update = function(info) { 
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R");
+  } else if (this.state == "GOFORWARD") {
+    sendCommand("NR");
+    sendCommand("NL");
+  }
+  //TODO: go forward but limit speed
+  //h0::check if MyInfo.mySpeed is smaller than 10
+  ::test (MyInfo.mySpeed &lt; 10)
+  ::is (MyInfo.mySpeed &lt; 10) 
+  ::if (MyInfo.mySpeed &lt; 10) 
+  if (MyInfo.mySpeed &lt; 10)
+    //h1::send command "F"
+    sendCommand("F");
+  //h2::otherwise:: using else
+  else
+    //h3::send command "NF"
+    sendCommand("NF");
+}; 
+  </code>
+</element>
+
+
+
+
+
+
+<element elementid="106" elementType="Info">
+  <h5 class="elementheader">Accessing The Camera Image</h5>
+  <p>
+    To detect obstacles, your robot needs to scan the front view camera image. Though we can give your robot the entire view
+    of what a human player sees, the game engine only passes a miniature version of the camera image to your robot to
+    accelerate the process.
+  </p>
+  <p>
+    <img src="/images/previewimagedodgeball.png" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;" />
+  </p>
+
+  <p>
+    This smaller image is stored as one array with has 64 rows and 64 columns, as displayed at the top center of your game window.
+  </p>
+
+  <p>
+    <img src="/images/64by64matrix.png" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;" />
+  </p>
+
+
+  <p>
+    To access the value of a point (called a <b>pixel</b>), your robot use <b>info.frontView[index]</b>, where <b>index = 64 * row + col</b>. For example, to read value of pixel at row 2 and column 3, you use info.frontView[64*2 + 3]. Note that row 0 is at the top, and column 0 is at the left.
+  </p>
+
+  <p>
+    In addition, as you can see in the matrix above, each pixel is stored as a number. For example, the sky color is stored as <b>3</b>, and the ground is stored as <b>1</b>. These numbers can be retrieved using the global variable <b>GameInfo</b>, as shown in the reference table below.  So to check if a pixel is a blue ball, your robot only needs to compare its value to <b>GameInfo.BLUE_BALL_COLOR_IND</b>.</p>
+  <p>
+    <table class="ReferenceTable">
+      <thead>
+        <th>Description</th>
+        <th>Color Reference Name</th>
+        <th>Number</th>
+        <th>Color</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>grey ground</td>
+          <td>GameInfo.GROUND_COLOR_IND</td>
+          <td>1</td>
+          <td style="background-color: #474d56">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>white wall</td>
+          <td>GameInfo.WALL_COLOR_IND</td>
+          <td>2</td>
+          <td style="background-color: #ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>blue sky</td>
+          <td>GameInfo.SKY_COLOR_IND</td>
+          <td>3</td>
+          <td style="background-color: #019ae6">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>red ball</td>
+          <td>GameInfo.RED_BALL_COLOR_IND</td>
+          <td>4</td>
+          <td style="background-color: #f79283">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>blue ball</td>
+          <td>GameInfo.BLUE_BALL_COLOR_IND</td>
+          <td>5</td>
+          <td style="background-color: #9d8ef8">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>red car</td>
+          <td>GameInfo.RED_CAR_COLOR_IND</td>
+          <td>6</td>
+          <td style="background-color: #d01415">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>blue car</td>
+          <td>GameInfo.BLUE_CAR_COLOR_IND</td>
+          <td>7</td>
+          <td style="background-color: #1e5ae1">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </p>
+</element>
+
+
+
+<element elementid="110" elementType="Coding" condition="TestDBDrivingForwardThenTurnRight" conditionind="1200">
+  <h5 class="elementheader">Turn right when blocked</h5>
+  <p>
+    Now let's change your robot to transit from <b>GOFORWARD</b> to <b>TURNRIGHT</b> state whenever its forward path is blocked. As shown in the reference code below, I added a new empty function <b>isForwardPathBlocked</b>, which scans the camera image and return true if any obstacle is found in front of the car.Then in the
+    <b>GOFORWARD</b> state, I added a transition to the <b>TURNRIGHT</b> state when isForwardPathBlocked returns true. </p>
+
+  <p>So now please implement the <b>isForwardPathBlocked</b> function. I have 3 hints for you before you start coding away:</p>
+  <ul>
+    <li>
+      First, a pixel is not an obstacle to your car if it is the ground (GameInfo.GROUND_COLOR_IND), or the color of the ball or car of your team (<b>MyInfo.myBallColor</b> or <b>MyInfo.myCarColor</b>).
+    </li>
+
+    <li>
+      Second, you need to think about which rows in the camera image to scan for obstacles. If you scan the top rows (rows close to 0), then you may be backing off your car too early; and the bottom rows are not worth scanning either, since it is mostly your own car's front body.
+    </li>
+
+    <li>
+      Third, you shouldn only check the columns in the center, since obstacles on the 2 sides won't block our car from moving forward. On the other hand, if you are checking too few columns in the center, your car may run into walls as it might transit back to GOFORWARD state too early.
+    </li>
+  </ul>
+
+  <p>When you are done coding, please click <b>TEST</b> to see if your car runs forward initially, and then turns right when it detects the blue car in the front.</p>
+  <code isHidden='false'>
+this.initialize = function(info) { 
+  this.state = "TURNLEFT"; 
+};                               
+
+// new function to test if car is blocked
+this.isForwardPathBlocked = function(info) {
+  //TODO: scan image for obstacles
+  //h0::iterate through rows in the middle::use for-loop on row
+  ::for (let row=0; row&lt;=33; row++) {
+  ::for (let row=27; row&lt;=40; row++) {
+  ::for (let row=35; row&lt;=50; row++) {
+  ::for (let row=20; row&lt;=25; row++) {
+  for (let row=27; row&lt;=40; row++) {
+    //h1::iterate through columns in the center::use for-loop on col
+    ::for (let col=0; col&lt;=63; col++) {
+    ::for (let col=26; col&lt;=37; col++) {
+    ::for (let col=10; col&lt;=30; col++) {
+    ::for (let col=22; col&lt;=41; col++) {
+    for (let col=22; col&lt;=41; col++) {
+      //h2::read pixel value at row/col::read from array info.frontView
+      ::let pixel = info.frontView[row*64+col];
+      ::let pixel = info.frontView[row+col];
+      ::let pixel = info.frontView[row][col];
+      let pixel = info.frontView[row*64+col];
+      //h3::check if pixel is not an obstacle::compare against ground/my ball/my car
+      if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+        //h4::return true directly
+        return true;
+      //h5::close h3 block with }
+      }            
+    //h6::close h1 block with }
+    }
+  //h7::close h0 block with }
+  }
+
+  return false;
+};  
+
+this.update = function(info) { 
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R");
+  } else if (this.state == "GOFORWARD") {
+    sendCommand("NR");
+    sendCommand("NL");
+
+    //new: transit to "TURNRIGHT" if blocked
+    if (this.isForwardPathBlocked(info))
+      this.state = "TURNRIGHT";
+  }
+  if (MyInfo.mySpeed &lt; 10) {
+    sendCommand("F");
+  } else {
+    sendCommand("NF");
+  }
+}; 
+
+
+
+  </code>
+</element>
+
+
+
+
+<element elementid="130" elementType="Coding" condition="TestDBDrivingNoStopping" conditionind="1200">
+  <h5 class="elementheader">Adding more transitions </h5>
+  <p>
+    For the last step of this tutorial, let's improve the state transitions a bit to make the driving experience more fun: 
+    <ul>
+      <li>
+        In <b>GOFORWARD</b> state, if the car is blocked, instead of always turning right, let's draw a random number and turn left or right randomly.
+      </li>
+      <li>
+        In <b>TURNRIGHT</b> state, if the car is not blocked any more, transit back to <b>GOFORWARD</b>
+      </li>
+      <li>
+        Similarly, in <b>TURNLEFT</b> state, if the car is not blocked any more, transit back to <b>GOFORWARD</b>
+      </li>
+    </ul>
+  </p>
+  <p>You can use the code below as a reference starting point. When you click
+    <b>TEST</b>, your robot should be able to run freely in the field without hitting any obstacles!</p>
+  <code isHidden='false'>
+this.initialize = function(info) { 
+  this.state = "TURNLEFT"; 
+};                               
+
+this.isForwardPathBlocked = function(info) {
+  for (let row=27; row&lt;=40; row++) {
+    for (let col=22; col&lt;=41; col++) {
+      let pixel = info.frontView[row*64+col];
+      if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+        return true;
+      }            
+    }
+  }
+  return false;
+};  
+
+this.update = function(info) { 
+  if (this.state == "TURNLEFT") {
+    sendCommand("L");
+    //TODO: switch back to "GOFORWARD" is not blocked
+    //h0::check if forward path is blocked::call this.isForwardPathBlocked
+    if (this.isForwardPathBlocked(info)) 
+      //h1::if so, change state to "GOFORWARD"
+      this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) {
+    sendCommand("R");
+    //TODO: switch back to "GOFORWARD" is not blocked
+    //h2::check if forward path is blocked::call this.isForwardPathBlocked
+    if (this.isForwardPathBlocked(info)) 
+      //h3::if so, change state to "GOFORWARD"
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") {
+    sendCommand("NR");
+    sendCommand("NL");
+
+    if (this.isForwardPathBlocked(info)) {
+      //TODO: switch to TURNLEFT or TURNRIGHT randomly
+      //h4::compare a random number with 0.5::check if Math.random() > 0.5
+      if (Math.random() > 0.5)
+        //h5::if so, transit to "TURNRIGHT"
+        this.state = "TURNRIGHT";
+      //h6::otherwise::use else
+      else
+        //h7::transit to "TURNLEFT"
+        this.state = "TURNLEFT";
+    }
+  }
+  if (MyInfo.mySpeed &lt; 10) {
+    sendCommand("F");
+  } else {
+    sendCommand("NF");
+  }
+}; 
+
+  </code>
+</element>
+
+
+
+
+<element elementid="140" elementType="Conclusion">
+  <h5 class="elementheader">Tutorial Completed!</h5>
+  <p>Congratulations! Your robot has learned how to extract information from the camera image and act upon it.</p>
+  <p>
+    For more exercise, can you try to reduce the number of rows and columns scanned in your isForwardPathBlocked function further? That will accelerate your robot's response time as your robot gets more complicated.
+    <!-- optimize your isForwardPathBlocked function to check the minimum number of pixels possible? For example, some obstacles may appear to be in front of your car, but when you drive closer it is actually not blocking your way. How to ignore such false alarms? -->
+  </p>
+</element>
+
+
+
+<!-- 
+
+this.initialize = function(info) {  
+  //TODO: change initial state to "GOFORWARD" 
+  this.state = "GOFORWARD";  
+};                                
+// new function to test if car is blocked 
+this.isForwardPathBlocked = function(info) { 
+  for(let row=27;row<=40;row++) {
+  	for(let col=22;col<=41;col++) {
+  	  let pixel = info.frontView[row*64+col];
+      if (pixel != GameInfo.GROUND_COLOR_IND && pixel != MyInfo.myBallColor && pixel != MyInfo.myCarColor)
+        return true;
+    }
+  }  
+  return false; 
+};   
+  
+this.update = function(info) {  
+  if (this.state == "TURNLEFT") { 
+    sendCommand("L"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) { 
+    sendCommand("R"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") { 
+    sendCommand("NR"); 
+    sendCommand("NL"); 
+  
+    //new: transit to "TURNRIGHT" if blocked 
+    if (this.isForwardPathBlocked(info)) {
+      if (Math.random() > 0.5)
+        this.state = "TURNRIGHT"; 
+      else
+        this.state = "TURNLEFT";
+    }
+  } 
+  if (MyInfo.mySpeed < 10) { 
+    sendCommand("F"); 
+  } else { 
+    sendCommand("NF"); 
+  } 
+};
+
+
+   -->

@@ -1,0 +1,132 @@
+<element elementid="100" elementType="Info">
+    <p>So far your robot has been using a default strength of <b>30</b>, which means <b>30% of maximum strength</b>. You can change the strength using a third property <b>strength</b> in the object returned by the getBreakShot function, as shown in the Robot Code editor. The maximum of strength values is <b>100</b>, and minimum is <b>2</b>. Any values outside this range will be reset to the maximum or minimum value. </p>
+</element>
+
+<element elementid="103" elementType="Coding" condition="TestFinishedValidBreakShot">
+    <p><b>Challenge:</b> please specify a stronger strength to get a valid break shot, which needs to either <b>pocket a red or yellow ball</b> or <b>drive at least 4 balls to touch the cushions</b>.</p>
+    <p>
+      <img src="/images/breakfullstrength.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>    
+    <code isHidden="true">
+function getBreakShot() {
+  //TODO: change strength value to get valid break
+  return { 
+    //h0::try a large strength value::any value greater than 60 should work
+    ::strength: 70
+    ::strength: 40
+    ::strength: 50
+    aimx: 0, aimy: 0, strength: 30
+  }; 
+  //ENDTODO
+}             
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 70
+  }; 
+}      
+    </cleancode>
+</element>
+
+
+<element elementid="110" elementType="Info">
+  <p>
+    Now let me introduce the last 2 properties <b>cueballx</b> and <b>cuebally</b> for break shot, which specifies <b>where you want to place the cue ball before the break shot</b>. For example, this command will place the cueball at lower left corner of the table:
+  </p> 
+  <p>
+    <pre class="brush: js">
+{
+  cueballx: -800, cuebally: 400, aimx: 0, aimy: 0, strength: 70
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedFirstTouchBall_11_CueballXY">
+  <p>
+    <b>Challenge: </b>please add 2 more properties to your shot command: <b>cueballx of -800</b> and <b>cuebally of 400</b>, as shown in example code below, and then <b class="reallyhighlight">try different values for aimx and aimy</b> so that the cue ball first hits the yellow ball on the right most (ball 11). Note that <b>you can drag the cue ball to the point (-800, 400) on the table </b> to help you find the correct aiming point.
+  </p>
+  <p>
+    <img src="/images/breakshotfromleftbottom.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    Click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> when you are ready.
+  </p>
+  <code isHidden="false">
+function getBreakShot() {
+  //TODO: change aimx and aimy to hit yellow ball on right
+  return { 
+    //h0::your cue ball needs to rebound off the right cushion first::try aimx = 0, aimy around 255
+    cueballx: -800, cuebally: 400, aimx: 0, aimy: 0, strength: 70
+  }; 
+  //ENDTODO
+}      
+  </code>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    cueballx: -800, cuebally: 400, aimx: 0, aimy: 255, strength: 70
+  }; 
+}
+  </cleancode>
+</element>
+  
+
+<element elementid="130" elementType="Coding" condition="TestFinishedValidBreakShot">
+  <p>
+    <b>Challenge: </b> for the last challenge of this tutorial, please <b>try different values of all the 5 properties</b> of the shot command until you find a great break shot that you like: it has to be valid, and ideally it should pocket a colored ball often. Note that the cue ball has to be placed to the left of the white head string, which means cueballx needs to be between -1000 and -500.
+  </p> 
+  <p>
+      <img src="/images/cueBallPositionInBreakShot.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <code isHidden="true">
+function getBreakShot() {
+  //TODO: get your best break shot
+  return { 
+    //h0::usually a large strength is required::try strength greater than 80 and different cue ball placement
+    cueballx: 0, cuebally: 0, aimx: 0, aimy: 0, strength: 0
+  }; 
+  //ENDTODO
+}      
+  </code>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    cueballx: -800, cuebally: 400, aimx: 0, aimy: 255, strength: 70
+  }; 
+}      
+  </cleancode>
+</element>
+  
+
+
+<element elementid="140" elementType="Conclusion">
+  <p>Tutorial completed! </p>
+  <p>
+    <b>Summary:</b> now you know all 5 properties to be specified when taking a break shot: <b>aimx</b>, <b>aimy</b>, <b>strength</b>, <b>cueballx</b> and <b>cuebally</b>. 
+  </p>
+  <p>
+      <b>Exercise:</b> count how many times you can pocket a colored ball legally if you run your final break shot for 20 times. I encourage you to share your result in the forum under <a href="https://forum.tgame.ai/t/a-great-break-shot/21" target="_blank">this lesson's topic</a>, and also check out how others are doing.
+  </p>
+    <!-- <p>
+        <b>Advanced:</b> your break shot doesn't have to use fixed numbers! You can set any of the 5 properties to a random number using <b>Math.random()</b>, which gives you a random number between 0 and 1. For example, to set a random strength between 1200 and 1500, you can do this: 
+    </p>
+    <p>
+      <pre class="brush: js">
+{
+  cueballx: 0, cuebally: 0, aimx: 0, aimy: 0, strength: 1200 + 300 * Math.random()
+}
+      </pre>
+    </p> -->
+    
+</element>
+
+
+<!-- 
+function getBreakShot() {
+  return {
+    strength: 2000, aimx: 0, aimy: 112, cueballx: -330, cuebally: 150
+  };
+}
+-->

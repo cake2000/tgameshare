@@ -1,0 +1,157 @@
+.tg{
+  &-wrapper{
+    &__warning {
+
+    }
+    &__main{
+      width: 100% !important;
+      height: 100% !important;
+      min-height: calc(100vh - 70px);
+      // overflow-y: auto;
+    }
+    &__lessonPage {
+      min-height: 100vh;
+    }
+    &__footer{
+      height: 25px;
+      position: fixed;
+      width: 100%;
+      bottom: 0px;
+    }
+  }
+  &-container{
+    width: calc(100% - 30px);
+    padding-left: 15px;
+    padding-right: 15px;
+    @include flexbox();
+    align-items: center;
+    margin: 0 auto;
+    position: relative;
+  }
+  &-footer{
+    text-align: center;
+    font-size: $tg-fs-comment;
+    display: flex;
+    line-height: 20px;
+    color: #0a2536;
+    background: #fff;
+    height: 50px;
+    box-shadow: 0px -2px 11px 6px #ababab1c;
+    .tg-container{
+      justify-content: center;
+    }
+  }
+  &-page{
+    &__header{
+      position: fixed;
+      z-index: 10;
+      top: 69px;
+      width: 100%;
+      padding: 5px 0px;
+      border-bottom: 1px solid $tg-col-basic-dark-grey;
+      background-color: #066656; //$tg-col-basic-black;
+      // background-image: url(/images/decision-tree2-p-500.png);
+      background-position: 50% 50%;
+      background-repeat: repeat;
+      box-shadow: inset 0 0 37px 5px rgba(0, 0, 0, .55);
+      &__block{
+        max-width: 100%;
+        padding: 4px 0px;
+        .heading-page{
+          position: relative;
+          // left: -30px;
+          flex: 1;
+          margin: 0 15px;
+          text-align: center;
+          color: $tg-col-basic-ivory;
+          font-family: $tg-ff-body;
+          font-size: $tg-fs-heading2;
+          font-size: 4vw;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        &.tg-container {
+          justify-content: center;
+        }
+        &__pre{
+          cursor: pointer;
+        }
+        &__wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &.buildMyAI-title {
+            flex: 1
+          }
+        }
+      }
+    }
+    &--general{
+      padding-top: 50px;
+      min-height: calc(100vh - 70px);
+      background-color: #fff;
+      background-image: radial-gradient(circle, #f3f3f3 20%, transparent 10%), radial-gradient(circle, #f3f3f3 20%, transparent 10%);
+      background-size: 10px 10px;
+      background-position: 0 0;
+      @media(max-width: 1024px){
+        padding-top: 20px;
+        min-height: calc(100vh - 50px);
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 15px;
+      }
+    }
+    &__container{
+      // max-width: calc(100% - 140px);
+      max-width: 1170px;
+      margin: 0 auto;
+      width: 100%;
+      @media(max-width: 1170px){
+        max-width: calc(100% - 30px);
+      }
+    }
+  }
+}
+.container{
+  margin-top: 0px;
+}
+
+@media(max-width: 868px){
+  .tg{
+    &-wrapper{
+      &__main{
+        min-height: 100%;
+      }
+    }
+    &-page{
+      margin-top: 0px;
+
+      &__header{
+        &__block{
+          flex-direction: column;
+          .heading-page{
+            font-size: $tg-fs-heading3;
+          }
+        }
+      }
+    }
+    &-footer{
+      font-size: $tg-fs-tiny;
+      line-height: 15px;
+    }
+  }
+  .container{
+    margin-top: 0px;
+  }
+}
+
+@media(max-width: 1024px) {
+  .tg {
+    &-page {
+      &__header {
+        top: 50px;
+      }
+    }
+  }
+}

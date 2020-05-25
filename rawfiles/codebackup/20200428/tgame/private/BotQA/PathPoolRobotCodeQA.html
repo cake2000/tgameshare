@@ -1,0 +1,487 @@
+<!-- required functions -->
+<qa>
+  <question key="getAimPosition" />
+  <answer>
+      <p>The <b>getAimPosition</b> function is a helper function provided to you to calculate the aiming point given a target ball position and target pocket position like shown below.</p>
+      <p>
+          <pre class="brush: js">
+const aimPosition = getAimPosition(ballPos, pocketPos);    
+          </pre>
+      </p>
+      <p>
+          Essentially we draw a line from the center of the pocket to the center of the ball, then extend that line further by the ball diameter, because when the cue ball arrives at the aim position and touches the target ball, their centers' distance is exactly the ball diameter.
+      </p>
+    <!-- </p>
+      img src="/images/getaimpositioncalc.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/
+    <p> -->
+
+      <!-- <p>
+        <pre class="brush: js">
+function getAimPosition(ballPos, pocketPos, shift) {
+  const bp = ballPos.clone();
+  const ballD = world.BallDiameter; 
+  const pp = pocketPos.clone();
+  // line from target ball to target pocket
+  const dirBallToPocket = pp.clone().subtract(bp); 
+  // default value of shift is ball diameter
+  if (typeof(shift) == "undefined") shift = ballD;
+  // make a new line segment of length "shift" along the same direction
+  const dirAimToBall = dirBallToPocket.normalize().scale(shift);
+  // the aim position is target ball position shifted by the new line segement
+  const aimPosition = bp.subtract(dirAimToBall);
+  return aimPosition;
+}
+        </pre>
+    </p>       -->
+  </answer>
+</qa>
+
+<qa>
+    <question key="getBreakShot" />
+    <answer>
+        <p>The <b>getBreakShot</b> function is a required function of your robot for Trajectory Pool. It returns a JSON object that specifies how your robot wants to take the break shot: where to aim at, how much strength, and/or any spin to use. If not specified, the game engine will use default value for these parameters.  </p>
+        <p>
+            <pre class="brush: js">
+// "this" here refers to the robot itself
+this.getBreakShot = function() {
+    return {
+        aimx: 0, 
+        aimy: 0,      
+        strength: 500, 
+        spin: 0
+    };
+};
+            </pre>
+        </p>
+        <p>
+            Note that for a break shot to be legal or valid, it needs to either pocket a colored ball (not the black ball or cue ball) or drive at least 4 balls to hit the rails (so the strength needs to be strong).
+        </p>
+    </answer>
+</qa>
+
+
+<qa>
+    <question key="getCallShot" />
+    <answer>
+        <p>The <b>getCallShot</b> function is a required function of your robot for Trajectory Pool. It returns a JSON object that specifies how your robot wants to take the call shot: where to aim at, how much strength, and/or any spin to use). If not specified, the game engine will use default value for these parameters.  </p>
+        <p>
+            <pre class="brush: js">
+// "this" here refers to the robot itself
+this.getCallShot = function() {
+    return {
+        aimx: 0, 
+        aimy: 0,      
+        strength: 500, 
+        spin: 0
+    };
+};
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+
+<qa>
+    <question key="getCueBallPlacement" />
+    <answer>
+        <p>The <b>getCueBallPlacement</b> function is a required function of your robot for Trajectory Pool. It allows your robot to specify where to place the cue ball when the opponent has made a foul. An object is returned that specifies the x and y coordinates of cue ball. If the function is not correctly implemented, the game engine will place cue ball at default position (-500, 0).
+        <p>
+            <pre class="brush: js">
+// "this" here refers to the robot itself
+this.getCueBallPlacement = function() {
+    return {
+        x: -500, 
+        y: 0
+    };
+};
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<!-- helper functions -->
+
+<qa>
+    <question key="extrapolatePoints"/>
+    <answer>
+        <p>
+            The <b>extrapolatePoints</b> function is a helper function to to calculate a new point by drawing a line from point1 to point2, then extrapolate that line further by some distance.
+        </p>
+        <p>
+            <pre class="brush: js">
+const position = extrapolatePoints(point1, point2, distance);
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="isPathBlocked"/>
+    <answer>
+        <p>
+            The <b>isPathBlocked</b> function is a helper function to detect whether a path between 2 points is blocked by any ball(s). It can be used to identify pocket or ball blockages.
+        </p>
+        <p>
+            <pre class="brush: js">
+const isBlocked = isPathBlocked(point1, point2);
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="getAngleToSidePocket"/>
+    <answer>
+        <p>
+            The <b>getAngleToSidePocket</b> function is a helper function. It calculates a ball's angle to a side pocket. The return value of this function is between <b>-90°</b> and <b>90°</b>. The syntax is shown as below. Please note the first parameter is a ball's position (with x and y properties), and second parameter is a side pocket ID (pocket 1 or 4).  
+        </p>
+        <p>
+            <pre class="brush: js">
+const angle = getAngleToSidePocket(ballPos, sidePocketID);
+            </pre>
+        </p>
+        <p>
+            <img src="/images/wideAngleToSidePocket.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+        </p> 
+    </answer>
+</qa>
+
+<qa>
+    <question key="getCutAngle"/>
+    <answer>
+        <p>
+            The <b>getCutAngle</b> function is a helper function to To help you calculate cut angles. The return value of this function is between -180° and 180°. 
+        </p>
+        <p>
+            <pre class="brush: js">
+const cutAngle = getCutAngle(pocketPos, aimPos, cueBallPos);
+            </pre>
+        </p>
+        <p>
+            As shown in the picture below, the <b>cut angle</b> is formed by two lines: one line is defined by the center of target pocket and aim position, called <b>impact line</b>; and the other is the <b>aiming line</b>, defined by the aim position and center of cue ball. 
+            </p>
+        <p>
+            <img src="/images/cutAngle.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="calculateEndState"/>
+    <answer>
+        <p>
+            The <b>calculateEndState</b> function is a helper function. It passes a shot command to the game engine, and asks for an <b>End State</b> object, which contains information on the whereabout of every ball when all balls have stopped moving. For ball with id <b>ballID</b>, you can find out that ball's state using <b>endStates[ballID]</b>, which contains the following properties:
+            <ul>
+                <li>
+                    <b>inPocketID:</b> the id of the pocket or "null" if the ball is not in any pocket.
+                </li>
+                <li>
+                    <b>x and y:</b> coordinates of the ball if it is not in any pocket
+                </li>
+            </ul>
+        </p>
+        <p>
+            <pre class="brush: js">
+const endStates = await calculateEndState(shotCmd, WithRandomNess = false);
+            </pre>
+        </p>
+        <p>
+            Samilar to calculateProbability, calculateEndState function also need be called with <b>await</b> keyword. The second parameter is an option to include randomness in the simulation. The default value is false.
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="calculateProbability"/>
+    <answer>
+        <p>
+            The <b>isPathBlocked</b> function is a helper function to get the success probability for a shot, based on the given shot command.
+        <p>
+            <pre class="brush: js">
+const prob = await calculateProbability(shotCommand);
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<!-- test functions -->
+
+<qa>
+    <question key="ResetTable"/>
+    <answer>
+        <p>
+            The <b>ResetTable</b> function is used in a test script to set pool table for tests. If the parameter <b>clearTable</b> is true, move all balls into pockets; if <b>clearTable</b> is false, move all balls to the starting position of a game.
+        </p>
+        <p>
+            <pre class="brush: js">
+ResetTable(clearTable);               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="PlaceBallOnTable"/>
+    <answer>
+        <p>
+            The <b>PlaceBallOnTable</b> function is used in a test script to places a ball with the specified id at the point (x,y) on table. For example, PlaceBallOnTable(1, 0, 0) would put the black ball at table center.
+        </p>
+        <p>
+            <pre class="brush: js">
+PlaceBallOnTable(ballID, x, y);               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="ChooseRedColor"/>
+    <answer>
+        <p>
+            The <b>ChooseRedColor</b> function is used in a test script to set red color as your robot's chosen color suite, so that the balls your robot can legally shoot (<i>world.CandidateBallList[MyID]</i>) will be limited to balls of this color on table.
+        </p>
+        <p>
+            <pre class="brush: js">
+ChooseRedColor();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="ChooseYellowColor"/>
+    <answer>
+        <p>
+            The <b>ChooseYellowColor</b> function is used in a test script to set yellow color as your robot's chosen color suite, so that the balls your robot can legally shoot (<i>world.CandidateBallList[MyID]</i>) will be limited to balls of this color on table.
+        </p>
+        <p>
+            <pre class="brush: js">
+ChooseYellowColor();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="TakeCallShot"/>
+    <answer>
+        <p>
+            The <b>TakeCallShot</b> function is used in a test script to prompt your robot to take a call shot.
+        </p>
+        <p>
+            <pre class="brush: js">
+TakeCallShot();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="TakeBreakShot"/>
+    <answer>
+        <p>
+            The <b>TakeBreakShot</b> function is used in a test script to prompt your robot to take a break shot.
+        </p>
+        <p>
+            <pre class="brush: js">
+TakeBreakShot();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="PlaceCueBallFromHand"/>
+    <answer>
+        <p>
+            The <b>PlaceCueBallFromHand</b> function is used in a test script to prompt your robot to place the cue ball on table as if the opponent has just made a foul.
+        </p>
+        <p>
+            <pre class="brush: js">
+await PlaceCueBallFromHand();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="WaitForAllBallStop"/>
+    <answer>
+        <p>
+            The <b>WaitForAllBallStop</b> function is used in a test script to pause execution of script until all balls have stopped. This is critical if you need to ask your robot to take more than one shots.
+        </p>
+        <p>
+            <pre class="brush: js">
+await WaitForAllBallStop();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="UpdateWorld"/>
+    <answer>
+        <p>
+            The <b>UpdateWorld</b> function is used in a test script to retrieve the latest ball position from the game engine, usually done after the ball positions may have changed.
+        </p>
+        <p>
+            <pre class="brush: js">
+await UpdateWorld();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="ReportEndOfTest"/>
+    <answer>
+        <p>
+            The <b>ReportEndOfTest</b> function is used in a test script to inform the game engine the test script has completed. This is usually the last line of your test script.
+        </p>
+        <p>
+            <pre class="brush: js">
+ReportEndOfTest();               
+            </pre>
+        </p>
+    </answer>
+</qa>
+
+<!-- global variables -->
+
+<qa>
+    <question key="Balls" />
+    <answer>
+        <p>
+            The variable <b>Balls</b> is an array that holds information of all balls. Balls[0] is for the cue ball, and Ball[1] is for the black ball. The following properties are provided. 
+        </p>
+        <p>
+            <ul>
+                <li>
+                    <b>ID: </b>ID of the ball, with 0 for cue ball and 1 for black ball always
+                </li>
+                <li>
+                    <b>x: </b>x coordinate of the ball relative to table center
+                </li>
+                <li>
+                    <b>y: </b>y coordinate of the ball relative to table center
+                </li>
+                <li>
+                    <b>inPocket: </b>>whether the ball is in pocket</td>
+                </li>
+                <li>
+                    <b>colorType: </b> 0 for red, 1 for yellow, 2 for white and 3 for black </td>
+                </li>
+            </ul>
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="Pockets" />
+    <answer>
+        <p>
+            The variable <b>Pockets</b> is an array that holds center coordinates (x and y) of pockets, from 0 to 5. Pockets[0] is of the top-left pocket, and clockwise to Pockets[5] on bottom-left.
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="BallDiameter" />
+    <answer>
+        <p>
+            The constant <b>BallDiameter</b> is the diameter of pool balls.
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="CushionWidth" />
+    <answer>
+        <p>
+            The constant <b>CushionWidth</b> is the width of the cushion bar on the four sides of the table.
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="Boundaries" />
+    <answer>
+        <p>
+            The constant <b>Boundaries</b> holds the boundary values of ball center coordinates, including TOP_Y, BOTTOM_Y, LEFT_X, and RIGHT_X.
+        </p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="world" />
+    <answer>
+        <p>The <b>world</b> is a read-only reference object for your robot to find out information about the game world, such as where are the balls, and how big is the pool table. Below is a full list of fields available to you: </p>
+        <p>
+            <table class="ReferenceTable">
+                <thead>
+                    <th> Attribute </th> <th>Description</th> 
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>world.TableWidth</td>
+                        <td>Full width of the pool table</td>
+                    </tr>
+                    <tr>
+                        <td>world.TableHeight</td>
+                        <td>Full height of the pool table</td>
+                    </tr>
+                    <tr>
+                      <td>world.CushionWidth</td>
+                      <td>Width of the cushion bar on the four sides of the table</td>
+                    </tr>
+                    <tr>
+                        <td>world.BallDiameter</td>
+                        <td>Diameter of each ball</td>
+                    </tr>
+                    <tr>
+                        <td>world.Pockets</td>
+                        <td>An array of pocket center coordinates (x and y)</td>
+                    </tr>
+                    <tr>
+                        <td>world.Cushions</td>
+                        <td>An array of rail end point coordinate (p1.x/p1.y and p2.x/p2.y)</td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls</td>
+                        <td>
+                            An array of objects indexed by ball ID (0, 1..)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls[id].ID</td>
+                        <td>ID of the ball, with 0 for cue ball and 1 for black ball always.</td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls[id].x</td>
+                        <td>x coordinate of the ball relative to table center</td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls[id].y</td>
+                        <td>y coordinate of the ball relative to table center</td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls[id].inPocket</td>
+                        <td>whether the ball is in pocket</td>
+                    </tr>
+                    <tr>
+                        <td>world.Balls[id].colorType</td>
+                        <td> 0 for red, 1 for yellow, 2 for white and 3 for black </td>
+                    </tr>
+                    <tr>
+                        <td>world.CandidateBallList[0] and world.CandidateBallList[1]</td>
+                        <td>
+                            Array of legal target ball IDs for player 0 and player 1
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+    </answer>
+</qa>
+
+        

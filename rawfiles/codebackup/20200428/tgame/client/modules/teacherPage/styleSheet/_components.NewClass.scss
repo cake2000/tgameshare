@@ -1,0 +1,145 @@
+.newclassform {
+  background-color: #051c30;
+  padding: 10px 0px;
+  width: 480px;
+  &--content {
+    &--hos {
+      margin: 0 auto;
+      padding: 10px 30px;
+      background-size: 150px;
+      color: white;
+      &--header {
+        &--title {
+          color: #e7e4e4;
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+      &--content {
+        &--field {
+          padding: 5px 0px;
+          &--label {
+            margin-bottom: 5px;
+          }
+          &--items {
+            color: black;
+          }
+          &--error {
+            color: red;
+            margin-top: 5px;
+          }
+          &--input{
+            width: 100%;
+          }
+        }
+        &--title {
+          margin-bottom: 5px;
+        }
+        &--section {
+          padding: 10px 0px;
+          &--field {
+            padding: 5px 0px;
+            &--label {
+              margin-bottom: 5px;
+            }
+            &--items {
+              color: black;
+            }
+            &--error {
+              color: red;
+              margin-top: 5px;
+            }
+            &--input{
+              width: 100%;
+            }
+          }
+          &--title {
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  &--error {
+    color: red;
+    padding: 10px 30px;
+  }
+
+  &--action {
+    padding: 10px 30px;
+  }
+}
+
+.newclassform {
+  background-color: #051c30;
+  padding: 10px 0px;
+  width: 480px;
+  &--content {
+    &--hos {
+      margin: 0 auto;
+      padding: 10px 30px;
+      background-size: 150px;
+      color: white;
+      &--header {
+        &--title {
+          color: #e7e4e4;
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+      &--content {
+        &--field {
+          padding: 5px 0px;
+          &--label {
+            margin-bottom: 5px;
+          }
+          &--items {
+            color: black;
+          }
+          &--error {
+            color: red;
+            margin-top: 5px;
+          }
+          &--input{
+            width: 100%;
+          }
+        }
+        &--title {
+          margin-bottom: 5px;
+        }
+        &--section {
+          padding: 10px 0px;
+          &--field {
+            padding: 5px 0px;
+            &--label {
+              margin-bottom: 5px;
+            }
+            &--items {
+              color: black;
+            }
+            &--error {
+              color: red;
+              margin-top: 5px;
+            }
+            &--input{
+              width: 100%;
+            }
+          }
+          &--title {
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  &--error {
+    color: red;
+    padding: 10px 30px;
+  }
+
+  &--action {
+    padding: 10px 30px;
+  }
+}

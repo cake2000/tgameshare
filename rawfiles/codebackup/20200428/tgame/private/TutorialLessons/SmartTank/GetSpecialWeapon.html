@@ -1,0 +1,444 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  if (!target) return '';
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = 1000;
+  let target = null;
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    // update shortDis 
+    if (dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  const target = getClosestItem(Crystals);
+  if (!target) return [];
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3"; 
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getRandomCommand() {  
+  // random command  
+  const r = Math.random() * 100;  
+  if (r > 10) return "S";  
+  if (r > 8) return "U";  
+  if (r > 6) return "D";  
+  if (r > 4) return "L";  
+  if (r > 2) return "R";  
+  return "";  
+} 
+
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand(); 
+}   
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>Welcome back! </p>
+  <p>
+    Besides power points, a white tank may also leave a special weapon icon when it dies. In this tutorial, we will review the power of different weapons and learn how to arm your tank with a proper special weapon. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Collecting weapons is pretty much like collecting crystals. However, there are two major differences: 1) Your tank can equip only one type of special weapon; 2) When Your tank picks up a special weapon it must use the weapon immediately. It cannot be saved for later. 
+  </p>
+  <p>
+    These two restrictions will affect our rules for collecting special weapons: instead of collecting as many weapons as possible, we want to find and acquire the best weapon available in the battlefield. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    In order to find the best weapon we must first know how to compare two weapons to determine which is better. 
+  </p>
+  <p>
+    Two new functions have been added to your code. 
+
+    <ul>
+      <li>
+          <span class="variablenamebold">weaponIsBetter(weaponType1, weaponType2)</span> will return <span class="variablenamebold">true</span> if <span class="variablenamebold">weaponType1</span> is better than <span class="variablenamebold">weaponType2</span>; otherwise, it will return <span class="variablenamebold">false</span>.
+      </li>
+      <li>
+        <span class="variablenamebold">getSpecialWeapon()</span> will return the shortest path commands to get the best available weapon.  
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    In addition, you would need the following information about special weapons:
+  </p>
+  <p>
+    <ul>
+      <li>
+        The special weapon that is currently equipped by <span class="variablename">MyTank</span> is stored in the <span class="variablenamebold">MyTank.specialWeapon.type</span> property. Its value will be 0 when no special weapon is equipped at the moment. 
+      </li>
+      <li>
+        We are using a number between 1 and 6 to represent each special weapon type, as specified in <span class="variablenamebold">SPECIAL_WEAPON_TYPES</span>:
+        <p>
+          <pre class="brush: js">
+const SPECIAL_WEAPON_TYPES = {
+  SPLITTER3: 1,
+  WAY4: 2,
+  FREEZER: 3,
+  NOVA: 4,
+  MISSILE: 5,
+  LASER_GUN: 6,
+};
+          </pre>
+        </p>
+      </li>
+      <li>
+        Like <span class="variablename">Crystals</span>, the weapons currently lying on the battlefield are stored in an array called <span class="variablenamebold">Weapons</span>. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+
+<element elementid="140" elementType="Coding" condition="TestFinishedCodeIncludes_=getSpecialWeapon(;TestFinishedAnyResult">
+  <p>
+    Let's implement the two new functions step by step. 
+  </p>
+  <p>
+    <b>Challenge: </b>First, call function <span class="variablenamebold">getSpecialWeapon</span> in your <span class="variablename">getNewCommand</span> function. 
+  </p>
+  <code isHidden="false">
+//TODO: call getSpecialWeapon
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  let path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  path = getSpecialWeapon();
+  // if path is not blank, return the first command
+  //h0::check path.length
+  ::if (path.length >= 0) return path[0];
+  ::if (path.length > 0) return path[0];
+  ::if (path.length > 0) return path[1];
+  ?
+
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand(); 
+}  
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  let path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  path = getSpecialWeapon();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand(); 
+}  
+  </cleancode>
+</element>
+
+<element elementid="150" elementType="Coding" condition="TestFinishedCodeIncludes_returnweaponType1==;TestFinishedAnyResult">
+  <p>
+    Next, we'll implement a simple version of <span class="variablenamebold">weaponIsBetter(weaponType1, weaponType2)</span>: return true if <span class="variablename">weaponType1</span> is <span class="variablename">SPECIAL_WEAPON_TYPES.WAY4</span>. This simple version of the function will prefer <span class="variablename">WAY4</span> over all other weapons, but it will exercise no other weapon preference.
+  </p>
+  <p>
+    <b>challenge: </b>Modify function <span class="variablename">weaponIsBetter</span> as discussed above. Click <b>TEST</b> when finish. 
+  </p>
+  <code isHidden="false">
+//TODO:
+function weaponIsBetter(weaponType1, weaponType2) {
+  //h0::return whether weaponType1 is SPECIAL_WEAPON_TYPES.WAY4
+  return ?;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function weaponIsBetter(weaponType1, weaponType2) {
+  return weaponType1 == SPECIAL_WEAPON_TYPES.WAY4;
+}
+  </cleancode>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Good job! In the next steps, we will implement function <span class="variablenamebold">getSpecialWeapon</span> to check all available special weapons in the battlefield and find the best one. 
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    First let's define our rules in pseudo code. 
+  </p>
+  <p>
+    <pre class="brush: js">
+bestType = MyTank.specialWeapon.type;
+for ( weapon in Weapons ) {
+  if (weapon.type is better than bestType) bestType = weapon.type;
+}
+bestWeapons = Weapons.filter( type == bestType );
+closeBestWeapon = getClosestItem(bestWeapons);
+shortestPath = getShortestPathCmd(graph, MyTank, closeBestWeapon);
+    </pre>
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedGetWeaponAt_2_6_8">
+  <p>
+    <b>Challenge: </b>Translate the above pseudo code into JavaScript code in your <span class="variablenamebold">getSpecialWeapon</span> function. 
+  </p>
+  <code isHidden="false">
+//TODO
+function getSpecialWeapon() {
+  let bestType = MyTank.specialWeapon.type;
+
+  for (let i = 0; i &lt; Weapons.length; i += 1) {
+    const weapon = Weapons[i];
+    // update bestType based on myPreference
+    //h0::if weapon type is better than current bestType
+    ::if (weaponIsBetter(weapon.type, bestType))
+    ::if (weaponIsBetter(bestType, weapon.type))
+    ::if (!weaponIsBetter(weapon.type, bestType))
+    if ( ? ) {
+      bestType = weapon.type;
+    }
+  }
+  // get all the best weapons
+  //h1::check if weapon type is the same as bestType
+  ::weapon => weapon.type == bestType
+  ::weapon.type == bestType
+  const bestWeapons = Weapons.filter( ? );
+  const closeBestWeapon = getClosestItem(bestWeapons);
+  if (closeBestWeapon == null) return [];
+
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getSpecialWeapon() {
+  let bestType = MyTank.specialWeapon.type;
+
+  for (let i = 0; i &lt; Weapons.length; i += 1) {
+    const weapon = Weapons[i];
+    if (weaponIsBetter(weapon.type, bestType)) {
+      bestType = weapon.type;
+    }
+  }
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);
+  const closeBestWeapon = getClosestItem(bestWeapons);
+  if (closeBestWeapon == null) return [];
+
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+  </cleancode>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Excellent! Now your tank is able to find the closest <span class="variablename">SPECIAL_WEAPON_TYPES.WAY4</span> in the battlefield and collect it. 
+  </p>
+  <p>
+    Unless you updated your weaponIsBetter function to express preferences other than its current preference for <span class="variablename">SPECIAL_WEAPON_TYPES.WAY4</span> over all other types, however, if there is no <span class="variablename">SPECIAL_WEAPON_TYPES.WAY4</span> on the battlefield, your tank will never gain other weapons. We need to improve your <span class="variablename">weaponIsBetter</span> function so it handles all possible situations well. 
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Let's fix the problem with <span class="variablename">weaponIsBetter</span>. First, we need to rank the special weapons. Among the special weapons shown as below, which one do you like most? Rank the weapons in the order of your preference, from best to worst. 
+  </p>
+  <p>
+    <img src="/images/specialweapons.jpg" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+  <p>
+    Here are my rankings: 1) Laser 2) Nova 3) 4-Way 4) 3-Splitter 5) Missile 6) Freezer. 
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Next, we are going to implement the rankings. It is too complicated to write an <span class="variablename">if</span> statement to compare any pair of the six weapon types. We'll use a <b>lookup table</b> to do the work.
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    In computer science, a <b>lookup table</b> is an array that replaces runtime computation with a simpler array indexing operation. This is a more elegant and better performing solution. In our case, we'll store our ranking information in an array and refer to it in our code later. 
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    The picture below is my rankings. You can create your own rankings like the one below.
+  </p>
+  <p>
+    <img src="/images/weaponrankings.png" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="240" elementType="Coding" condition="TestFinishedGetWeaponAt_6_10_5">
+  <p>
+    <b>Challenge: </b>Fix function <span class="variablename">weaponIsBetter</span> by using a lookup table. 
+  </p>
+  <code isHidden="false">
+//TODO: define and use a lookup table
+function weaponIsBetter(weaponType1, weaponType2) {
+  const rankings = {};
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  rankings[0] = 7; // no weapon
+  
+  //h0::return whether the ranking of weaponType1 is better than the one of weaponType2
+  ::return rankings[weaponType1] &lt; rankings[weaponType2]
+  ::return rankings.weaponType1 &lt; rankings.weaponType2
+  ::return rankings[weaponType1] > rankings[weaponType2]
+  return ?;
+}
+  </code>
+  <cleancode>
+function weaponIsBetter(weaponType1, weaponType2) {
+  const rankings = {};
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  rankings[0] = 7; // no weapon
+
+  return rankings[weaponType1] &lt; rankings[weaponType2];
+}
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>Well done!</p>
+  <p>
+    <b>Summary:</b> Now your tank is able to choose and collect the best special weapon in the battlefield. It is much more powerful and competitive. 
+  </p>
+  <p>
+    <b>Exercise 1:</b> Define your own rankings of special weapons and implement it.
+  </p>
+  <p>
+    <b>Exercise 2:</b> You might find it advantageous to avoid the <b>Freezer</b> weapon at the start of the game, until your tank has gained <b>Damage</b> power. This is because if your tank's damage value is low, the Freezer will freeze rather than kill white tanks. Can you change your code to ignore Freezers unless your tank's Damage power at least 3?
+  </p>
+  <p>
+    Please post your ideas or questions on our forum, under <a href="https://forum.tgame.ai/t/lesson-13-grabbing-special-weapons/422" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

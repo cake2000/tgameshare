@@ -1,0 +1,628 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>   
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {
+    prob: -1
+  };
+
+  // new constant representing table center
+  const tableCenter = {
+    x: 0,
+    y: 0
+  };
+
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+            bestCommand = cmd;
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+            bestCommand = cmd;
+          }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s = 2; s &lt; 40; s = s + 1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    } // end of for loop "s"
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>        
+</element>
+
+
+<element elementid="100" elementType="Info">
+  <p>
+    Now that your bot can execute more sophisticated algorithms in order to select a more optimal shot, <b>you probably find that at times it is too slow</b>, especially at the beginning of a game, when there are so many balls on the table to consider. 
+  </p>
+  <p>
+    <b>This can become a serious problem</b>. Your game bot may be slowed to such a degree that you cannot further improve it, and your bot may even time out and lose a game. But what can you do about it?
+  </p>
+  <p>
+    Is your bot doing anything time-consuming that can be avoided? Is there any "shortcut" you can take? These are the key questions you need to ask yourself all the time as you program. 
+  </p>
+</element>
+
+<element elementid="101" elementType="Quiz" answerKey="B" answerReason="To calculate the success probability, the game engine needs to run many simulation with different random errors, so that takes the longest time.">
+  <p>
+    To tackle your bot's performance problem, you must first consider how (where in the code) your bot is spending most of its time.
+  </p>
+  <p>
+    Can you guess which task below consumes most of your bot's "thinking time"?
+  </p>
+  <ul>
+    <li>
+      <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a>: given a target ball and a target pocket, calculate the aiming point.
+    </li>
+    <li>
+      <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>: given a shot command, calculate the success probability.
+    </li>
+    <li>
+      <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton">C</a>: given a shot command, calculate its end state.
+    </li>
+    <li>
+      <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton">D</a>: given a shot command, send that command to the game engine.
+    </li>
+  </ul>
+</element>
+
+  <!-- <p>
+    One of the main reasons that slow down your robot is, in order to find the best call shot, your robot walks through all balls and all pockets, asking for success probability of each pair. <b>Each call to "await calculateProbability" takes hundreds of milliseconds, and too many such inquiries slow down the whole search process</b>. 
+  </p> -->
+  <!-- <p>
+    So, in this lesson, let's try to skip some unnecessary probability inquiries to accelerate the process.
+  </p>
+</element> -->
+    
+<element elementid="102" elementType="Info">
+  <p>
+    Based on this information, <b>we could improve the performance of your bot by making fewer calls to the <span class="variablenamebold">calculateProbability</span> function</b>. This effort will be the focus of this lesson.
+  </p>
+  <p>
+    Please, if you get stuck at any point, visit <a href="https://forum.tgame.ai/t/speed-up-search-of-best-call-shots/66" target="_blank">this lesson's topic</a> in our forum to seek help.
+  </p>
+  <p>
+    Now, before continuing, think through your bot's decision-making processes. Can you think of some situations in which your bot may be calling the <span class="variablenamebold">calculateProbability</span> function unnecessarily</b>?
+  </p>
+</element>
+
+<element elementid="103" elementType="Info">
+  <p>
+    There are quite a few changes we can make which will reduce the number of probability calculations, so let's begin with an easier one: let's alter the bot such that it will <b>ignore (skip calculation of probability for) those balls blocked from the cue ball</b>. For example, in the current test setup ball 2 is blocked (by ball 7) from the cue ball, so there is no point in asking the game engine for the success probability of shooting ball 2 into any pocket at all.
+  </p>
+  <p>
+    <img src="/images/ball2blockedbyball7.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+</element>
+  
+<element elementid="106" elementType="Coding" condition="TestFinishedNoProbabilityInquiry2_2">
+  <p>
+    <b>Challenge:</b> Using the code below for guidance, modify your <span class="variablename">getCallShot</span> function to <b>check whether the path from cue ball to target ball is blocked</b>, and if so, skip that ball. You will use the <b class="variablenamebold">isPathBlocked(point1, point2)</b> function to check for blockage and the <b class="keyword">continue</b> keyword in the for-loop to skip a ball. The <b class="keyword">continue</b> keyword alters the program execution to skip to the beginning of the next iteration directly.  
+  </p>
+  <p>Review the log printed on the developer console to determine which balls are skipped.</p>
+  <code isHidden="false">
+//TODO: skip the ball if blocked from cue ball
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {
+    prob: -1
+  };
+
+  // new constant representing table center
+  const tableCenter = {
+    x: 0, 
+    y: 0
+  };
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+
+    // new code: skip this ball if blocked from cue ball
+    
+    //h0::use isPathBlocked on cue ball position and target ball position::you can get ball positions using Balls[ballID] and Balls[0]
+    ::const isBlocked = isPathBlocked(ballID, 0);
+    ::const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    ::const isBlocked = isPathBlocked(Balls[ballID]);
+    const isBlocked = ? ;
+    if (isBlocked) {
+      //h1::skip current iteration::write 'continue;'
+      ? ;
+    }
+    // new code ends here
+    //ENDTODO
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, 
+          targetBallID: ballID, targetPocketID: pocketID };
+
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          if (cmd.distance &lt; bestCommand.distance) { bestCommand = cmd; }
+        } else {
+          if (cmd.prob > bestCommand.prob) { bestCommand = cmd; }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s = 2; s &lt; 40; s = s + 1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    } // end of for loop "s"
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+  </code>   
+  <cleancode>  
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {
+    prob: -1
+  };
+
+  // new constant representing table center
+  const tableCenter = {
+    x: 0,
+    y: 0
+  };
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+            bestCommand = cmd;
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+            bestCommand = cmd;
+          }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s = 2; s &lt; 40; s = s + 1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    } // end of for loop "s"
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}      
+  </cleancode> 
+</element>  
+
+<element elementid="110" elementType="Info">
+  <p>
+    Great! Though this code change is fairly small, it should significantly speed up the search process in <span class="variablename">getCallShot</span>. 
+  </p>
+  <p>
+    Now let's look into another way to optimize our search process: <b>ignoring pockets with an obtuse cut angle</b>. As shown below, <b>the cut angle is formed by two lines</b>: the line from aim position to cue ball (the <b>aiming line</b>), and the extended line from the target pocket to the aim position (the <b>impact line</b>). 
+  </p>
+  <p>
+    <img src="/images/cutAngle.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="113" elementType="Quiz" answerKey="C" answerReason="A is an acute angle and less than 90°; B is a reflex angle and greater than 180°; C is an obtuse angle between 90° and 180°; D is also a reflex angle. ">
+  <p>
+    Before discussing cut angle calculations, let's have a quick review of some common types of angles in geometry. As shown below, <b>a right angle is 90°; a straight angle is 180°; and a whole turn is 360°</b>. An <b>obtuse angle</b> is an angle between 90° and 180°, such as the 135° angle.
+  </p>
+  <p>
+      <img src="/images/anglereview.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+  <p>
+    <b>Quiz:</b> out of the 4 angles (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A</b></a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B</b></a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C</b></a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D</b></a>) below, which one is an obtuse angle (between 90° and 180°)?
+  </p>
+  <p>
+    <img src="/images/anglequiz.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="114" elementType="Info">
+  <p>
+    Now let's come back to cut angles. According to basic law of physics, <b>you cannot pocket a ball if the cut angle for the shot is an obtuse angle (between 90° and 180°)</b>. For example, in the setup below, the cut angle is obtuse for ball 3 to pocket 1, so there is no need to calculate its pocketing probability. We can safely skip pocket 1 when considering ball 3.
+  </p>
+  <p>
+    <img src="/images/impossiblePocket.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="116" elementType="Info">
+  <p>
+    To help you calculate cut angles, a new function, <span class="variablenamebold">getCutAngle</span>, has been pre-defined for you. The return value of this function is an angle value between -180° and 180°. The syntax is shown as below: 
+  </p>
+  <p>
+    <pre class="brush: js">
+  const cutAngle = getCutAngle(pocketPos, aimPos, cueBallPos);
+    </pre>
+  </p>
+  <p>
+    In case you are curious, the function <span class="variablenamebold">getCutAngle</span> is implemented by getting the direction angle for the aiming line and the impact line, then taking the difference between these two angles.
+  </p>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedNoProbabilityInquiry_3_1">
+  <p>
+    <b>Challenge:</b> In your <span class="variablename">getCallShot</span> function, <b>if the cut angle of a pocket is too big (such as greater than 90°), skip that pocket</b>. You can use the code below as guidance. Note that the cut angle returned can be negative, so you must reject cut angles less than -90 as well as those greater than 90. You will therefore want to use <b class="variablenamebold">Math.abs(number)</b> to check the <b>absolute</b> value of the cut angle. For example, Math.abs(-20) is 20, and Math.abs(30) is still 30.
+  </p>
+  <code isHidden="false">
+//TODO: check if pocket's cut angle is too wide for the ball
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = { prob: -1 };
+  // new constant representing table center
+  const tableCenter = { x: 0, y: 0 };
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) { continue; }
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+
+      // new code starts here
+      // check if pocket's cut angle is too wide for this ball
+
+      //h0::call getCutAngle with pocket position, aim position and cue ball position
+      ::const cutAngle = getCutAngle(pocketID, aimPoint, 0);
+      ::const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      const cutAngle = ? ;
+      
+      console.log("cut angle for ball " + ballID + " pocket " + pocketID + " is " + cutAngle);
+
+      //h1::check if cutAngle's absolute value is greater than 90°::use function Math.abs() to get absolute value
+      ::if (Math.abs(cutAngle) &lt; 90) {
+      ::if (cutAngle > 90) {
+      ::if (Math.abs(cutAngle) > 90) {      
+      if (?) {
+        // skip this pocket
+        continue ;
+      }      
+      // new code ends here
+      //ENDTODO
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s,
+           targetBallID: ballID, targetPocketID: pocketID };
+
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          if (cmd.distance &lt; bestCommand.distance) { bestCommand = cmd; }
+        } else {
+          if (cmd.prob > bestCommand.prob) { bestCommand = cmd; }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s = 2; s &lt; 40; s = s + 1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    } // end of for loop "s"
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+  </code>
+  <cleancode>     
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = {
+    prob: -1
+  };
+
+  // new constant representing table center
+  const tableCenter = {
+    x: 0,
+    y: 0
+  };
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) {
+        continue;
+      }
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+            bestCommand = cmd;
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+            bestCommand = cmd;
+          }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s = 2; s &lt; 40; s = s + 1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    } // end of for loop "s"
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}  
+  </cleancode>  
+</element>  
+  
+<element elementid="200" elementType="Conclusion">
+  <p>That's all for this lesson. Good job!</p>
+  <p><b>Summary:</b> You have reused the <b class="variablenamebold">isPathBlocked</b> function to avoid querying blocked balls, and you have learned how to use <b>cut angles</b> to filter out "impossible" pockets (for a given ball position). You have used the keyword <span class="keyword">continue</span> in both cases to skip to the next iteration of the loop. Now your robot is much faster than before, which makes it possible for you to implement further optimizations in your program when you want to.   
+  </p>
+  <p>
+    <b>Open Directions:</b> There are many other shortcuts that you could take in searching for best call shots. Feel free to try one of the ideas below or come up with new ideas of your own. Note that you still need to make sure a valid shot command is returned from the <span class="variablename">getCallShot</span> function. 
+  </p>
+  <p>
+    <ul>
+      <li>
+        If a pocket is blocked by other balls from your target ball, you can skip that pocket when considering that particular target ball. 
+      </li>
+      <li>
+        Side pockets have smaller open angles than corner pockets. If the target ball has a very wide angle to a side pocket, the probability of pocketing the target ball to that side pocket is very low. One example is shown below.
+        <p>
+          <img src="/images/wideAngleToSidePocket.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+        </p>
+        <p>
+          A helper function <b class="variablenamebold">getAngleToSidePocket</b> is predefined for you. It calculates a ball's angle to a side pocket. It takes the ball position (with x and y properties) and side pocket ID (pocket 1 or 4) as input parameters, and returns an angle between -90° and 90°.
+        </p>
+        <p>
+        <pre class="brush: js">
+      const angle = getAngleToSidePocket(ballPosition, sidePocketID);
+        </pre>
+        </p> 
+      </li>
+      <li>
+        During the search for the optimal shot, if you have already found a shot with a high success probability and a good ending position for the cue ball, you can probably stop searching right there to save time, especially when there are still many balls on the table. 
+      </li>
+      <li>
+        When you are searching for an optimal strength value, you might reduce the number of iterations by starting in the middle. If you are iterating through strength values of [10, 30, 50, 70, 90], you might begin with 50. If success probability at strength 50 is 0, there is no need even to consider lower strengths (10, 30), since the target ball won't arrive at the target pocket even at a strength of 50.
+      </li>
+      <li>
+          You could even adjust the number of possibilities you investigate based upon how much time is left in the game. You can use the following pre-defined function in <span class="variablename">getCallShot</span> to find out how much time is left for your bot:
+          <pre class="brush: js">
+const s = await getSecondsLeft();
+console.log("seconds left: " + s);
+          </pre>
+      </li>
+    </ul>
+  </p>
+  <p>
+    If you want to discuss with others how you might implement an idea, go to <a href="https://forum.tgame.ai/t/speed-up-search-of-best-call-shots/66" target="_blank">this lesson's topic</a> in our forum.
+  </p>
+</element>
+    

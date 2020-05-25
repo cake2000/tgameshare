@@ -1,0 +1,15 @@
+.admin-game-practice {
+  &__part {
+    margin-bottom: 25px;
+    &__title {
+      font-size: 1.4em;
+      margin-bottom: 10px
+    }
+  }
+  .difficulty-star {
+    margin-left: -4rem;
+    margin-right: 1rem;
+    display: 'inline-block';
+    color: #20a8d8
+  }
+}

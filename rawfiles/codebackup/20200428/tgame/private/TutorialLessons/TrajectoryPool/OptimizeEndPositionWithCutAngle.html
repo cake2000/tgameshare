@@ -1,0 +1,876 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+
+/*
+Purpose: 
+  To check if the current ball placement on table matches 
+  with the given scenario description.
+
+Return value: 
+  - empty list "[]" if not matching 
+  - an array of ball IDs corresponding to each region
+*/
+
+function matchScenario(scenario) {
+
+  // first check number of balls left on table
+  let countOfBallsOnTable = 0;
+  for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+    const b = Balls[ballID];
+    if (b.inPocket) continue;
+    // add 1 to counter for balls left on table
+    countOfBallsOnTable ++;
+  }
+
+  // if the number of balls is not equal to number of regions in the scenario, no match
+  if (countOfBallsOnTable != scenario.length) return [];
+
+  // keep track of ball ID of each ball matching with a region
+  let matchedBallIDs = [];
+
+  // go through each region in the scenario array 
+  for (let k=0; k &lt; scenario.length; k++) {
+    const r = scenario[k];
+    
+    // try to find a matching ball for this region
+    let found = false;
+
+    // go through all balls 
+    for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+      const b = Balls[ballID];
+      // ignore a ball if it is already pocketed
+      if (b.inPocket) continue;
+
+      // check ball color and coordinate against region definition
+      if (b.colorType != r.colorType) continue;
+      if (Math.abs(b.x - r.x) > r.width/2) continue;
+      if (Math.abs(b.y - r.y) > r.height/2) continue;
+
+      // this ball has found a matching region
+      found = true;
+
+      // record the ballID matching this region
+      matchedBallIDs.push(ballID);
+
+      // no need to search any more
+      break;
+    }
+
+    // if a region doesn't have a matching ball, then not a match
+    if (!found) return [];
+  }
+
+  // we have a match, and here are the ballIDs for each region
+  return matchedBallIDs;
+}
+
+async function checkEndGame1() {
+  const scenario = [
+    {colorType: Pool.WHITE, x: -800, y: -300, width: 200, height: 150},
+    {colorType: Pool.BLACK, x: 680, y: 0, width: 200, height: 200},
+    {colorType: OpponentColorType, x: 125, y: 150, width: 400, height: 200},
+  ];
+  
+  const matchedBallIDs = matchScenario(scenario);
+  if (matchedBallIDs.length == 0) return null;
+  
+  const targetPoint = extrapolatePoints(Balls[matchedBallIDs[2]], Balls[1], BallDiameter);
+  let bestCommand = {distance: 10000};
+  for (let y = (Balls[0].y + Balls[1].y)/2; y &lt; Balls[1].y; y = y + 3) {
+    for (let s = 18; s &lt; 29; s ++) {
+      console.log("Checking y " + y + " strength " + s);
+
+      // calculate cue ball end position given the current aim point and strength
+      const cmd = {aimx: Boundaries.RIGHT_X - BallDiameter/2, aimy: y, strength: s};
+      const endStates = await calculateEndState(cmd);
+      cmd.distance = dist2(endStates[0], targetPoint);
+
+      // check movement of black ball 
+      const blackBallMovement = dist2(Balls[1], endStates[1]);
+
+      // if cue ball's end position is closer to optimal point, update bestCommand
+      if (cmd.distance &lt; bestCommand.distance &amp;&amp; blackBallMovement > 0) {
+        console.log("new best " + cmd.distance);
+        bestCommand = cmd;
+      }
+    }
+  }
+  
+  return bestCommand;
+}
+
+async function getCallShot() {
+
+  // adopt special handler if there is a match
+  const specialCmd1 = await checkEndGame1();
+  if (specialCmd1) return specialCmd1;  
+
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.distance &lt; bestCommand.distance) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // search for best kick shot command with highest success probability
+
+    // setup the bestCommand as negative probability so it will be reassigned later
+    bestCommand = {prob: -1};
+    
+    // iterate through all legal ball IDs
+    for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+      const ballID = legalBallIDs[k];
+
+      // iterate through all bottom pockets
+      for (let pocketID = 3; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+        const contactPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);   
+        const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+        // search for the optimal adjustment amount 
+        let direction = 1;
+        if (Balls[ballID].x > Balls[0].x) {
+          direction = -1;
+        }
+        
+        for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+          const cmd = {aimx: mirrorPoint.x + adjustX * direction, aimy: mirrorPoint.y, strength: 45, targetBallID: ballID, targetPocketID: pocketID};    
+          cmd.prob = await calculateProbability(cmd); 
+          console.log("ball " + ballID + " pocket " + pocketID + " adjustX " + (adjustX * direction) + ": prob " + cmd.prob); 
+          if (cmd.prob > bestCommand.prob) { 
+            console.log("new best!");
+            bestCommand = cmd; 
+          } 
+        }   
+      }
+    }      
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}          
+  </cleancode>        
+</element>
+
+
+<element elementid="100" elementType="Info">
+  <p>
+    I have been giving out open directions to explore at the end of the intermediate lessons, but I feel some more examples would help you get started on implementing them. So in the next few lessons, I will pick some ideas and show you how to implement them.
+  </p>
+  <p>
+    Recall that in lesson 14, I showed you how to find a shot that moves the cue ball's stopping position closer to the center of table. In this lesson, I'll show you how to use <b>cut angle</b> to optimize the cue ball's end position instead. 
+  </p>
+</element>
+
+<element elementid="101" elementType="Info">
+  <p>
+    First, the test setup provided for this lesson is a pretty challenging. The goal is to <b>shoot both ball 2 and ball 3 into pockets in 2 consecutive shots</b>.
+  </p>
+  <p>
+    In lesson 14, you have changed your code to prefer a command if it would bring the cue ball closer to table center after all balls stop.
+  </p>
+  <p>
+    If you click "Test" now, you should see that your bot would choose a shot that moves the cue ball to some position close to table center after pocketing ball 2, and it becomes very hard to pocket ball 3 in the next shot.
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    The basic idea for improving the situation is this: after the cue ball kicks ball 2, if it stops at a position that is almost on the same line as ball 3 and pocket 0, then it is much easier for the second shot to pocket ball 3. The idea region for cue ball's end position is illustrated below:
+  </p>
+  <p>
+    <img src="/images/idealcueballpos.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+  
+  <p>
+    To implement this idea, we need to replace the current code that calculates and compare <b>cmd.distance</b> with some new code that calculates and compares <b>cut angle</b>.
+  </p>
+  <p>
+    Can you think about how to make this change before continuing?
+  </p>
+</element>
+
+<element elementid="106" elementType="Info">
+  <p>
+    Please first add a new function named <b>getMinCutAngle</b> right above the getCallShot function. It should take one variable <b>endStates</b> as input. You can leave the function body as empty.
+  </p>
+  <p>
+    Press "?" if you need help.
+  </p>
+  <code isHidden="true">
+//TODO: add starting code for new function    
+function getMinCutAngle(endStates) {
+}
+//ENDTODO
+  </code>
+</element>  
+
+
+<element elementid="107" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+    Now, let's implement this new function to <b>calculate the cut angle for ball 3 and pocket 0</b>. Note that since we are dealing with the end states of balls, you need to read the position of a ball using the "endStates" array and the ball ID as the index. For example, the cue ball's end state is "endStates[0]".
+  </p>
+  <p>
+    <b>Challenge:</b> please implement the getMinCutAngle function using the guidance below. Recall that to calculate the cut angle, you need to call the helper function <b>getCutAngle</b> with 3 parameters: the pocket position, the aim point and the cue ball's position.
+  </p>
+  <code isHidden="false">
+//TODO: first implementation of the getMinCutAngle function
+function getMinCutAngle(endStates) {
+  // read cue ball position from endStates array
+  const cueballPos = endStates[0];
+  // read ball 3 position from endStates array
+  //h0::write "endStates[3]"
+  const targetBallPos = ?;
+  // read pocket 0 position from Pockets array
+  const pocketPos = Pockets[0];
+
+  // calculate aim point for targetBallPos and pocketPos
+  const aimPoint = getAimPosition(targetBallPos, pocketPos); 
+
+  // calculate absolute value of cut angle
+  //h1::write "getCutAngle(pocketPos, aimPoint, cueballPos)"
+  const angle = Math.abs( ? ));
+
+  return angle;
+}
+//ENDTODO
+  </code>
+</element>  
+
+<element elementid="108" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+  <p>
+    Now we are very close to pocketing ball 3. All we need to do now is to change the getCallShot function, so that when it compares 2 commands, instead of using distance to table center, it uses the cut angle returned by our new function "getMinCutAngle". Also, to make our search more accurate, change the step size for the strength "s" from 20 to 10.
+  </p>
+  <p>
+    <b>Challenge:</b> please implement the basic idea using the code below as a guidance:
+  </p>
+  <code isHidden="false">
+
+        //TODO: change search criteria from distance to angle
+
+        ...
+        // change step size of s from 20 to 10
+        //h0::write "s = s+10"
+        for (let s = 20; s &lt;= 80; s = ?) {
+          const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+          
+          const endStates = await calculateEndState(cmd);
+          const cueballPosition = endStates[0];
+
+          cmd.prob = await calculateProbability(cmd);
+          cmd.distance = dist2(tableCenter, cueballPosition);
+          
+          // call getMinCutAngle and save the result as "cmd.minAngle"
+          //h1::call getMinCutAngle with endStates as input::write "getMinCutAngle(endStates)"
+          cmd.minAngle = ?;
+
+          console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+          // new method to update best command 
+          if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          
+            // instead of cmd.distance, compare cmd.minAngle
+            //h2::check if cmd.minAngle is smaller::write "cmd.minAngle &lt; bestCommand.minAngle"
+            if (cmd.minAngle ? bestCommand.minAngle) {
+                bestCommand = cmd; 
+            }
+
+          } else {
+            // simply choose the one with higher probability
+            if (cmd.prob > bestCommand.prob) {
+                bestCommand = cmd; 
+            }
+          }
+        }
+        //ENDTODO
+  </code>   
+  <cleancode>
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+
+/*
+Purpose: 
+  To check if the current ball placement on table matches 
+  with the given scenario description.
+
+Return value: 
+  - empty list "[]" if not matching 
+  - an array of ball IDs corresponding to each region
+*/
+
+function matchScenario(scenario) {
+
+  // first check number of balls left on table
+  let countOfBallsOnTable = 0;
+  for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+    const b = Balls[ballID];
+    if (b.inPocket) continue;
+    // add 1 to counter for balls left on table
+    countOfBallsOnTable ++;
+  }
+
+  // if the number of balls is not equal to number of regions in the scenario, no match
+  if (countOfBallsOnTable != scenario.length) return [];
+
+  // keep track of ball ID of each ball matching with a region
+  let matchedBallIDs = [];
+
+  // go through each region in the scenario array 
+  for (let k=0; k &lt; scenario.length; k++) {
+    const r = scenario[k];
+    
+    // try to find a matching ball for this region
+    let found = false;
+
+    // go through all balls 
+    for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+      const b = Balls[ballID];
+      // ignore a ball if it is already pocketed
+      if (b.inPocket) continue;
+
+      // check ball color and coordinate against region definition
+      if (b.colorType != r.colorType) continue;
+      if (Math.abs(b.x - r.x) > r.width/2) continue;
+      if (Math.abs(b.y - r.y) > r.height/2) continue;
+
+      // this ball has found a matching region
+      found = true;
+
+      // record the ballID matching this region
+      matchedBallIDs.push(ballID);
+
+      // no need to search any more
+      break;
+    }
+
+    // if a region doesn't have a matching ball, then not a match
+    if (!found) return [];
+  }
+
+  // we have a match, and here are the ballIDs for each region
+  return matchedBallIDs;
+}
+
+function checkEndGame1() {
+  const scenario = [
+    {colorType: Pool.WHITE, x: -800, y: -300, width: 200, height: 150},
+    {colorType: Pool.BLACK, x: 680, y: 0, width: 200, height: 200},
+    {colorType: OpponentColorType, x: 125, y: 150, width: 400, height: 200},
+  ];
+  
+ 	const matchedBallIDs = matchScenario(scenario);
+  if (matchedBallIDs.length == 0) return null;
+  return {aimx: 0, aimy: 0, strength: 50};
+}
+
+//TODO: first implementation of the getMinCutAngle function 
+function getMinCutAngle(endStates) { 
+  // read cue ball position from endStates array 
+  const cueballPos = endStates[0]; 
+  // read ball 3 position from endStates array 
+  const targetBallPos = endStates[3]; 
+  // read pocket 0 position from Pockets array 
+  const pocketPos = Pockets[0]; 
+  
+  // calculate aim point for targetBallPos and pocketPos 
+  const aimPoint = getAimPosition(targetBallPos, pocketPos);  
+  
+  // calculate absolute value of cut angle 
+  const angle = Math.abs( getCutAngle(pocketPos, aimPoint, cueballPos) ); 
+  
+  return angle; 
+} 
+
+async function getCallShot() {
+
+  // new logic: if special handler returns a shot command, then use it
+  const specialCmd1 = checkEndGame1();
+  if (specialCmd1) return specialCmd1;  
+
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20 to 80 at step of 10
+      for (let s = 20; s &lt;= 80; s = s + 10) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        cmd.minAngle = getMinCutAngle(endStates);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.minAngle &lt; bestCommand.minAngle) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // search for best kick shot command with highest success probability
+
+    // setup the bestCommand as negative probability so it will be reassigned later
+    bestCommand = {prob: -1};
+    
+    // iterate through all legal ball IDs
+    for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+      const ballID = legalBallIDs[k];
+
+      // iterate through all bottom pockets
+      for (let pocketID = 3; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+        const contactPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);   
+        const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+        // search for the optimal adjustment amount 
+        let direction = 1;
+        if (Balls[ballID].x > Balls[0].x) {
+          direction = -1;
+        }
+        
+        for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+          const cmd = {aimx: mirrorPoint.x + adjustX * direction, aimy: mirrorPoint.y, strength: 45, targetBallID: ballID, targetPocketID: pocketID};    
+          cmd.prob = await calculateProbability(cmd); 
+          console.log("ball " + ballID + " pocket " + pocketID + " adjustX " + (adjustX * direction) + ": prob " + cmd.prob); 
+          if (cmd.prob > bestCommand.prob) { 
+            console.log("new best!");
+            bestCommand = cmd; 
+          } 
+        }   
+      }
+    }      
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}    
+  </cleancode> 
+</element>  
+
+
+
+<element elementid="118" elementType="Info">
+  <p>
+    Good work! Now it is time to make our function <b>getMinCutAngle</b> to work for all balls remaining and all pockets, not just the pocket 0 and ball 3.
+  </p>
+  <p>
+    The basic idea is to go through each ballID in the legalBallIDs array, and each of the 6 pockets, and find a ball-pocket combination that gives the minimum cut angle. After going through all combinations, return the minimum cut angle.
+  </p>
+  <p>
+    This should be a fairly familiar exercise for you, since you have implemented such nested for-loops for a few times now. Please give it a try yourself before clicking next.
+  </p>
+</element>
+  
+
+<element elementid="120" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+  <p>
+    <b>Challenge:</b> using the code below as a guidance, please implement the <span class="variablenamebold">getMinCutAngle</span> function</b>. It should output the minimum cut angle for any ball-pocket combination, given the endStates specified.
+  </p>
+  <code isHidden="false">
+//TODO: calculate minimum cut angle given endStates    
+function getMinCutAngle(endStates) {
+  // initialize minAngle
+  //h0::minAngle should be a large number initially::set minAngle to 361
+  let minAngle = ?;
+  const legalBallIDs = world.CandidateBallList[MyID]; 
+
+  // for loop to go through legalBallIDs
+  //h1::k should go from 0 to legalBallIDs.length-1::write "for (let k = 0; k &lt; legalBallIDs.length; k ++)"
+  for (let k = ?; k ?; k ?) { 
+    const ballID = legalBallIDs[k]; 
+    const targetBallPos = endStates[ballID]; 
+
+    // go through all 6 pockets
+    //h2::pocketID should go from 0 to 5::write "for (let pocketID=0; pocketID &lt;= 5; pocketID ++)"
+    for (let pocketID=?; pocketID ?; pocketID ?) { 
+      const cueballPos = endStates[0];
+      const pocketPos = Pockets[pocketID]; 
+      const aimPoint = getAimPosition(targetBallPos, pocketPos); 
+      const angle = Math.abs(getCutAngle(pocketPos, aimPoint, cueballPos));
+
+      //h2::look for smaller angle::use "&lt;"
+      if (angle ? minAngle) {
+        minAngle = angle;
+      }
+    }
+  }
+  return minAngle;
+}
+//ENDTODO
+      
+  </code>
+  <cleancode>
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+          return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+
+/*
+Purpose: 
+  To check if the current ball placement on table matches 
+  with the given scenario description.
+
+Return value: 
+  - empty list "[]" if not matching 
+  - an array of ball IDs corresponding to each region
+*/
+
+function matchScenario(scenario) {
+
+  // first check number of balls left on table
+  let countOfBallsOnTable = 0;
+  for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+    const b = Balls[ballID];
+    if (b.inPocket) continue;
+    // add 1 to counter for balls left on table
+    countOfBallsOnTable ++;
+  }
+
+  // if the number of balls is not equal to number of regions in the scenario, no match
+  if (countOfBallsOnTable != scenario.length) return [];
+
+  // keep track of ball ID of each ball matching with a region
+  let matchedBallIDs = [];
+
+  // go through each region in the scenario array 
+  for (let k=0; k &lt; scenario.length; k++) {
+    const r = scenario[k];
+    
+    // try to find a matching ball for this region
+    let found = false;
+
+    // go through all balls 
+    for (let ballID=0; ballID &lt; Balls.length; ballID ++) {
+      const b = Balls[ballID];
+      // ignore a ball if it is already pocketed
+      if (b.inPocket) continue;
+
+      // check ball color and coordinate against region definition
+      if (b.colorType != r.colorType) continue;
+      if (Math.abs(b.x - r.x) > r.width/2) continue;
+      if (Math.abs(b.y - r.y) > r.height/2) continue;
+
+      // this ball has found a matching region
+      found = true;
+
+      // record the ballID matching this region
+      matchedBallIDs.push(ballID);
+
+      // no need to search any more
+      break;
+    }
+
+    // if a region doesn't have a matching ball, then not a match
+    if (!found) return [];
+  }
+
+  // we have a match, and here are the ballIDs for each region
+  return matchedBallIDs;
+}
+
+function checkEndGame1() {
+  const scenario = [
+    {colorType: Pool.WHITE, x: -800, y: -300, width: 200, height: 150},
+    {colorType: Pool.BLACK, x: 680, y: 0, width: 200, height: 200},
+    {colorType: OpponentColorType, x: 125, y: 150, width: 400, height: 200},
+  ];
+  
+    const matchedBallIDs = matchScenario(scenario);
+  if (matchedBallIDs.length == 0) return null;
+  return {aimx: 0, aimy: 0, strength: 50};
+}
+
+// given endStates, what's the minimum cut angel for any ball-pocket combination
+function getMinCutAngle(endStates) {
+  let minAngle = 361;
+  const legalBallIDs = world.CandidateBallList[MyID]; 
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) { 
+    const ballID = legalBallIDs[k]; 
+    const targetBallPos = endStates[ballID]; 
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) { 
+      const cueballPos = endStates[0];
+      const pocketPos = Pockets[pocketID]; 
+      const aimPoint = getAimPosition(targetBallPos, pocketPos); 
+      const angle = Math.abs(getCutAngle(pocketPos, aimPoint, cueballPos));
+
+      if (angle &lt; minAngle) {
+        minAngle = angle;
+      }
+    }
+  }
+  return minAngle;
+}
+
+async function getCallShot() {
+
+  // new logic: if special handler returns a shot command, then use it
+  const specialCmd1 = checkEndGame1();
+  if (specialCmd1) return specialCmd1;  
+
+  // place holder for best command and highest probability
+  let bestCommand = {prob: -1};
+
+  // new constant representing table center
+  const tableCenter = {x: 0, y: 0};
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) continue;
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) > 90) continue ;
+
+      // iterate through strength values of 20 to 80 at step of 10
+      for (let s = 20; s &lt;= 80; s = s + 10) {
+        const cmd = { aimx: aimPoint.x, aimy: aimPoint.y, strength: s, targetBallID: ballID, targetPocketID: pocketID };
+        
+        const endStates = await calculateEndState(cmd);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+        cmd.minAngle = getMinCutAngle(endStates);
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+          if (cmd.minAngle &lt; bestCommand.minAngle) {
+              bestCommand = cmd; 
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+              bestCommand = cmd; 
+          }
+        }
+      }
+    }
+  }
+
+  // new behavior when we don't have a good shot
+  if (bestCommand.prob >= 0 &amp;&amp; bestCommand.prob &lt; 50) {
+    const targetPosOld = Balls[bestCommand.targetBallID];
+    for (let s=2; s&lt;40; s=s+1) {
+      console.log("trying strength " + s);
+      bestCommand.strength = s;
+      const endStates = await calculateEndState(bestCommand);
+      const targetPosNew = endStates[bestCommand.targetBallID];
+      if (targetPosOld.x != targetPosNew.x || targetPosOld.y != targetPosNew.y) {
+        break;
+      }
+    }
+  } else if (bestCommand.prob == -1) {
+    // search for best kick shot command with highest success probability
+
+    // setup the bestCommand as negative probability so it will be reassigned later
+    bestCommand = {prob: -1};
+    
+    // iterate through all legal ball IDs
+    for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+      const ballID = legalBallIDs[k];
+
+      // iterate through all bottom pockets
+      for (let pocketID = 3; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+        const contactPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);   
+        const mirrorPoint = {x: contactPoint.x, y: 2 * Boundaries.TOP_Y - contactPoint.y};
+
+        // search for the optimal adjustment amount 
+        let direction = 1;
+        if (Balls[ballID].x > Balls[0].x) {
+          direction = -1;
+        }
+        
+        for (let adjustX = 0; adjustX &lt; 50; adjustX = adjustX + 1) { 
+          const cmd = {aimx: mirrorPoint.x + adjustX * direction, aimy: mirrorPoint.y, strength: 45, targetBallID: ballID, targetPocketID: pocketID};    
+          cmd.prob = await calculateProbability(cmd); 
+          console.log("ball " + ballID + " pocket " + pocketID + " adjustX " + (adjustX * direction) + ": prob " + cmd.prob); 
+          if (cmd.prob > bestCommand.prob) { 
+            console.log("new best!");
+            bestCommand = cmd; 
+          } 
+        }   
+      }
+    }      
+  }
+
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}        
+  </cleancode>  
+</element>  
+  
+<element elementid="200" elementType="Conclusion">
+  <p>Well done!</p>
+  <p><b>Summary:</b> you have just improved your getCallShot function to optimize cue ball end position using cut angle, instead of distance to table center. Now you should expect the cue ball to move to align itself against a target ball-pocket combination. 
+  </p>
+  <p>
+    <b>Open Directions:</b> I hope this lesson has opened up more ideas for you to further improve your game bot. Some example ideas are discussed below for you to consider.
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>Combining cut angle and distane: </b> sometimes even if the cue ball is in line with the target ball and target pocket, if the cue ball is too far away from the target ball, it's success probability is still low. Can you think about how to incorporate the distance factor into your optimization?
+      </li>
+      <li>
+        <b>Blocked target ball or target pocket: </b> in the implementation given in this lesson, we didn't consider the case that the target ball or target pocket may be blocked from the cue ball in their end states. You should probably skip those combinations when searching for minimum cut angle.
+      </li>
+    </ul>
+  </p>
+  <p>
+    If you want to discuss any implementation or new idea with others, feel free to discuss in our forum.
+  </p>
+</element>
+    

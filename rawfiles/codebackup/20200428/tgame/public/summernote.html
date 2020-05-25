@@ -1,0 +1,145 @@
+<!-- <html lang="en"> -->
+
+<head>
+  <meta charset="UTF-8">
+  <title>Summernote</title>
+  <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+  <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote.js"></script>
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"/>
+  <script type="text/javascript" src="//rawgit.com/google/code-prettify/master/src/prettify.js"></script>
+  <script type="text/javascript" src="//rawgit.com/epiksel/summernote-highlight/master/dist/summernote-ext-highlight.min.js"></script>
+  <link rel="stylesheet" href="">
+  <style>
+    /* Pretty printing styles. Used with prettify.js. */
+
+    /* SPAN elements with the classes below are added by prettyprint. */
+    .pln { color: #000 }  /* plain text */
+
+    @media screen {
+      .str { color: #080 }  /* string content */
+      .kwd { color: #008 }  /* a keyword */
+      .com { color: #800 }  /* a comment */
+      .typ { color: #606 }  /* a type name */
+      .lit { color: #066 }  /* a literal value */
+      /* punctuation, lisp open bracket, lisp close bracket */
+      .pun, .opn, .clo { color: #660 }
+      .tag { color: #008 }  /* a markup tag name */
+      .atn { color: #606 }  /* a markup attribute name */
+      .atv { color: #080 }  /* a markup attribute value */
+      .dec, .var { color: #606 }  /* a declaration; a variable name */
+      .fun { color: red }  /* a function name */
+    }
+
+    /* Use higher contrast and text-weight for printable form. */
+    @media print, projection {
+      .str { color: #060 }
+      .kwd { color: #006; font-weight: bold }
+      .com { color: #600; font-style: italic }
+      .typ { color: #404; font-weight: bold }
+      .lit { color: #044 }
+      .pun, .opn, .clo { color: #440 }
+      .tag { color: #006; font-weight: bold }
+      .atn { color: #404 }
+      .atv { color: #060 }
+    }
+
+    /* Put a border around prettyprinted code snippets. */
+    pre.prettyprint { padding: 2px; border: 1px solid #888 }
+
+    /* Specify class=linenums on a pre to get line numbering */
+    ol.linenums { margin-top: 0; margin-bottom: 0 } /* IE indents via margin-left */
+    li.L0,
+    li.L1,
+    li.L2,
+    li.L3,
+    li.L5,
+    li.L6,
+    li.L7,
+    li.L8 { list-style-type: none }
+    /* Alternate shading for lines */
+    li.L1,
+    li.L3,
+    li.L5,
+    li.L7,
+    li.L9 { background: #eee }
+    #summernote + .note-editor {
+      margin-bottom: 0;
+    }
+    .note-editable {
+      height: 128px;
+      max-height: 128px;
+    }
+    .note-toolbar .btn-sm {
+      height: 30px;
+    }
+    .note-toolbar .note-btn-group.btn-group.note-fontname,
+    .note-toolbar .note-btn.btn-fullscreen,
+    .note-toolbar .note-btn.btn-codeview {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="summernote"></div>
+  <script>
+    $(document).ready(function () {
+      
+      $('#summernote').summernote({
+        toolbar:[
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['height', ['height']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'hr']],
+            ['javascript', ['highlight']],
+            ['help', ['help']],
+          ],
+          disableResizeEditor: true,
+      });
+
+      // Hide languages selection
+      $('.ext-highlight .modal-body > .form-group').first().remove();
+      $('.ext-highlight .modal-body > .form-group > label').first().remove();
+
+      // Hide code block in style
+      $('ul.dropdown-menu.dropdown-style > li').get(2).remove();
+
+      function summernodeAPI (key) {
+        return function () {
+          return $('#summernote').summernote(key);
+        }
+      }
+
+      function setOnChangeHandler(handleChange) {
+        $('#summernote').on('summernote.change', function(we, contents) { handleChange(we, contents); prettyPrint(); });
+      }
+
+      window.summernote = {
+        code: summernodeAPI('code'),
+        reset: summernodeAPI('reset'),
+        isEmpty: summernodeAPI('isEmpty'),
+        setOnChangeHandler: setOnChangeHandler,
+      };
+
+      if (window.parent.lessonChatHandleChange) {
+        window.summernote.setOnChangeHandler(window.parent.lessonChatHandleChange);
+      }
+
+      // $(".note-javascript > button").prop('title', 'JavaScript');
+      setTimeout(()=>{
+        $(".note-javascript > button").attr('data-original-title', 'JavaScript');
+        $(".note-javascript > button").attr('original-title', 'JavaScript');
+      }, 2000);
+      // $(".note-javascript > button").prop('aria-label', 'JavaScript');
+    });
+  </script>
+</body>
+
+<!-- </html> -->

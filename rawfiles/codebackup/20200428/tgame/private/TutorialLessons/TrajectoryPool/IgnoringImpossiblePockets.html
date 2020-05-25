@@ -1,0 +1,169 @@
+<element elementid="100" elementType="Info">
+  <p>Welcome back! In the previous lesson, we've learned how to skip blocked balls and pockets in search of best shot command. In this tutorial, we'll continue to optimize our search process by skipping pockets with a cut angle that's too wide.  
+    </p>
+  <p>
+    As shown below, <b>the cut angle is formed by two lines</b>: the line from the cue ball to the aim position (the <b>aiming line</b>), and the line from the aim position to the target pocket (the <b>impact line</b>). 
+  </p>
+  <p>
+    <img src="/images/cutAngle.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="103" elementType="Quiz" answerKey="C" answerReason="A is an acute angle and less than 90°; B is a reflex angle and greater than 180°; C is an obtuse angle between 90° and 180°; D is also a reflex angle. ">
+  <p>
+    Before moving on to cut angle calculations, let's have a quick review of some special angles and their degrees. As shown below, a right angle is 90°; a straight angle is 180°; and a whole turn is 360°. An <b>obtuse angle</b> is an angle between 90° and 180°, such as the 135° angle.
+  </p>
+  <p>
+      <img src="/images/anglereview.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+  <p>
+    <b>Quiz:</b> out of the 4 angles (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A</b></a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B</b></a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C</b></a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D</b></a>) below, which one is an obtuse angle (between 90° and 180°)?
+  </p>
+  <p>
+    <img src="/images/anglequiz.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="104" elementType="Info">
+  <p>
+    Now let's come back to cut angles. According to basic law of physics, you can not hit a ball into any pocket with an obtuse cut angle. For example, in the setup below, <b>the cut angle for pocket 1 is too wide for ball 3, so we can safely skip pocket 1</b> in our search when reviewing ball 3, saving some valuable "thinking" time for more important tasks later.
+  </p>
+  <p>
+    <img src="/images/impossiblePocket.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="106" elementType="Info">
+  <p>
+    To help you calculate cut angles, a new function, <b>getCutAngle</b>, has been pre-defined for you. The return value of this function is an angle value between -180° and 180°. The syntax is shown as below: 
+  </p>
+  <p>
+    <pre class="brush: js">
+  const cutAngle = getCutAngle(pocketPos, aimPos, cueBallPos);
+    </pre>
+  </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedNoProbabilityInquiry_3_1">
+  <p>
+    <b>Challenge:</b> as illustrated below, in your getCallShot function, <b>if the cut angle of a pocket is too big, then skip that pocket</b>. Note that you can use <b>Math.abs(number)</b> to get the <b>absolute</b> value of a number. For example, Math.abs(-20) is 20, while Math.abs(30) is still 30.
+  </p>
+  <code isHidden="false">
+
+for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+  if (isBlocked2) {
+    continue;
+  }
+        
+  const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+  //TODO: check if pocket's cut angle is too wide
+  //h0::to get cut angle, call getCutAngle using pocket position, aim position and cue ball position
+  ::const cutAngle = getCutAngle(pocketID, aimPoint, 0);
+  ::const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+  const cutAngle = ? ;
+  //h1::check if cutAngle's absolute value is at least 90°::use function Math.abs() to get absolute value
+  ::if (Math.abs(cutAngle) &lt;= 90) {
+  ::if (cutAngle >= 90) {
+  ::if (Math.abs(cutAngle) >= 90) {      
+  if (?) {
+    // skip this pocket
+    continue ;
+  }      
+  //ENDTODO
+
+  
+  const cmd = { 
+    aimx: aimPoint.x, 
+    aimy: aimPoint.y, 
+    strength: 30, 
+    targetBallID: ballID, 
+    targetPocketID: pocketID 
+  };
+  console.log("BallID = " + ballID + " pocketID = " + pocketID );
+  const prob = await calculateProbability(cmd);
+
+  if (prob > highestProb) {
+    bestCommand = cmd; highestProb = prob;
+  }
+}
+  </code>    
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+      if (isBlocked2) {
+        continue;
+      }
+            
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cutAngle = getCutAngle(Pockets[pocketID], aimPoint, Balls[0]);
+      if (Math.abs(cutAngle) >= 90) {
+        continue;
+      }
+      
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+      
+  </cleancode> 
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Great! </p>
+  <p><b>Summary:</b> you've learned the concept of <b>cut angle</b>, and <b>how to use it to filter out pockets with obtuse cut angles</b> in your getCallShot function. </p>
+  <p>
+    <b>Exercise:</b> 90° may not be the optimal threshold for the cut angle. For example, in the current setup, even though pocket 2's cut angle is less than 90° for ball 7, it is still too wide for a good shot. <b>Try to reduce the threshold for cut angles further</b> so your robot will skip pocket 2 for ball 7 as well. Use the <b>console.log</b> function to check if your change works, and share the optimal threshold you chose in our forum, under <a href="https://forum.tgame.ai/t/skipping-pockets-with-obtuse-cut-angles/47" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+

@@ -1,0 +1,77 @@
+.conversation-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .tg-tutorial__container {
+    flex: 1;
+    margin: 0;
+  }
+  .conversation-list {
+    height: calc(100vh - 125px);
+    overflow: auto;
+    flex: 0 0 450px;
+    .awesome-searchBox {
+      margin-bottom: 10px;
+      input {
+        width: 95%;
+      }
+    }
+  }
+}
+.message-activity {
+  &__info {
+    background-color: #fff;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    &__title {
+      border-bottom: none;
+      margin-bottom: 5px;
+      > h4 {
+        color: #f78f1f;
+        &:hover {
+          cursor: pointer;
+          color: #2793ff;
+        }
+      }
+    }
+  }
+  &__username {
+    font-weight: 600;
+    &__me {
+      color: #2892FF;
+    }
+    &__other {
+      color: red;
+    }
+  }
+  &__createdAt {
+    color: #6e6e6e;
+    margin-right: 10px;
+  }
+  &__dot-separator {
+    padding: 0 7px;
+    font-weight: 800;
+  }
+  &__action {
+    float: right;
+    > button {
+      padding: 4px 20px;
+    }
+  }
+  &__content {
+    padding: 15px 10px 5px 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  &__content__line {
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-start;
+  }
+  &__history-content {
+    flex: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 14px;
+    white-space: nowrap;
+  }
+}

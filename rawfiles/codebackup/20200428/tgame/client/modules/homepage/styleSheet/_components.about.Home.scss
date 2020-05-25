@@ -1,0 +1,186 @@
+
+
+
+.tournament-intro {
+  padding: 35px 0px;
+  background-color: #052b4b;
+  // background-image: url(images/3px-tile.png);
+  background-size: 150px;
+  color: #fefaf1;
+}
+
+.tournament-intro {
+  padding-bottom: 35px;
+  .faq-section {
+    background: transparent !important;
+  }
+  &__block{
+    flex-direction: column;
+    padding-bottom: 45px;
+    align-items: flex-start;
+    &__list{
+      &__title{
+        margin-top: 0px;
+        margin-bottom: 15px;
+        font-family: $tg-ff-body;
+        text-align: left;
+        position: relative;
+        padding-bottom: 20px;
+        &:after{
+          // content:'';
+          // display: inline-block;
+          // left: 0px;
+          // bottom: 0px;
+          // position: absolute;
+          // width: 50px;
+          // height: 6px;
+          // background-color: #fefaf1;
+        }
+      }
+      &__sub-title{
+        color: $tg-col-basic-navy;
+        font-family: $tg-ff-body;
+        font-size: $tg-fs-heading3;
+        font-weight: 500;
+      }
+      &__content{
+        margin-bottom: 37px;
+        color: #fefaf1;
+        line-height: 20px;
+        p {
+          margin-bottom: 27px;
+          color: #fefaf1;
+          font-weight: 500;
+        }
+        &__sub{
+          margin-bottom: 27px;
+          font-size: 18px;
+        }
+        strong{
+          font-weight: bold;
+        }
+        a{
+          margin: 0 3px;
+        }
+      }
+    }
+  }
+}
+.feature-section,
+.faq-section,
+.about-us-section{
+  padding: 35px 0px;
+  background-color: $tg-col-basic-ivory;
+  background-image: url(images/dark-geometric-copy.png);
+  background-position: 50% 50%;
+  background-size: 35px;
+}
+
+.about-us-section{
+  padding-bottom: 35px;
+  &__block{
+    flex-direction: column;
+    padding-bottom: 45px;
+    align-items: flex-start;
+    &__list{
+      &__title{
+        margin-top: 0px;
+        margin-bottom: 15px;
+        color: blue;
+        font-family: $tg-ff-body;
+        text-align: left;
+        position: relative;
+        padding-bottom: 20px;
+        &:after{
+          // content:'';
+          // display: inline-block;
+          // left: 0px;
+          // bottom: 0px;
+          // position: absolute;
+          // width: 50px;
+          // height: 6px;
+          // background-color: #383737;
+        }
+      }
+      &__sub-title{
+        color: $tg-col-basic-navy;
+        font-family: $tg-ff-body;
+        font-size: $tg-fs-heading3;
+        font-weight: 500;
+      }
+      &__content{
+        margin-bottom: 37px;
+        color: #383737;
+        line-height: 20px;
+        p{
+          margin-bottom: 27px;
+          color: #383737;
+          font-weight: 500;
+        }
+        &__sub{
+          margin-bottom: 27px;
+          font-size: 18px;
+        }
+        strong{
+          font-weight: bold;
+        }
+        a{
+          margin: 0 3px;
+        }
+      }
+    }
+  }
+}
+.privacy-section {
+  padding: 80px 200px;
+  background-color: $tg-col-basic-ivory;
+  background-image: url(images/dark-geometric-copy.png);
+  background-position: 50% 50%;
+  background-size: 35px;
+  text-align: justify;
+}
+.privacy-section li {
+  list-style-type: circle;
+}
+
+.privacy-section p {
+  font-size: 18px;
+  line-height: 23px;
+}
+
+.list-faq{
+  margin-left: 20px;
+  margin-top: 25px;
+  &__items{
+    margin-bottom: 3px;
+    margin-left: 0px;
+    padding-bottom: 12px;
+    font-size: $tg-fs-body;
+    line-height: 20px;
+    list-style-type: square;
+    strong{
+      font-size: $tg-fs-heading4;
+      color: $tg-col-basic-dark-grey;
+      font-weight: bold;
+    }
+  }
+}
+@media(max-width: 768px){
+  .about-us-section{
+    &__block{
+      &__list{
+        &__title{
+          font-size: 18px;
+        }
+        &__sub-title{
+          text-align: center;
+        }
+      }
+    }
+  }
+  .list-faq{
+    &__items{
+      font-size: 14px;
+    }
+  }
+}

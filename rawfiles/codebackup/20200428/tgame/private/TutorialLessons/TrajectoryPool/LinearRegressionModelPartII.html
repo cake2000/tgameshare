@@ -1,0 +1,163 @@
+<element elementid="100" elementType="Info">
+  <p>Now that you have generated tons of training data samples, let's use them to build a model.</p>    
+  <p>
+    In this lesson we'll first explain what a model looks like, and then show you how to build one.
+  </p>
+
+</element>
+
+<element elementid="102" elementType="Quiz" answerKey="C" answerReason="Plot C clearly shows a non-linear relationship where the data points show an upward trend initially and then start to trend down later.">
+  <p>
+    The simplest models are <b>linear models</b>, which describe <b>linear</b> relationships. What is a <b>linear relationship</b> then? When you plot 2 variables in a scatter plot, and the data points form a line-like pattern, then these 2 variables have a linear relationship. 
+  </p>
+  <p>
+    For example, when playing a new game, people generally believe that the more hours you practice, the more skilled at the game you become. If we choose 20 players and plot their skill level (from 0 to 100, the higher the better) against the number of hours they have played, we would have a scatter plot like this, where the data points form an upward slope line:
+  </p>
+  <p>
+      <img src="/images/playgameskillvshournoline.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    <b>Quiz</b>: out of the 4 scatter plots below, which is least likely showing a linear relationship? Click or type <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A</b></a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B</b></a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C</b></a> or <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D</b></a>.
+  </p>
+  <p>
+      <img src="/images/4scatterplots.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+
+  </element>
+
+  <element elementid="103" elementType="Info">
+  <p>
+    Given a data set with linear relationship, we can <b>train a model</b> by approximating all the data points with a line, as shown below:
+  </p>
+  <p>
+      <img src="/images/playgameskillvshour.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    A few notes on the plot:
+  </p>
+  <p>
+    <ul>
+      <li>
+        The fitted line has an equation of <b>y = 2.636x + 0.337</b>, where y represents the skill level and x represents the hours played. Here the <b>intercept</b> of the model is 0.337, which means when x is 0 (no hours played yet), the skill level is 0.337 on average. The <b>coefficient for x</b> is 2.636, which means for every 1 additional hour played, the skill level increases by 2.636 on average.
+      </li>
+      <li>
+        The <b>R<sup>2</sup> ("r squared")</b> of the model is 0.8385. This is used to measure <b>how good the fit is</b>, and it is always between 0 and 1, with higher value indicating a better model fit. The value of 0.8385 means this is a pretty good fit.
+      </li>
+      <li>
+        Most of the training data points do not fall exactly on the fitted line, since there are other factors affecting a player's skill level besides hours played, such as a player's age and gaming experience in general.
+      </li>
+      <li>
+        If we need to estimate the skill level after 15 hours of game play, we can use the equation like this: 2.636 * 15 + 0.337 = 39.877. Essentially we just pick a point on the line corresponding to the given x value. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="104" elementType="Info">
+    <p>
+      Now let's get back to the pool game data. Since we have seen a strong trend that longer ball distance tends to result in lower success probability, let's start with a simple model that uses 'BallDistance' to predict the success probability. 
+    </p> 
+    <p>
+      As shown in the given test script, we call a helper function <b>TrainLinearModel</b> to train a linear model, with the parameters of the data table name 'testresult1', the name of the variable we are trying to predict 'Probability', and an array of the names of variables we are using as data inputs "['BallDistance']". Then the model is used to calculate a predicted success probability value for each data point, and finally we plot the predicted probability against the actual probability values. 
+    </p>
+    <p>
+      <img src="/images/predictedvsactualprobability.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>  
+    <p>
+        For a perfect model, all points should be on the 45 degree diagonal line, but when you run the test script you would probabily get a graph like above. Note that the model's <b>R<sup>2</sup> ("r squared")</b> is less than 0.3, so it is not a very good model yet. Though the model is pretty good at very high probability points, it is not so accurate for low probability points.
+    </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestTrainLinearModelCutAngle">
+    <p>
+      <b>Challenge</b>: can you change the test script to train a model using cut angle to predict probability? 
+    </p>
+    <code isHidden="true">
+const allResults = await LoadData('testresult1');
+//TODO: change model to use cut angle instead of ball distance 
+//h0::change 'BallDistance' to 'CutAngle'
+const model = await TrainLinearModel('testresult1', 'Probability', ['BallDistance']);
+const predictedProb = [];
+for (let i=0; i&lt;allResults.Probability.length; i++) {
+  //h1::change BallDistance to CutAngle
+  const x = allResults.BallDistance[i];
+  //h2::change BallDistance to CutAngle
+  const prob = model.intercept + model.coefficients.BallDistance. * x;
+  predictedProb.push(prob);
+}
+//ENDTODO
+const newResults = {};
+newResults.Probability = allResults.Probability;
+newResults.PredictedProbability = predictedProb;
+await SubmitData('linearModelResult', newResults);
+await PlotData('linearModelResult', 'Scatter', 'Probability', 'PredictedProbability');
+ReportEndOfTest();
+  </code>    
+</element>
+
+
+
+<element elementid="115" elementType="Coding" condition="TestTrainLinearModelCutAngleBallPocketDistance">
+    <p>
+      One of the reasons for the bad model fit using BallDistance or CutAngle alone is that the probability depends on multiple factors at the same time. So let's train the model using all 3 variables.
+    </p>
+    <p>
+      <b>Challenge</b>: please follow the example test script below, and modify it to use all 3 variables 'BallDistance', 'CutAngle' and 'PocketDistance'.
+    </p>
+    <code isHidden="true">
+const allResults = await LoadData('testresult1');
+
+//TODO: add PocketDistance as another input variable
+//h0::append 'PocketDistance' after 'CutAngle'::inputs should become ['BallDistance', 'CutAngle', 'PocketDistance']
+const model = await TrainLinearModel('testresult1', 'Probability', ['BallDistance', 'CutAngle']);
+const predictedProb = [];
+for (let i=0; i&lt;allResults.Probability.length; i++) {
+  const x1 = allResults.BallDistance[i];
+  const x2 = allResults.CutAngle[i];
+  //h1::use PocketDistance property::allResults.PocketDistance[i]
+  const x3 = ? ;
+  //h2::use PocketDistance as well for predicted probability calculation
+  const prob = model.intercept + model.coefficients.BallDistance * x1 + model.coefficients.CutAngle * x2;
+  predictedProb.push(prob);
+}
+const newResults = {};
+newResults.Probability = allResults.Probability;
+newResults.PredictedProbability = predictedProb;
+await SubmitData('linearModelResult', newResults);
+await PlotData('linearModelResult', 'Scatter', 'Probability', 'PredictedProbability');
+ReportEndOfTest();      
+    </code>
+   
+</element>
+
+
+<!-- 
+const allResults = await LoadData('testresult1');
+const model = await TrainLinearModel('testresult1', 'Probability', ['BallDistance', 'PocketDistance', 'CutAngle']);
+const predictedProb = [];
+for (let i=0; i<allResults.Probability.length; i++) {
+  const x1 = allResults.BallDistance[i];
+  const x2 = allResults.PocketDistance[i];
+  const x3 = allResults.CutAngle[i];
+  const prob = model.intercept + model.coefficients.BallDistance * x1 + model.coefficients.PocketDistance * x2 + model.coefficients.CutAngle * x3;
+  predictedProb.push(prob);
+}
+const newResults = {};
+newResults.Probability = allResults.Probability;
+newResults.PredictedProbability = predictedProb;
+await SubmitData('linearModelResult', newResults);
+await PlotData('linearModelResult', 'Scatter', 'Probability', 'PredictedProbability');
+ReportEndOfTest(); -->
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! As you can see, using all variables significantly improves your prediction, with an <b>R<sup>2</sup> ("r squared")</b> in the range of 0.6 to 0.7.</p>
+  <p><b>Summary:</b> you have learned <b>how to train a linear model</b> and how to use the model to predict new probability values.</p>
+  <p>
+      <b>Exercise:</b> go to the previous tutorial, and generate new training data with an additional attribute of 'Strength'. Then try to update your success probability model using all 4 attributes, and see if they improve the model fit further. Share your new <b>R<sup>2</sup> ("r squared")</b> in the forum.
+  </p>
+  <p>
+    <b>Exercise 2:</b> generate training data and fit a new model for success probability for the pocket 1 on the side.
+  </p>
+</element>
+

@@ -1,0 +1,170 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Hi there, I am <b>TBot</b>, and I'm here to show you how to build your own bot to play the Trajectory Pool game. </p>    
+    <p>You can chat with me by typing your questions or commands in the box below and then press <b>Enter</b>, such as <b>What's the pool table's size?</b> </p>
+    <!-- <p>
+        <ul>
+            <li>
+                <b>What's the pool table's size</b>?</b>
+            </li>
+            <li>
+                <b>How to use an array in Javascript?</b>
+            </li>
+            <li>
+                <b>help</b> or simply <b>h</b> for help.
+            </li>
+        </ul>
+    </p> -->
+    <p>Shall we start? You can say "yes", "ok" or simply "y" or "o" to continue. </p> 
+</element>
+    
+
+<!-- <element elementid="104" elementType="UserJavascriptLevel" answerKey="AB">
+    <p>
+      To tailor the tutorial to your needs, can you tell me how well you know the Javascript programming language? Please choose one of the following and type <b>A</b> or <b>B</b>:
+    </p>
+    <p>
+        <ul>
+          <li>
+            <b>[A]</b>: I am fairly new to Javascript.
+          </li>
+          <li>
+            <b>[B]</b>: I have some experience with Javascript so don't bother with the basics.
+          </li>
+        </ul>
+    </p>
+</element>
+ -->
+
+<element elementid="106" elementType="Info">
+    <h5 class="elementheader">[Info] The Break Shot</h5> 
+    <p>In this tutorial, we teach your robot how to take a <b>break shot</b>, which breaks the ball pack to start a new game.</p>
+
+    <p>Let's start by adding a new function <b>getBreakShot</b> to your robot program. The game engine calls the getBreakShot function to get your robot's break shot command, then executes the shot for you. 
+      </p>
+      <!-- <p>
+          <img src="/images/howgameengineworks.png" style="width: 94%; height: auto; margin-left: 3%; vertical-align: top;"/>
+        </p> -->
+    <p class="jshelp">
+      <b>Javascript Help:</b> if you are new to Javascript, don't be shy to ask me questions on any Javascript keyword, such as <b>what is a function</b> or <b>tell me about const</b>.
+    </p>
+    <p>Please copy or type the code below into the <b>Robot Code</b> editor on the right. When you are done, you can say "ok" or simply "o" to continue.</p>
+    <code isHidden='false'>
+function getBreakShot() {
+
+}                                 
+    </code>
+</element>
+
+
+<element elementid="108" elementType="Quiz" answerKey="C">
+  <h5 class="elementheader">[Info] About the pool table</h5> 
+  <p>Before we implement the getBreakShot function, I need to explain how to specify any location on the pool table using its <b>coordinate</b>. </p>
+  <p>
+    <img src="/images/PathPoolTableDimension2.jpg" style="width: 96%; height: auto; margin-left: 0px; vertical-align: top;"/>
+  </p>
+  <p>The coordinate of the center of the table is <b>(x=0, y=0)</b>, or simply <b>(0,0)</b>.</p>
+  <p><b>Quiz:</b> out of the 4 points (<b>A</b>, <b>B</b>, <b>C</b> and <b>D</b>) on the picture above, which one is most likely to have a coordinate of (490, -330)?</p>
+</element>
+
+
+<element elementid="110" elementType="Coding" condition="TestFinishedAnyResultAimXY">
+    <h5 class="elementheader">[Challenge] First Break Shot Command</h5> 
+    <p>Now let's change your break shot function to return an object with 2 properties <b>aimx</b> and <b>aimy</b>, both with a initial value of 0. This will tell the game engine to aim the cue stick from behind the cue ball towards an imaginary <b>aim position</b> at the <b>table center</b>.</p>
+    <p>
+      <img src="/images/breakaimingatcenter.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+  
+
+    <p class="jshelp">
+      <b>Javascript Help:</b> in Javascript, an object can be represented by a set of key-value pairs like this: 
+        <pre class="brush: js">
+//an object with 2 properties "x" and "y"
+obj = { x: 200, y: 50 };
+        </pre>
+        For more information, you can ask me "what is an object?".
+    </p>
+
+    <p>When you are done, click the <b>TEST</b> button on the top right to watch your robot's first break shot in action! </p>
+    <p class="important">
+        If you are stuck in coding, ask me for <b>hint</b> or simply type <b>h</b>. If you want to terminate a test before it finishes, simply press the <b>ESC</b> key or click outside the game window.
+    </p>
+    <!-- <p>Note that you can press the <b>ESC</b> key to dismiss the game world window at any time, or click <b>Dismiss</b> when you see the test result.</p> -->
+    <code isHidden='false'>
+function getBreakShot() {
+  //TODO: return break shot command object
+  //h0::add aimx and aimy properties::for an example, "{x: 1, y:2};" is an object with properties x/y.
+  ::return {aimx==0, aimy==0};
+  ::return {aimx=0, aimy=0};
+  ::return {aimx:0, aimy:0};
+  return { ? }; 
+  //ENDTODO
+}                                 
+    </code>
+</element>
+
+
+<element elementid="125" elementType="Coding" condition="TestFinishedYellowBallFirstTouch">
+  <h5 class="elementheader">[Challenge] Hitting a yellow ball first</h5> 
+  <p>Now I have a new challenge for you. Can you change the value of <b>aimx</b> or <b>aimy</b> so that the cue ball will hit one of the <b>yellow</b> balls first?</p>
+  <p>
+    <img src="/images/breakaimingatyellowball.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>You can try different values of aimx and aimy, and click the "TEST" button to check the result.</p>
+  <code isHidden="false">
+function getBreakShot() {
+  //TODO: make cue ball hit any yellow ball first
+  //h0::only need to change value of aimy::try setting aimy between 18 and 25
+  ::return {21};
+  ::return {aimx: 0, aimy= 21};
+  ::return {aimx: 0, aimy: 21};
+  return { aimx: ? , aimy: ? };
+  //ENDTODO
+}
+  </code>
+</element>
+
+
+<element elementid="130" elementType="Coding" condition="TestFinishedValidBreakShot">
+    <h5 class="elementheader">[Challenge] Taking a valid break shot</h5>         
+    <!-- <p>At this time you probably have found out an issue with your break shot: it is not strong enough. A valid break shot needs to pocket a colored ball or drive at least 4 balls to the rails (table borders).</p>  -->
+    <p>So far your shot has been using a default strength of 500. You can change the strength value by adding a new property <b>strength</b> in the object returned.</p>
+    <p><b>Challenge:</b> please specify a stronger strength to get a valid break shot. Note that at beginner level your shot strength can be at most <b>3000</b>. Also your shot doesn't need to hit a yellow ball first any more.</p>
+    <p>
+      <img src="/images/breakfullstrength.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>    
+    <code isHidden="false">
+function getBreakShot() {
+  //TODO: add 'strength' in shot command object
+  //h0::add a new property 'strength'
+  ::return {aimx: 0, aimy: 0, strength = 3000};
+  ::return {aimx: 0, aimy: 0, 3000:strength};
+  ::return {aimx: 0, aimy: 0, strength: 3000};
+  ::return {aimx: 0, aimy: 0, strength: 300};
+  return { aimx: ?, aimy: ?, ? };
+  //ENDTODO
+}                                 
+    </code>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+    <p>Congratulations on completing your first tutorial! </p>
+    <p>
+        For extra exercise, try to improve your break shot by adding 2 other properties: <b>cueballx</b> and <b>cuebally</b>. They control the initial position of the cue ball before the break shot. Note that the cueballx needs to be no more than -328 so the cue ball is to the left of the white head string.
+    </p>
+    <!-- <p>
+      <img src="/images/breakwithcueballxy.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>     -->
+    <!-- <p>
+      You can continue to change all 5 properties of the break shot command until you are satisfied. Ideally you want to pocket one or more colored balls (but not the cue ball or the black ball).
+    </p> -->
+</element>
+
+
+<!-- 
+function getBreakShot() {
+  return {
+    strength: 2000, aimx: 0, aimy: 112, cueballx: -330, cuebally: 150
+  };
+}
+-->

@@ -1,0 +1,949 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackOpponent() { 
+  // rule #1: The health score of my tank has to be greater than 2000.  
+  if (MyTank.health &lt;= 2000) return ""; 
+  
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal. 
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return ""; 
+  
+  // get all opponent tanks 
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+  if (opponents.length == 0) return ""; 
+  
+  // go through all opponent tanks 
+  for (let i = 0; i &lt; opponents.length; i += 1) { 
+    const target = opponents[i]; 
+    // rule #3: Either my tank's health regeneration is greater than the target tank,  
+    // or my tank has higher health score at the begin of the battle. 
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) { 
+      return attackTank(target); 
+    } 
+  } 
+  return ""; 
+}
+ 
+ 
+function getNewCommand() {  
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+}
+ 
+ 
+function attackTank(target) { 
+  if (!target) return ""; 
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+  
+  const graph = createGraph(); 
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ""; 
+} 
+ 
+ 
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == "white" &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  return attackTank(target); 
+}
+ 
+ 
+function weaponIsBetter(weaponType1, weaponType2) {  
+  const rankings = {}; 
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1; 
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2; 
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3; 
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4; 
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5; 
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6; 
+  rankings[0] = 7; // no weapon 
+  
+  return rankings[weaponType1] &lt; rankings[weaponType2]; 
+} 
+ 
+ 
+function getSpecialWeapon() {  
+  let bestType = MyTank.specialWeapon.type;  
+    
+  for (let i = 0; i &lt; Weapons.length; i += 1) {  
+    const weapon = Weapons[i];  
+    if (weaponIsBetter(weapon.type, bestType)) {  
+      bestType = weapon.type;  
+    }  
+  }  
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);  
+  const closeBestWeapon = getClosestItem(bestWeapons);  
+  if (closeBestWeapon == null) return [];  
+    
+  const graph = createGraph();  
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);  
+} 
+ 
+ 
+function getRandomCommand() {   
+  // random command   
+  const r = Math.random() * 100;   
+  if (r > 10) return "S";   
+  if (r > 8) return "U";   
+  if (r > 6) return "D";   
+  if (r > 4) return "L";   
+  if (r > 2) return "R";   
+  return "";   
+}  
+ 
+ 
+function createGraph() {  
+  // create a new Set to hold blocking tile types  
+  const blockingTileTypes = ["R", "M", "T"];  
+  // create a new graph  
+  const graph = createNewGraph();  
+    
+  // set values of graph, 1 = pass and 0 = blockage  
+  for (let i = 0; i &lt; graph.length; i += 1) {  
+    for (let j = 0; j &lt; graph[i].length; j += 1) {  
+      // tile type  
+      const tile = Maze[i][j];  
+      // check if it is a blockage  
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;  
+      else graph[i][j] = 1;  
+    }  
+  }  
+  return graph;  
+}  
+ 
+ 
+function getClosestItem(items) {  
+  // initialize variables to hold shortest distance and target  
+  let shortDis = 1000;  
+  let target = null;  
+    
+  // loop through all items  
+  for (let i = 0; i &lt; items.length; i += 1) {  
+    const pos = items[i];  
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;  
+    // calculate the absolute distance  
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);  
+    // update shortDis   
+    if (dis &lt; shortDis) {  
+      shortDis = dis;  
+      target = pos;  
+    }  
+  }  
+  return target;  
+}  
+ 
+ 
+function getCrystal() {  
+  const target = getClosestItem(Crystals);  
+  if (!target) return [];  
+  const graph = createGraph();  
+  return getShortestPathCmd(graph, MyTank, target);  
+}  
+ 
+ 
+function upgradeSpecialPowers() {  
+  let cmd = "";  
+  // if no power point, return blank command cmd  
+  if (MyTank.powerPoint == 0 ) return cmd;  
+  const sp = MyTank.specialPower;  
+    
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3"; 
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";  
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";  
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";  
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+    
+  return cmd;  
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome to the intermediate tutorials for Smart Tank! After the beginner tutorials, your tank is able to perform many basic actions, such as searching for the shortest paths, collecting crystals and weapons, and attacking other tanks. Beginning with this tutorial, we are going to discuss strategies to improve your tanks further. 
+  </p>
+  <p>
+    In the first few tutorials, we'll talk about how to avoid or escape from dangerous situations.
+  </p>
+  <p>
+     In this tutorial, we'll focus on how to measure danger and calculate "danger scores", and use these scores in our calculation for the shortest path. In the next tutorial, we'll discuss how to escape from dangerous situations. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    When is your tank in danger? When it is within the firing range of other tanks, either white tanks or opponent tanks. With the basic cannons, other tanks can fire at your tank only when they are on the same row or column with it. (We'll discuss special weapons later.) 
+  </p>
+  <p>
+    Your tank faces greater danger when multiple tanks could be attacking it, or when the enemy tanks have higher damage values. 
+  </p>
+</element>
+
+<element elementid="115" elementType="Info">
+  <p>
+    Therefore, we'll define the <b>danger score</b> of a position (c, r) as:
+  </p>
+  <p>
+    <b>sum of (1 + damage value) of all unblocked opponent tanks and white tanks facing the tile (c, r).</b>
+  </p>
+  <p>
+    Note that by "<b>unblocked</b>", we mean that the tank's direct firing range (in its facing direction) covers position (c, r) and its bomb shell can reach this position without being blocked by a tree, a rock, or some other tank. 
+  </p>
+  <p>
+    In addition, we add 1 to the damage value of each tank. This is how actual damage is calculated in the game engine. A tank's damage power is equal to <b>180 * (1 + its damage value)</b>.
+  </p>
+</element>
+
+<element elementid="120" elementType="Quiz" answerKey="B" answerReason="I'll explain next.">
+  <p>
+    <b>Quiz:</b> What is the danger score of the blue tank's position according to the definition above? Let's assume every tank has a <b>damage value of 0</b>.
+  </p>
+  <p>
+    <img src="/images/dangerscore.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 4
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 5
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 6
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 7
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="125" elementType="Info">
+  <p>
+    In the battlefield, there are five white tanks and one red tank facing towards your blue tank. However, the red tank's fire power is blocked by the white tank in front of it. The bomb shells from the red tank will hit the white tank, not your blue tank. But since tanks of the same color do not damage/obstruct one another, the damage values of all five white tanks must be added up. The total danger score for the blue tank's position, therefore, is 5 (1 for each of the five white tanks).  
+  </p>
+  <p>
+    <img src="/images/dsranges.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    With such a definition of the danger score, how do we calculate the danger score of every position in the map efficiently? 
+  </p>
+  <p>
+    One solution is this: for each position, find all tanks facing this position and add up the damage values for those tanks not blocked from that position by a tree, rock, or different-colored tank. This would require examination of every tank's facing direction as well as obstacles for every position. So we would need to recalculate each tank's reachable range many times. 
+  </p>
+  <p>
+    <b>Can you think of a simpler solution?</b> 
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Instead of focusing on each position, what if we calculate danger scores from <b>the perspectives of the attacking tanks</b>? For any particular tank, its attack range is like a ray of light cast in its facing direction, extending until it reaches an obstacle (a rock, tree, or a tank of another color). Therefore, we can simply add this tank's damage value to the danger scores of all tiles in its reachable range. 
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    Take the setup below as an example. The white tank is facing right, so the danger score of every tile to its right, until the rock tile, should be increased by the tank's damage value plus 1.
+  </p>
+  <p>
+    <img src="/images/dangerscorefromtank.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    To implement this solution, we will create a 2D array called <b>dangerScores</b> to store danger scores. Each item in this array corresponds to a tile in the battlefield, and initially all elements of this array are set to zero. 
+  </p>
+  <p>
+    Next, we will loop through every tank, get its facing direction, and add its damage value to each position within its firing range, until an obstacle (rock, tree, or different-colored tank) is encountered.
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    <img src="/images/dangerscorefromtank.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    For this example, when we calculate the impact of the white tank, assuming that white tank's damage value is 1, we'll add 2 to each item in the 2D array that represents a tile in its attack range:
+  </p>
+  <p>
+    <img src="/images/dscalculation.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedWithLog_1">
+  <p>
+    <b>Challenge: </b>Let's implement this solution. First, add a new function called <span class="variablenamebold">getDangerScores</span>, which takes no input parameters. In this <span class="variablenamebold">getDangerScores</span> function, call <span class="variablenamebold">createNewGraph</span> to generate a 2D array initialized with zeros and return this array. After that, call the getDangerScores function in <span class="variablenamebold">getNewCommand</span> and print out the returned array. 
+  </p>
+  <code isHidden="false">
+function getDangerScores() {
+  const scores = createNewGraph();
+  return scores;
+}
+
+function getNewCommand() {
+
+  const dangerScores = getDangerScores();
+  console.log(dangerScores);
+
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  ......
+}
+  </code>
+  <cleancode>
+function getDangerScores() {
+  const scores = createNewGraph();
+  return scores;
+}
+
+function getNewCommand() {  
+
+  const dangerScores = getDangerScores();
+  console.log(dangerScores);
+
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+}
+  </cleancode>
+</element>
+
+<element elementid="185" elementType="Coding" condition="TestFinishedWithLog_2">
+  <p>
+    Great! Now let's improve the new function to evaluate danger to all positions within the range of an <b>upward-facing tank</b>. 
+  </p>
+  <p>
+    Please use a <span class="variablenamebold">for-loop</span> to go through all tanks in the <b>Tanks</b> array, using a variable <span class="variablenamebold">i</span>. Check the color property in order to skip tanks of the same color as <span class="variablenamebold">MyTank</span>. Then, if a tank is facing upward, add its damage value plus 1 to the danger score of every tile above it in the same column, stopping at the first rock or tree tile encountered (ignoring other tanks for now).
+  </p>
+  <code isHidden="false">
+//TODO: calculate danger scores
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  //h0::for-loop with i going from 0 to length of the Tanks array minus 1
+  ::for (let i = 0; i &lt; Tanks.length - 1; i + 1) {
+  ::for (let i = 0; i &lt;= Tanks.length - 1; i + 1) {
+  ::for (let i = 0; i &lt; Tanks.length - 1; i += 1) {
+  ::for (let i = 0; i &lt; Tanks.length; i += 1) {
+  for ( ? ) {
+    const t = Tanks[i];
+    // skip t if it has the same color as MyTank
+    //h1::if t has the same color as MyTank, continue.::if (t.color == MyTank.color) continue;
+    ? 
+    
+    // danger power is 1 + this tank's damage value
+    const dscore = 1 + t.specialPower.damage;
+
+    // t facing upward
+    if (t.dir == 'U') {
+      // go through all tiles above t's position using a for-loop,
+      // using a variable j to represent the row number 
+      //h2::j should go from the row above t's row, up to the top border::j should go from t.r - 1 down to 0
+      ::for (let j = t.r - 1; j >= 0; j += 1) {
+      ::for (let j = 0; j &lt;= t.r - 1; j += 1) {
+      ::for (let j = t.r - 1; j >= 0; j -= 1) {
+      for ( ? ) {
+        scores[j][t.c] += dscore;
+        if (Maze[j][t.c] == 'R' || Maze[j][t.c] == 'T') break;
+      }
+    } 
+  }
+  return scores;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (Maze[j][t.c] == 'R' || Maze[j][t.c] == 'T') break;
+      }
+    }
+  }
+  return scores;
+}
+  </cleancode>
+</element>
+
+<!--element elementid="190" elementType="Info">
+  <p>
+    The danger scores for the blue tank is shown below, please compare them with your results.
+  </p>
+  <p>
+    <img src="/images/dsblue.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element-->
+
+<element elementid="200" elementType="Info">
+  <p>
+    Next, let's account for the effect of other tanks in our calculation of danger scores. As illustrated below, the red tank in front of the white tank has the same effect as a rock tile; any shells shot from the white tank will be blocked by the red tank.
+  </p>
+  <p>
+    <img src="/images/scfromtank2.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="205" elementType="Info">
+  <p>
+    However, since we are calculating the danger scores for <span class="variablename">MyTank</span>, we must not treat <span class="variablename">MyTank</span> itself as an obstacle for bomb shells. For example, in the picture below, the tiles to the right of the blue tank are no safer than the tile on which it now stands: if the blue tank moves to the right, the white tank's bomb shells can then reach its new position. 
+  </p>
+  <p>
+    <img src="/images/scfromtank3.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    How do we know if there is a tank at any position (c, r)? Unlike tile types, we cannot get tank related information directly from the <span class="variablenamebold">Maze</span> array. Instead, we have to walk through the <span class="variablenamebold">Tanks</span> array and check the position of each tank. 
+  </p>
+  <p>
+    In addition, a tank's bomb shells will only be blocked by other tanks of a different color. For example, a white tank does not block shells from other white tanks. 
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedWithLog_3">
+  <p>
+    <b>Challenge: </b>Add a new function called <span class="variablenamebold">isShellBlockedAtPos</span> that takes three parameters: col, row and color. This function should return <span class="variablenamebold">true</span> if a shell from a tank in the specified <b>color</b> will be blocked at the given position <b>(col, row)</b>, by a tank (excluding <span class="variablename">MyTank</span>) or an obstacle (tree or rock). Call this new function in <span class="variablenamebold">getDangerScores</span>.
+  </p>
+  <code isHidden="false">
+//TODO: check if a position is blocking bombs from tanks in given color
+function isShellBlockedAtPos(col, row, color) {
+  // whether there is a tank (not MyTank) at this position and of a different color. 
+  //h0::t.tankID should not be MyID::t's color should be different from color:: t's position should be (col, row)
+  ::t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row
+  ::t.tankID != MyID || t.color != color || t.c == col || t.r == row
+  ::t.tankID != MyID &amp;&amp; t.color != color || t.c == col &amp;&amp; t.r == row
+  const hasBlockingTank = Tanks.find( t => ? );
+  
+  // return whether this is a blocking tank, a tree or a rock.
+  //h1::you need to test hasBlockingTank or if Maze[row][col] is "R" or "T"
+  ::return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');
+  ::return (hasBlockingTank &amp;&amp; Maze[row][col] == 'R' &amp;&amp; Maze[row][col] == 'T');
+  return ?;
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        //h2::call isShellBlockedAtPos::isShellBlockedAtPos(t.c, j, t.color)
+        if ( ? ) break;
+      }
+    }
+  }
+  return scores;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function isShellBlockedAtPos(col, row, color) {
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+  </cleancode>
+</element>
+
+<element elementid="230" elementType="Coding" condition="TestFinishedWithLog_4">
+  <p>
+    Wonderful! Now, please go back to the <span class="variablenamebold">getDangerScores</span> function, and complete the code for the other three facing directions: downward, left, and right.
+  </p>
+  <code isHidden="false">
+//TODO: add code for tank facing downward, left, and right.
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      //h0::get the max row number using scores.length or Maze.length
+      ::for (let j = r + 1; j &lt;= scores.length; j + 1) {
+      ::for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+      ::for (let j = t.r + 1; j &lt;= scores.length; j += 1) {
+      ::for (let j = t.r + 1; j &lt; scores.length; j = 1) {
+      for ( ? ) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      //h1::loop from the column to the left of t until the left edge of the maze::column number of left edge is 0
+      ::for (let j = c - 1; j > 0; j + 1) {
+      ::for (let j = t.c - 1; j > 0; j - 1) {
+      ::for (let j = t.c; j >= 0; j += 1) {
+      ::for (let j = t.c - 1; j >= 0; j -= 1) {
+      for ( ? ) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+  </cleancode>
+</element>
+
+
+<!--element elementid="230" elementType="Info">
+  <p>
+    The danger scores for the blue tank is shown below, please compare them with your results. Note that since the red tank blocks all shells from white tanks below it, the danger scores above it decreased from 9 to 1. 
+  </p>
+  <p>
+    <img src="/images/dsblue2.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element-->
+
+<element elementid="240" elementType="Info">
+  <p>
+    Great job! Now that we have the danger scores for every position in the battlefield, how can we use it to avoid dangerous positions automatically? When we search for the shortest path, we try to find a series of tiles that we can walk through, assuming each tile has a "length" or travel distance of 1. So if we add the danger scores to a tile's "length", and use this new length to search for the shortest path, then safer paths are preferred. 
+  </p>
+</element>
+
+<element elementid="250" elementType="Coding" condition="TestFinishedNoPassAt_0_7_5">
+  <p>
+    <b>Challenge: </b>change the 2D array <span class="variablenamebold">dangerScores</span> to a <b>global variable</b> by moving its definition outside all functions, so that we can initialize it in <span class="variablenamebold">getNewCommand</span> and use it in other functions. You might have noticed that the variable <span class="variablenamebold">graph</span> has been created and used in multiple places. We should change it to a <b>global variable</b> as well. 
+  </p>
+  <p>
+    Change your code following the steps below:
+  </p>
+  <p>
+    <ul>
+      <li>
+        Step 1: define <span class="variablenamebold">dangerScores</span> and <span class="variablenamebold">graph</span> at the very beginning of your code.
+        <pre class="brush: js">
+let dangerScores = null;
+let graph = null;
+        </pre>
+      </li>
+      <li>
+        Step 2: in function <span class="variablenamebold">createGraph</span>, change <span class="variablename">const graph = createNewGraph();</span> to <span class="variablename">graph = createNewGraph();</span> (delete 'const').
+        <pre class="brush: js">
+graph = createNewGraph();
+        </pre>
+      </li>
+      <li>
+        Step 3: delete all code that creates the graph (marked as errors).
+        <pre class="brush: js">
+const graph = createGraph();
+        </pre>
+      </li>
+      <li>
+        Step 4: add calculation of <span class="variablenamebold">dangerScores</span> and <span class="variablenamebold">graph</span> at the beginning of function <span class="variablenamebold">getNewCommand</span>.
+        <pre class="brush: js">
+dangerScores = getDangerScores();
+graph = createGraph();
+        </pre>        
+      </li>
+      <li>
+        Step 5: change function <span class="variablenamebold">createGraph</span> from <span class="variablename">else graph[i][j] = 1;</span> to
+        <pre class="brush: js">
+else graph[i][j] = 1 + dangerScores[i][j];
+        </pre>
+      </li>
+    </ul>
+  </p>
+  <p>
+    Lastly, for the purpose of testing, please comment out the line that places the red tank in the test script, so all white tanks are able to attack the blue tank if it passes through position (7, 5). This way, the danger score of the tile (7, 5) will be very high, causing your tank to avoid this tile when it tries to retrieve the crystal.
+  </p>
+  <p>
+    <pre class="brush: js">
+// PlaceTank('red', 7, 7, false);
+    </pre>
+  </p>
+  <cleancode>
+let dangerScores = null;
+let graph = null;
+
+function isShellBlockedAtPos(col, row, color) {
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');
+}
+
+function getDangerScores() {
+  const scores = createNewGraph();
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const t = Tanks[i];
+    if (t.color == MyTank.color) continue;
+    const dscore = 1 + t.specialPower.damage;
+    
+    // tank facing upward
+    if (t.dir == 'U') {
+      for (let j = t.r - 1; j >= 0; j -= 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir == 'D') { // facing downward
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {
+        scores[j][t.c] += dscore;
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;
+      }
+    } else if (t.dir === 'L') { // facing to the left
+      for (let j = t.c - 1; j >= 0; j -= 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    } else if (t.dir === 'R') { // facing to the right
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {
+        scores[t.r][j] += dscore;
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;
+      }
+    }
+  }
+  return scores;
+}
+
+function attackOpponent() { 
+  // rule #1: The health score of my tank has to be greater than 2000.  
+  if (MyTank.health &lt;= 2000) return ""; 
+  
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal. 
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return ""; 
+  
+  // get all opponent tanks 
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+  if (opponents.length == 0) return ""; 
+  
+  // go through all opponent tanks 
+  for (let i = 0; i &lt; opponents.length; i += 1) { 
+    const target = opponents[i]; 
+    // rule #3: Either my tank's health regeneration is greater than the target tank,  
+    // or my tank has higher health score at the begin of the battle. 
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) { 
+      return attackTank(target); 
+    } 
+  } 
+  return ""; 
+}
+ 
+function getNewCommand() {  
+  dangerScores = getDangerScores();
+  graph = createGraph();
+
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // get a crystal  
+  let path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // get a weapon  
+  path = getSpecialWeapon();  
+  if (path.length > 0) return path[0];  
+    
+  // attack opponent tank 
+  cmd = attackOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // attack white tank  
+  cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand(); 
+}
+
+function attackTank(target) { 
+  if (!target) return ""; 
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ''; 
+} 
+
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  return attackTank(target); 
+}
+ 
+ 
+function weaponIsBetter(weaponType1, weaponType2) {  
+  const rankings = {}; 
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1; 
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2; 
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3; 
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4; 
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5; 
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6; 
+  rankings[0] = 7; // no weapon 
+  
+  return rankings[weaponType1] &lt; rankings[weaponType2]; 
+} 
+ 
+ 
+function getSpecialWeapon() {  
+  let bestType = MyTank.specialWeapon.type;  
+    
+  for (let i = 0; i &lt; Weapons.length; i += 1) {  
+    const weapon = Weapons[i];  
+    if (weaponIsBetter(weapon.type, bestType)) {  
+      bestType = weapon.type;  
+    }  
+  }  
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);  
+  const closeBestWeapon = getClosestItem(bestWeapons);  
+  if (closeBestWeapon == null) return [];  
+
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);  
+} 
+ 
+ 
+function getRandomCommand() {   
+  // random command   
+  const r = Math.random() * 100;   
+  if (r > 10) return "S";   
+  if (r > 8) return "U";   
+  if (r > 6) return "D";   
+  if (r > 4) return "L";   
+  if (r > 2) return "R";   
+  return "";   
+}  
+ 
+function createGraph() {  
+  // create a new Set to hold blocking tile types  
+  const blockingTileTypes = ['R', 'M', 'T'];  
+  // create a new graph  
+  graph = createNewGraph();  
+    
+  // set values of graph, 1 = pass and 0 = blockage  
+  for (let i = 0; i &lt; graph.length; i += 1) {  
+    for (let j = 0; j &lt; graph[i].length; j += 1) {  
+      // tile type  
+      const tile = Maze[i][j];  
+      // check if it is a blockage  
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;  
+      else graph[i][j] = 1 + dangerScores[i][j];  
+    }  
+  }  
+  return graph;  
+}  
+
+function getClosestItem(items) {  
+  // initialize variables to hold shortest distance and target  
+  let shortDis = 1000;  
+  let target = null;  
+    
+  // loop through all items  
+  for (let i = 0; i &lt; items.length; i += 1) {  
+    const pos = items[i];  
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;  
+    // calculate the absolute distance  
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);  
+    // update shortDis   
+    if (dis &lt; shortDis) {  
+      shortDis = dis;  
+      target = pos;  
+    }  
+  }  
+  return target;  
+}  
+
+function getCrystal() {  
+  const target = getClosestItem(Crystals);  
+  if (!target) return [];  
+  return getShortestPathCmd(graph, MyTank, target);  
+}  
+ 
+function upgradeSpecialPowers() {  
+  let cmd = "";  
+  // if no power point, return blank command cmd  
+  if (MyTank.powerPoint == 0 ) return cmd;  
+  const sp = MyTank.specialPower;  
+    
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3"; 
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";  
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";  
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";  
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+    
+  return cmd;  
+}
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>Congratulations! You have just completed your first intermediate tutorial for Smart Tank! </p>
+  <p>
+    <b>Summary:</b> In this tutorial, we discussed how to define and calculate danger scores, and we used our calculated results in the search of shortest paths in order to avoid more dangerous areas. 
+  </p>
+  <p>
+    <b>Exercise:</b> Save a new release of your code and try it in Smart Tank games. Currently we use the dangerScores directly in <span class="variablenamebold">createGraph</span> function as <span class="variablename">graph[i][j] = 1 + dangerScores[i][j];</span>. Change this line to use 2 times or 3 times the current <span class="variablenamebold">dangerScores[i][j]</span>. Try the changed version in games and observe the difference.
+  </p>
+  <p>
+    Share your ideas or questions in the forum under <a href="https://forum.tgame.ai/t/lesson-15-avoid-dangerous-areas/424" target="_blank">this lesson's topic</a>, and also check out how others are doing.
+  </p>
+</element>

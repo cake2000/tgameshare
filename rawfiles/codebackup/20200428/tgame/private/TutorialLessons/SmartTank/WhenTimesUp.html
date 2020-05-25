@@ -1,0 +1,1056 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+let dangerScores = null;     
+let graph = null;     
+const weaponRangeFuncs = {};   
+
+function upgradeSpecialPowers() {          
+  let cmd = "";          
+  // if no power point, return blank command cmd          
+  if (MyTank.powerPoint == 0 ) return cmd;          
+  const sp = MyTank.specialPower;          
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) return "3";   
+  
+  const oppos = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color); 
+  const myTeam = Tanks.filter(t => t.color == MyTank.color); 
+  const oppoSpeed = oppos.reduce((sofar, t) => sofar + t.specialPower.speed, 0) / oppos.length; 
+  const mySpeed = myTeam.reduce((sofar, t) => sofar + t.specialPower.speed, 0) / myTeam.length; 
+  if (mySpeed &lt; oppoSpeed &amp;&amp; sp.speed &lt; MAX_POWER) return "2"; 
+  
+  if (sp.speed &lt; 2) cmd = "2";   
+  else if (sp.damage &lt; 2) cmd = "1";   
+  else if (sp.reload &lt; 2) cmd = "4";   
+  else if (sp.healthRegen &lt; 2) cmd = "3";        
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";          
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";          
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";          
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";          
+                    
+  return cmd;          
+}
+ 
+function getDangerScores() {        
+  const scores = createNewGraph();        
+  const swTypes = [ 
+    SPECIAL_WEAPON_TYPES.SPLITTER3,  
+    SPECIAL_WEAPON_TYPES.NOVA,  
+    SPECIAL_WEAPON_TYPES.WAY4 
+  ];             
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {        
+    const t = Tanks[i];        
+    if (t.color == MyTank.color) continue;        
+    let dscore = 1 + t.specialPower.damage;        
+      
+    if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.LASER_GUN) { 
+      dscore *= 1.5; 
+    } else if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) { 
+      dscore *= 2; 
+    } 
+  
+    if (swTypes.includes(t.specialWeapon.type)) { 
+      const funcName = weaponRangeFuncs[t.specialWeapon.type];  
+      let range = []; 
+      if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) { 
+        range = funcName(t, t.color); 
+      } else { 
+        range = funcName(t, t.dir, t.color); 
+      } 
+      for (const colRow of range) { 
+        const tokens = colRow.split("_"); 
+        scores[tokens[1]][tokens[0]] += dscore;    
+      } 
+      continue; 
+    } 
+  
+    // tank facing upward        
+    if (t.dir == 'U') {        
+      for (let j = t.r - 1; j >= 0; j -= 1) {        
+        scores[j][t.c] += dscore;        
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;        
+      }        
+    } else if (t.dir == 'D') { // facing downward        
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {        
+        scores[j][t.c] += dscore;        
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;        
+      }        
+    } else if (t.dir === 'L') { // facing to the left        
+      for (let j = t.c - 1; j >= 0; j -= 1) {        
+        scores[t.r][j] += dscore;        
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;        
+      }        
+    } else if (t.dir === 'R') { // facing to the right        
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {        
+        scores[t.r][j] += dscore;        
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;        
+      }        
+    }        
+  }  
+  return scores;        
+}
+ 
+function getSpecialWeapon() {        
+  let curType = MyTank.specialWeapon.type;        
+    
+  let candidates = Weapons;    
+  const cmd = attackOpponent();    
+  if (cmd == "") {    
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);    
+  }    
+     
+  const betterWeapons = candidates.filter(weapon => weaponIsBetter(weapon.type, curType));        
+    
+  const closeBestWeapon = getClosestItem(betterWeapons);        
+  if (closeBestWeapon == null) return [];        
+            
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);        
+} 
+   
+function getClosestItem(items, includeOppoImp = true) {  
+  let shortDis = -1;  
+  let target = null;  
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);  
+    
+  for (let i = 0; i &lt; items.length; i += 1) {  
+    const pos = items[i];  
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;  
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);  
+    const myTime = dis / getSpeed(MyTank);  
+    
+    let flag = false;  
+    if (includeOppoImp) {  
+      for (let j = 0; j &lt; oppoTanks.length; j += 1) {  
+        const oppo = oppoTanks[j];  
+        const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);  
+        const oppoTime = oppoDis / getSpeed(oppo);  
+    
+        if (oppoTime * 1.5 &lt; myTime) {  
+          flag = true;  
+          break;  
+        }  
+      }  
+    }  
+    if (flag) continue;  
+    
+    if (shortDis === -1 || dis &lt; shortDis) {  
+      shortDis = dis;  
+      target = pos;  
+    }  
+  }  
+  return target;  
+} 
+   
+function getSpeed(tank) {  
+  if (tank.specialPower.speed == 0) return 1/20;  
+  return 1/(19 - tank.specialPower.speed);  
+}  
+   
+function freezeOpponent() {     
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {     
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");    
+    const target = getClosestItem(opponents, false);     
+    return attackTank(target);     
+  }     
+  return "";     
+} 
+      
+function shootWith4Way(whiteTanks) {   
+  const positions = [[MyTank.c, MyTank.r]];    
+  const obs = ['T', 'R', 'M'];   
+  // get positions in current row   
+  for (let col = MyTank.c - 1; col >= 0; col -= 1) {   
+    if (obs.includes(Maze[MyTank.r][col])) break;   
+    positions.push([col, MyTank.r]);   
+  }   
+  for (let col = MyTank.c + 1; col &lt; Maze[MyTank.r].length; col += 1) {   
+    if (obs.includes(Maze[MyTank.r][col])) break;   
+    positions.push([col, MyTank.r]);   
+  }   
+  // get positions in current column   
+  for (let row = MyTank.r - 1; row >= 0; row -= 1) {   
+    if (obs.includes(Maze[row][MyTank.c])) break;   
+    positions.push([MyTank.c, row]);   
+  }   
+  for (let row = MyTank.r + 1; row &lt; Maze.length; row += 1) {   
+    if (obs.includes(Maze[row][MyTank.c])) break;   
+    positions.push([MyTank.c, row]);   
+  }   
+      
+  let bestPos = null;    
+  let mostHit = 0;    
+  // loop through the positions    
+  for (const pos of positions) {    
+    const range = get4WayRange({ c: pos[0], r: pos[1] }, MyTank.color);    
+    const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length;    
+    if (count > mostHit) {    
+      mostHit = count;    
+      bestPos = { c: pos[0], r: pos[1]};    
+    }    
+  }    
+          
+  if (mostHit > 1) {    
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) { 
+      // park MyTank at bestPos if its speed is not zero by sending "P". 
+      if (MyTank.speedX != 0 || MyTank.speedY != 0) return "P"; 
+      return "S";   
+    }    
+    if (bestPos.c &lt; MyTank.c) return "L";    
+    if (bestPos.c > MyTank.c) return "R";    
+    if (bestPos.r &lt; MyTank.r) return "U";    
+    if (bestPos.r > MyTank.r) return "D";    
+  }    
+        
+  return "";   
+}  
+     
+function shootWith3SplOrNova(whiteTanks) {   
+  const funcName = weaponRangeFuncs[MyTank.specialWeapon.type];    
+  let bestPos = null;    
+  let mostHit = 0;    
+  const obs = ['T', 'M', 'R'];    
+  const positions = [    
+    [MyTank.c, MyTank.r],     
+    [MyTank.c - 1, MyTank.r],     
+    [MyTank.c + 1, MyTank.r],     
+    [MyTank.c, MyTank.r - 1],     
+    [MyTank.c, MyTank.r + 1]    
+  ];    
+      
+  // loop through the positions    
+  for (const pos of positions) {    
+    if (pos[0] &lt; 0     
+        || pos[0] >= Maze[MyTank.r].length     
+        || pos[1] &lt; 0     
+        || pos[1] >= Maze.length    
+        || obs.includes(Maze[pos[1]][pos[0]])) {    
+      continue;    
+    }    
+    for (const dir of ['L', 'R', 'U', 'D']) {    
+      const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color);    
+      const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length;    
+      if (count > mostHit) {    
+        mostHit = count;    
+        bestPos = { c: pos[0], r: pos[1], dir: dir };    
+      }    
+    }    
+  }    
+          
+  if (mostHit > 1) {    
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) {    
+      if (MyTank.dir == bestPos.dir) return "S";    
+      else return bestPos.dir;    
+    }     
+    if (bestPos.c &lt; MyTank.c) return "L";    
+    if (bestPos.c > MyTank.c) return "R";    
+    if (bestPos.r &lt; MyTank.r) return "U";    
+    if (bestPos.r > MyTank.r) return "D";    
+  }    
+  return "";   
+}   
+      
+function attackWhiteTank() {      
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;       
+  (MyTank.r != tank.r || MyTank.c != tank.c));      
+        
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) {     
+    const cmd = shootWith4Way(whiteTanks);   
+    if (cmd.length > 0) return cmd;    
+  }    
+      
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {     
+    const cmd = shootWith3SplOrNova(whiteTanks);   
+    if (cmd.length > 0) return cmd;    
+  }    
+        
+  // if MyTank is equipped with a Freezer      
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {      
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);      
+  }      
+            
+  const target = getClosestItem(whiteTanks);      
+  return attackTank(target);      
+}  
+     
+function getNewCommand() {        
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange;    
+        
+  dangerScores = getDangerScores();        
+  graph = createGraph();        
+                
+  let cmd = upgradeSpecialPowers();        
+  if (cmd.length > 0) return cmd;        
+                
+  // escape from danger        
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];        
+  if (MyTank.health &lt; 2 * totalDamage) {        
+    cmd = escapeFromDanger();        
+    if (cmd.length > 0) return cmd;        
+  }        
+              
+  // freeze opponents       
+  cmd = freezeOpponent();       
+  if (cmd.length > 0) return cmd;        
+              
+  // get a crystal          
+  let path = getCrystal();          
+  if (path.length > 0) return path[0];          
+                    
+  // get a weapon          
+  path = getSpecialWeapon();          
+  if (path.length > 0) return path[0];          
+                    
+  // attack opponent tank         
+  cmd = attackOpponent();         
+  if (cmd.length > 0) return cmd;          
+                  
+  // attack white tank          
+  cmd = attackWhiteTank();          
+  if (cmd.length > 0) return cmd;          
+                    
+  // random command          
+  return getRandomCommand();         
+}  
+    
+function attackTank(target) {         
+  if (!target) return "";         
+            
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {     
+    const dirs = ['U', 'D', 'L', 'R'];     
+    const funcName = weaponRangeFuncs[MyTank.specialWeapon.type];    
+    for (const dir of dirs) {     
+      const range = funcName(MyTank, dir, MyTank.color);     
+      if (range.includes(target.c + '_' + target.r)) {     
+        if (MyTank.dir != dir) return dir;     
+        else return "S";     
+      }     
+    }     
+  }     
+          
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE &amp;&amp; target.color == "white") {      
+    const rowDis = Math.abs(MyTank.r - target.r);       
+    const colDis = Math.abs(MyTank.c - target.c);      
+    let withinRange = (rowDis == 0 &amp;&amp; colDis &lt; 3);      
+    withinRange = withinRange || (colDis == 0 &amp;&amp; rowDis &lt; 3);      
+            
+    if (!withinRange) {      
+      const path = getShortestPathCmd(graph, MyTank, target);         
+      if (path.length > 0) return path[0];         
+    }      
+  }      
+            
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {         
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {         
+      return "R";         
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {         
+      return "L";         
+    } else {         
+      return "S";         
+    }         
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {         
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {         
+      return "D";         
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {         
+      return "U";         
+    } else {         
+      return "S";         
+    }         
+  }         
+                
+  const path = getShortestPathCmd(graph, MyTank, target);         
+  if (path.length > 0) return path[0];         
+  return '';         
+}   
+   
+function getMissileDirs() {      
+  const delta = {        
+    U: [0, -1],        
+    D: [0, 1],        
+    L: [-1, 0],        
+    R: [1, 0],        
+  };        
+  const dirs = Object.keys(delta);        
+  const ret = [];      
+  for (let i = 0; i &lt; dirs.length; i += 1) {      
+    const d = delta[dirs[i]];      
+    if (['T', 'R'].includes(Maze[MyTank.r + d[1]][MyTank.c + d[0]]) ||       
+    ['T', 'R'].includes(Maze[MyTank.r + 2 * d[1]][MyTank.c + 2 * d[0]])) {      
+      continue;      
+    }      
+    ret.push(dirs[i]);      
+  }      
+  return ret;      
+}      
+            
+function attackOpponent() {        
+  if (MyTank.health &lt;= 2000) return "";        
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";        
+                
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");        
+  if (opponents.length == 0) return "";        
+                
+  for (let i = 0; i &lt; opponents.length; i += 1) {        
+    const target = opponents[i];        
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {        
+      if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE) {      
+        if (dangerScores[MyTank.r][MyTank.c] > 1) {      
+          const cmd = escapeFromDanger();        
+          if (cmd.length > 0) return cmd;      
+        } else {      
+          const dirs = getMissileDirs();      
+          if (dirs.includes(MyTank.dir)) return "S";      
+          else if (dirs.length > 0) return dirs[0];      
+        }      
+      }       
+      return attackTank(target);        
+    }        
+  }        
+  return "";        
+}     
+               
+function weaponIsBetter(weaponType1, weaponType2) {          
+  const rankings = {};         
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;         
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;         
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;         
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;         
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;         
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;         
+  rankings[0] = 7; // no weapon         
+                
+  const values = Object.values(MyTank.specialPower);       
+  const allPowers = values.reduce((a, b) => a + b, 0);       
+                
+  if (allPowers &lt; 4 * MAX_POWER &amp;&amp; (MyTank.specialPower.damage >= 2)) {       
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0;        
+  }       
+              
+  return rankings[weaponType1] &lt; rankings[weaponType2];         
+}      
+              
+function escapeFromDanger() {        
+  const delta = {        
+    U: [0, -1],        
+    D: [0, 1],        
+    L: [-1, 0],        
+    R: [1, 0],        
+  };        
+  const dirs = Object.keys(delta);        
+  let bestDir = "";        
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];        
+                
+  for (let i = 0; i &lt; dirs.length; i += 1) {        
+    const dir = dirs[i];        
+    const newc = MyTank.c + delta[dir][0];        
+    const newr = MyTank.r + delta[dir][1];        
+                
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;        
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;        
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);        
+                
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {        
+      lowestDS = dangerScores[newr][newc];        
+      bestDir = dir;        
+    }        
+  }        
+  return bestDir;          
+}       
+            
+function isShellBlockedAtPos(col, row, color) {       
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );       
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');       
+}       
+               
+function getRandomCommand() {           
+  // random command           
+  const r = Math.random() * 100;           
+  if (r > 10) return "S";           
+  if (r > 8) return "U";           
+  if (r > 6) return "D";           
+  if (r > 4) return "L";           
+  if (r > 2) return "R";           
+  return "";           
+}          
+               
+function createGraph() {          
+  const blockingTileTypes = ['R', 'M', 'T'];          
+  graph = createNewGraph();          
+                    
+  for (let i = 0; i &lt; graph.length; i += 1) {          
+    for (let j = 0; j &lt; graph[i].length; j += 1) {          
+      const tile = Maze[i][j];          
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;          
+      else graph[i][j] = 1 + dangerScores[i][j];          
+    }          
+  }          
+  return graph;          
+}          
+                       
+function getCrystal() {          
+  const target = getClosestItem(Crystals);          
+  if (!target) return [];          
+  return getShortestPathCmd(graph, MyTank, target);          
+}      
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back to the last intermediate tutorial! We'll talk about what to do at the end of the game. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    When the game times up and no team has won the game yet, the game engine will start the <b>end game</b> mode. In this mode, a new rock will be added every second along the border in a spiral shape until to the center of the battlefield. It means that the battlefield will become more and more covered with rocks in the 4 sides, until all tiles are covered. If any tank is standing at a tile when a new rock is dropped there, it will be killed by the rock right away.  
+  </p>
+  <p>
+    <img src="/images/endgamemode.jpg" style="width: 95%; height: auto; margin-left: 2.5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    In such scenarios, to win the game, your tanks must avoid being crushed by the newly generated rocks and try to kill the opponents before the new rocks cover the entire battlefield. From the first new rock to the end of game, the total time for beginner level games is 13 * 13 = 169 seconds. For advanced games, the time is 19 * 19 = 361 seconds.  
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    In this tutorial, we will discuss the strategies in the end game mode from two aspects: 1) How to avoid being crushed by the new rocks; 2) How to attack or escape from opponents to win the game. 
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    First, we need to know whether the game has entered the end-game mode. In manual games, we can see the time left on the top right corner. Similarly, we can get the time left by calling a pre-defined function: <span class="variablenamebold">getTimeLeftInSeconds</span>. 
+  </p>
+  <p>
+    <img src="/images/gametimeleft.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    Th function <span class="variablenamebold">getTimeLeftInSeconds</span> takes no parameters and returns the time left in seconds. For example, if the function returns 35, it means after 35 seconds the game will enter the end game mode. 
+  </p>
+</element>
+
+<!--element elementid="160" elementType="Info">
+  <p>
+    One thing that requires our attention is, <span class="variablenamebold">getSecondsLeft</span> is defined with <span class="variablenamebold">async</span>, because it has to ask the game engine and wait for the answer. So if you call this function anywhere in your code, you need to add the keyward <span class="variablenamebold">await</span>, and add <span class="variablenamebold">async</span> to the definition of every function in which <span class="variablenamebold">getSecondsLeft</span> is called. See the example below. 
+  </p>
+  <pre class="brush: js">
+async function getNewCommand() {
+  ......
+  const secondsLeft = await getSecondsLeft();
+  ......
+}
+  </pre>
+</element-->
+
+<element elementid="170" elementType="Coding" condition="TestFinishedWithLog_13">
+  <p>
+    <b>challenge: </b>Create a global variable <span class="variablenamebold">inEndGameMode</span>, and set it to <span class="variablenamebold">false</span>. In the <span class="variablenamebold">getNewCommand</span> function, call <span class="variablenamebold">getTimeLeftInSeconds</span> to get the time left. If the returned value is zero, set <span class="variablenamebold">inEndGameMode</span> to <span class="variablenamebold">true</span>, and print "in end game mode". Note: when <span class="variablenamebold">inEndGameMode</span> is set to true, we don't need to check it any more (think about why). 
+  </p>
+  <code isHidden="true">
+//TODO
+let inEndGameMode = false;
+
+function getNewCommand() {   
+  if (!inEndGameMode) {
+    //h0::get the time left::call getTimeLeftInSeconds
+    const secondsLeft = ? ;
+    //h1::check whether it is end game mode::check whether secondsLeft is zero::if (secondsLeft == 0)
+    if ( ? ) {
+      inEndGameMode = true;
+      console.log("in end game mode");
+    }
+  }
+  
+  ......
+} 
+//ENDTODO   
+  </code>
+  <cleancode>
+let inEndGameMode = false;
+
+function getNewCommand() { 
+  if (!inEndGameMode) {
+    const secondsLeft = getTimeLeftInSeconds();
+    if (secondsLeft == 0) {
+      inEndGameMode = true;
+      console.log("in end game mode");
+    }
+  }
+
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange;    
+        
+  dangerScores = await getDangerScores();        
+  graph = createGraph();        
+                
+  let cmd = upgradeSpecialPowers();        
+  if (cmd.length > 0) return cmd;        
+  
+  // escape from danger        
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];        
+  if (MyTank.health &lt; 2 * totalDamage) {        
+    cmd = escapeFromDanger();        
+    if (cmd.length > 0) return cmd;        
+  }        
+              
+  // freeze opponents       
+  cmd = freezeOpponent();       
+  if (cmd.length > 0) return cmd;        
+              
+  // get a crystal          
+  let path = getCrystal();          
+  if (path.length > 0) return path[0];          
+                    
+  // get a weapon          
+  path = getSpecialWeapon();          
+  if (path.length > 0) return path[0];          
+                    
+  // attack opponent tank         
+  cmd = attackOpponent();         
+  if (cmd.length > 0) return cmd;          
+                  
+  // attack white tank          
+  cmd = attackWhiteTank();          
+  if (cmd.length > 0) return cmd;          
+                    
+  // random command          
+  return getRandomCommand();         
+} 
+  </cleancode>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    If you check your test script, you will notice a new function <span class="variablenamebold">StartEndGameMode()</span>. Because the test environment doesn't have a running timer, we call this function to simulate the real game's end game mode. 
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Now, let's focus on how to avoid the newly generated rocks. If you know the position where the next rock will emerge, your tank can avoid that position and won't get buried by the rock. Fortunately, the rocks emerge along the fixed spiral path at fixed intervals, so they are totally predictable. 
+  </p>
+  <p>
+    <img src="/images/endgamerockpath.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    The next question is, how can you make your tank avoid a position? 
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    The answer is to set a high danger score on that position. So when your tank calculates its next step, it will avoid that poisition in the shortest path. 
+  </p>
+  <p>
+    Sounds good? Let's implement it. 
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    The function <span class="variablenamebold">getNextEndGameRockPos(numOfPos)</span> has been provided for you to get the next <span class="variablenamebold">numOfPos</span> positions of the upcoming rocks. For example, if the argument <span class="variablenamebold">numOfPos</span> is 10, the function will return an array of the next 10 positions, in format of "<b>columnNumber_rowNumber</b>", same as the weapon ranges. 
+  </p>
+</element>
+
+<element elementid="230" elementType="Quiz" answerKey="A" answerReason="Starting from the current position (8, 1), the next ten positions are (9, 1) ... (13, 1) (13, 2) ... (13, 6).">
+  <p>
+    <b>Quiz:</b> Out of the four choices below, which one is the value of array <span class="variablenamebold">nextPoses</span> in the scenario below? 
+  </p>
+  <p>
+    <pre class="brush: js">
+const nextPoses = getNextEndGameRockPos(10);
+    </pre>
+  </p>
+  <p>
+    <img src="/images/endgamerockexample.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> ['9_1', '10_1', '11_1', '12_1', '13_1', '13_2', '13_3', '13_4', '13_5', '13_6']
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> ['1_9', '1_10', '1_11', '1_12', '1_13', '2_13', '3_13', '4_13', '5_13', '6_13']
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> ['9_1', '10_1', '11_1', '12_1', '13_1', '13_1', '13_2', '13_3', '13_4', '13_5']
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> ['1_9', '1_10', '1_11', '1_12', '1_13', '1_14', '2_14', '3_14', '4_14', '5_14']
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="240" elementType="Info">
+  <p>
+    With this helper function <span class="variablename">getNextEndGameRockPos</span>, you are able to set high danger scores for the next few positions, so that your tanks will avoid these positions. Let's assume we are focusing on the next 10 positions. But shall we set the same danger score for all these 10 positions? Probably not. Because the further a position is away from the last newly added rock, the less dangerous it is. We can set the danger score for first position to be covered by a new rock as 20, and decrease it by 2 at each step along the path. Let's implement this idea. 
+  </p>
+</element>
+
+<element elementid="250" elementType="Coding" condition="TestFinishedTanksKilled_3">
+  <p>
+    <b>Challenge: </b>In the function <span class="variablenamebold">getDangerScores</span>, if the global variable <span class="variablenamebold">inEndGameMode</span> is <span class="variablename">true</span>, call the helper function <span class="variablename">getNextEndGameRockPos</span> to get the positions for the next 10 upcoming rocks. Add 20 to the danger score of the first position in this array, 18 to the second, ..., and add 2 to the last one. Print out the final scores. 
+  </p>
+  <code isHidden="true">
+//TODO
+function getDangerScores() {        
+  const scores = createNewGraph();        
+  const swTypes = [ 
+    SPECIAL_WEAPON_TYPES.SPLITTER3,  
+    SPECIAL_WEAPON_TYPES.NOVA,  
+    SPECIAL_WEAPON_TYPES.WAY4 
+  ];             
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {  
+    ......      
+  }  
+
+  // new code starts
+
+  if (inEndGameMode) {
+    const nextPoses = getNextEndGameRockPos(10);
+    for (let i = 0; i &lt; nextPoses.length; i += 1) {
+      //h0::split the nextPoses[i] to get col and row numbers::call function split with "_" as the separator::nextPoses[i].split("_");
+      const tokens = ? ;
+      const col = tokens[0];
+      const row = tokens[1];
+      //h1::add value to danger scores::when i = 0, add 20; when i = 1, add 18 ...
+      ::20 - 2 * i
+      ::20 - i
+      ::2 * i - 20
+      scores[row][col] += ? ;
+    }
+  }
+
+  // new code ends
+
+  return scores;        
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getDangerScores() {        
+  const scores = createNewGraph();        
+  const swTypes = [ 
+    SPECIAL_WEAPON_TYPES.SPLITTER3,  
+    SPECIAL_WEAPON_TYPES.NOVA,  
+    SPECIAL_WEAPON_TYPES.WAY4 
+  ];             
+  
+  for (let i = 0; i &lt; Tanks.length; i += 1) {        
+    const t = Tanks[i];        
+    if (t.color == MyTank.color) continue;        
+    let dscore = 1 + t.specialPower.damage;        
+      
+    if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.LASER_GUN) { 
+      dscore *= 1.5; 
+    } else if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) { 
+      dscore *= 2; 
+    } 
+  
+    if (swTypes.includes(t.specialWeapon.type)) { 
+      const funcName = weaponRangeFuncs[t.specialWeapon.type];  
+      let range = []; 
+      if (t.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) { 
+        range = funcName(t, t.color); 
+      } else { 
+        range = funcName(t, t.dir, t.color); 
+      } 
+      for (const colRow of range) { 
+        const tokens = colRow.split("_"); 
+        scores[tokens[1]][tokens[0]] += dscore;    
+      } 
+      continue; 
+    } 
+  
+    // tank facing upward        
+    if (t.dir == 'U') {        
+      for (let j = t.r - 1; j >= 0; j -= 1) {        
+        scores[j][t.c] += dscore;        
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;        
+      }        
+    } else if (t.dir == 'D') { // facing downward        
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {        
+        scores[j][t.c] += dscore;        
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;        
+      }        
+    } else if (t.dir === 'L') { // facing to the left        
+      for (let j = t.c - 1; j >= 0; j -= 1) {        
+        scores[t.r][j] += dscore;        
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;        
+      }        
+    } else if (t.dir === 'R') { // facing to the right        
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {        
+        scores[t.r][j] += dscore;        
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;        
+      }        
+    }        
+  }  
+
+  if (inEndGameMode) {
+    const nextPoses = getNextEndGameRockPos(10);
+    for (let i = 0; i &lt; nextPoses.length; i += 1) {
+      const tokens = nextPoses[i].split("_");
+      const col = tokens[0];
+      const row = tokens[1];
+      scores[row][col] += 20 - 2 * i;
+    }
+  }
+
+  return scores;        
+}
+  </cleancode>
+</element>
+
+<element elementid="260" elementType="Info">
+  <p>
+    Great! Your tank is able to avoid hitting by the new rocks now. We'll move on to the next topic: how to win the game in the end game mode. 
+  </p>
+  <p>
+    You can win the game either by killing all the opponent tanks, or waiting for the opponent tanks to be killed by the new rocks before you. If at last, the tanks from two teams are killed at the same time, the team that has higher total health values wins. 
+  </p>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    Based on these rules, we can decide our strategies in the end game mode. we'll try to attack the opponent tanks and reduce their health scores, meanwhile, we'd like to keep our tanks alive with higher health values. 
+  </p>
+  <p>
+    Here are our basic rules: suppose your tank attacks a target tank, and the target will attack back. Which tank would lose more health points in this process? Assuming both tanks start at the same level of health, if your tank will lose less health points, it should attack the opponent tank. 
+  </p>
+</element>
+
+
+<element elementid="280" elementType="Info">
+  <p>
+    The change of the health points in a 5-seconds period can be calculated as (health regenerated - damage value * reload speed). 
+  </p>
+  <p>
+    <img src="/images/cppoints.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    So the formula for calculating the change in health is given below. The values in red are the opponent tank's values. Essentially we gain health from regeneration, but lose health from each shell we receive (damage per shell times total number of shells).
+  </p>
+  <p>
+    <img src="/images/endgameformula.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="300" elementType="Info">
+  <p>
+    Here is the strategy:
+  </p>
+  <ul>
+    <li>If <span class="variablename">MyTank</span>'s <span class="variablename">deltaHealth</span> is greater than that of the opponent tank, attack it;</li>
+    <li>Otherwise, try to attack white tanks or escape. If there is no way to escape, attack the opponent tanks anyway. </li>
+  </ul>
+</element>
+
+<element elementid="310" elementType="Info">
+  <p>
+    Before coding the strategy, please update your test script as below.
+  </p>
+  <pre class="brush: js">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7);
+PlaceTank('red', 10, 9, false);
+
+SetTankProperties(0, {specialPower: {
+  speed: 2, damage: 3, reload: 2, healthRegen: 3}});
+
+SetTankProperties(1, {health: 1000, specialPower: {
+  speed: 3, damage: 2, reload: 1, healthRegen: 2}});
+
+PlaceTank('white', 7, 1, true);
+PlaceTank('white', 19, 3, true);
+PlaceTank('white', 10, 1, true);
+
+StartEndGameMode();
+await SetupTickUpdates(1000);
+ReportEndOfTest();
+  </pre>
+</element>
+
+<element elementid="320" elementType="Coding" condition="TestFinishedKilledOpponents_1">
+  <p>
+    <b>Challenge: </b>Create a new function <span class="variablenamebold">calcDeltaHealth</span> which calculates the delta health as shown in the formula above. Define another function called <span class="variablenamebold">getEndGameCommand</span>, which implements the strategy that we just discussed. Return the command from <span class="variablenamebold">getEndGameCommand</span> in <span class="variablename">getNewCommand</span> if <span class="variablenamebold">inEndGameMode</span> is true. 
+  </p>
+  <code isHidden="false">
+//TODO
+function calcDeltaHealth(t1, t2) {
+  //h0::return delta health calculated from the formula::120 * (1 + healthRegen) * 2 - (1200 - 100 * reload)/1000 * 180 * (1 + damage)::120 * (1 + t1.specialPower.healthRegen) * 2 - (1200 - 100 * t2.specialPower.reload) / 1000 * 180 * (1 + t2.specialPower.damage); 
+  return ? ;
+}
+
+function getEndGameCommand() {
+  let cmd = "";
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white"); 
+  //h1::loop through all opponents with variable target::for (const target of opponents)
+  for ( ? ) {
+    //h2::calculate my delta health::calcDeltaHealth(MyTank, target);
+    const myDelta = ? ;
+    //h3::calculate opponent's delta health::calcDeltaHealth(target, MyTank);
+    const oppoDelta = ? ;
+    if (myDelta > oppoDelta) {
+      cmd = attackTank(target);
+      if (cmd.length > 0) return cmd;
+    }
+  }
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  cmd = escapeFromDanger();        
+  if (cmd.length > 0) return cmd;
+
+  const target = getClosestItem(opponents, false);
+  cmd = attackTank(target);
+  if (cmd.length > 0) return cmd;
+
+  return getRandomCommand(); 
+}
+
+function getNewCommand() { 
+  if (!inEndGameMode) {
+    const secondsLeft = getTimeLeftInSeconds();
+    if (secondsLeft == 0) {
+      inEndGameMode = true;
+    }
+  }
+
+  ......
+
+  // get a weapon          
+  path = getSpecialWeapon();          
+  if (path.length > 0) return path[0];          
+                    
+  // new code starts
+  
+  if (inEndGameMode) return getEndGameCommand();
+
+  // new code ends
+
+  // attack opponent tank         
+  cmd = attackOpponent();         
+  if (cmd.length > 0) return cmd;          
+                  
+  // attack white tank          
+  cmd = attackWhiteTank();          
+  if (cmd.length > 0) return cmd;          
+                    
+  // random command          
+  return getRandomCommand();         
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function calcDeltaHealth(t1, t2) {
+  return 120 * (1 + t1.specialPower.healthRegen) * 2 - 
+    (1200 - 100 * t2.specialPower.reload) / 1000 * 180 * (1 + t2.specialPower.damage);
+}
+
+function getEndGameCommand() {
+  let cmd = "";
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");   
+  for (const target of opponents) {
+    const myDelta = calcDeltaHealth(MyTank, target);
+    const oppoDelta = calcDeltaHealth(target, MyTank);
+    if (myDelta > oppoDelta) {
+      cmd = attackTank(target);
+      if (cmd.length > 0) return cmd;
+    }
+  }
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  cmd = escapeFromDanger();        
+  if (cmd.length > 0) return cmd;
+
+  const target = getClosestItem(opponents, false);
+  cmd = attackTank(target);
+  if (cmd.length > 0) return cmd;
+  
+  return getRandomCommand(); 
+}
+
+function getNewCommand() { 
+  if (!inEndGameMode) {
+    const secondsLeft = getTimeLeftInSeconds();
+    if (secondsLeft == 0) {
+      inEndGameMode = true;
+    }
+  }
+
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange;    
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange;    
+        
+  dangerScores = await getDangerScores();        
+  graph = createGraph();        
+                
+  let cmd = upgradeSpecialPowers();        
+  if (cmd.length > 0) return cmd;        
+  
+  // escape from danger        
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];        
+  if (MyTank.health &lt; 2 * totalDamage) {        
+    cmd = escapeFromDanger();        
+    if (cmd.length > 0) return cmd;        
+  }        
+              
+  // freeze opponents       
+  cmd = freezeOpponent();       
+  if (cmd.length > 0) return cmd;        
+              
+  // get a crystal          
+  let path = getCrystal();          
+  if (path.length > 0) return path[0];          
+                    
+  // get a weapon          
+  path = getSpecialWeapon();          
+  if (path.length > 0) return path[0];          
+                    
+  if (inEndGameMode) return getEndGameCommand();
+
+  // attack opponent tank         
+  cmd = attackOpponent();         
+  if (cmd.length > 0) return cmd;          
+                  
+  // attack white tank          
+  cmd = attackWhiteTank();          
+  if (cmd.length > 0) return cmd;          
+                    
+  // random command          
+  return getRandomCommand();         
+} 
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    Congratulations! You've finished all the intermediate tutorials. Now your tanks are pretty smart!
+  </p>
+  <p>
+    <b>Summary: </b>In this tutorial, we studied the special scenario when the game enters the end-game mode. We discussed and implemented some strategies to avoid being crushed by the new generated rocks and to attack the opponents. 
+  </p>
+  <p>
+    <b>Exercise: </b>Read through your entire code. Remove all print-outs. Add necessary comments. Release a new version and test it out in real games. Adjust your strategies if you see any issues.
+  </p>
+  <p>
+    If you have any questions, please post them in the forum under <a href="https://forum.tgame.ai/t/lesson-25-end-game-strategies/452" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

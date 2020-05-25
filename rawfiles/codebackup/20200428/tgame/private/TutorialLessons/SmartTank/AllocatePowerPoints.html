@@ -1,0 +1,427 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  if (!target) return ''; 
+    
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+  
+  const graph = createGraph(); 
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ''; 
+}
+ 
+function createGraph() {  
+  // create a new Set to hold blocking tile types  
+  const blockingTileTypes = ['R', 'M', 'T'];  
+  // create a new graph  
+  const graph = createNewGraph();  
+    
+  // set values of graph, 1 = pass and 0 = blockage  
+  for (let i = 0; i &lt; graph.length; i += 1) {  
+    for (let j = 0; j &lt; graph[i].length; j += 1) {  
+      // tile type  
+      const tile = Maze[i][j];  
+      // check if it is a blockage  
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;  
+      else graph[i][j] = 1;  
+    }  
+  }  
+  return graph;  
+}  
+ 
+ 
+function getClosestItem(items) { 
+  // initialize variables to hold shortest distance and target 
+  let shortDis = 100; 
+  let target = null; 
+  
+  // loop through all items 
+  for (let i = 0; i &lt; items.length; i += 1) { 
+    const pos = items[i]; 
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue; 
+    // calculate the Manhattan distance 
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    // update shortDis  
+    if (dis &lt; shortDis) { 
+      shortDis = dis; 
+      target = pos; 
+    } 
+  } 
+  return target; 
+} 
+ 
+ 
+function getCrystal() { 
+  const target = getClosestItem(Crystals); 
+  if (!target) return []; 
+  const graph = createGraph(); 
+  return getShortestPathCmd(graph, MyTank, target); 
+}
+ 
+ 
+function getRandomCommand() {  
+  // random command  
+  const r = Math.random() * 100;  
+  if (r > 10) return "S";  
+  if (r > 8) return "U";  
+  if (r > 6) return "D";  
+  if (r > 4) return "L";  
+  if (r > 2) return "R";  
+  return "";  
+}  
+ 
+ 
+function getNewCommand() {  
+  // get a crystal  
+  const path = getCrystal();  
+  if (path.length > 0) return path[0];  
+    
+  // attack white tank  
+  const cmd = attackWhiteTank();  
+  if (cmd.length > 0) return cmd;  
+    
+  // random command  
+  return getRandomCommand();  
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hi! Have you tried out your bot in some online games? It should be able to kill some white tanks and collect crystals now, so the next big question is how to allocate these power points to enhance your tank's special powers. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    For a quick review, here are the four types of special powers: 
+    <ur>
+      <li>
+        <b>Speed:</b> this power determines how fast your tank can move. If your tank is much faster than other tanks, it can collect more crystals and special weapons, or more easily escape from dangerous areas. 
+      </li>
+      <li>
+        <b>HealthRegen:</b> this power determines the how fast your tank can regenerate health. If your tank has higher <b>HealthRegen</b>, it can recover from damage faster.
+      </li>
+      <li>
+        <b>Reload:</b> this power controls the speed of reloading shells. If your tank has higher <b>Reload</b>, it can fire more frequently and cause greater damage.
+      </li>
+      <li>
+        <b>Damage:</b> this power determines how much health other tanks will lose when hit by your shells. If your tank has higher <b>Damage</b> power, it can cause greater damage on each shot.
+      </li>
+    </ur>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    So, which special power do you like most? Is <b>Damage</b> more important to you than <b>HealthRegen</b>? Should you max out on one power and then move on to the next power, or enhance every power evenly? 
+  </p>
+  <p>
+    There are no right or wrong answers to these questions. Experiment with different strategies under manual play, and you will develop your own preferences and strategies.
+  </p>
+  <p>
+    In this lesson, I'll show you how to implement a simple strategy for allocating power points, and you can adapt it over time based on your own preference. 
+  </p>
+</element>
+
+<!-- <element elementid="130" elementType="Info">
+  <p>
+    Then, the next question is, <b>how do we translate our ideas into code, so our tanks can understand</b>? 
+  </p>
+</element> -->
+
+<element elementid="140" elementType="Info">
+  <p>
+    Let's start with some simple rules. We'll <b>max out</b> the four special powers one-by-one in the order of <b>Speed -> Damage -> Reload -> HealthRegen</b>. For example, at the start, we will keep adding to the Speed power until we reach max speed; then we will move on to enhance our Damage power, etc.  
+  </p>
+  <p>
+    This idea can be translated into the following pseudo code: 
+  </p>
+  <p>
+    <pre class="brush: js">
+if Speed is less than MAX value
+  then add to Speed
+else if Damage is less than MAX value 
+  then add to Damage
+else if Reload is less than MAX value 
+  then add to Reload
+else if HealthRegen is less than MAX
+  then add to HealthRegen
+else 
+  nothing left to do
+    </pre>
+  </p>
+</element>
+
+<!--element elementid="150" elementType="Info">
+  <p>Here are some explaination of the rules.</p>
+  <p>
+    If my tank's health points are really low (such as less than 2000), to keep itself alive, my tank has to regenarate its health points as fast as possible. So I'd love to allocate the power points to <b>healthRegen</b> until it reaches the maximal value (four for beginner games and six for advanced games). 
+  </p>
+  <p>
+    Otherwise, if my tank is pretty healthy, I would like to increase the power of speed to two points. 
+  </p>
+  <p>
+    Then, I'll increase the damage power up to maximal in the same order. 
+  </p>
+</element-->
+
+<element elementid="160" elementType="Info">
+  <p>
+    Essentially we are building a simple <b>Rule-Based System</b>, which is a series of "if-else" statements that specify what actions to take under different conditions. Rule-based systems are often used to encode some form of knowledge in software systems, and if designed well, they can encode very complicated solutions. 
+  </p>
+  <p>
+    For example, we can create a <b>robot doctor</b> that make diagnoses based on patient health information, such as family history, test results, previous conditions, etc. If we add tens of thousands of rules to this system based on what a human doctor would do in various situations, this robot doctor can probably handle most of the common patient inquiries automatically. 
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    Instead of the "if-else" statements in the pseudo code above, we can also represent these rules using a <b>Decision Tree</b>. A decision tree is an inverted tree (the root is on top), where each node in the tree represents a decision point, and branches from the node represent differing outcomes (actions) based on decision made.
+  </p>
+  <p>
+    For example, if we draw a decision tree from the rules above, it will look like the tree below. 
+  </p>
+  <p>
+    <img src="/images/decisiontree.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    When you design a set of rules, you need to make sure the rules are logical. Specifically, you need to check the following two requirements carefully:
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>Self-consistent</b>: your rules cannot contradict each other. For example, if you have a rule saying when your tank is facing a white tank, you should attack it, and you have another rule saying you should run away in this case, then your tank will be confused as to which rule to follow.
+      </li>
+      <li>
+        <b>Complete</b>: your rules have to cover all possible situations. For example, if you are working on a robot that drives a car automatically, you must make sure it issues some reasonable command at all times, regardless of the circumstances around the car. It'll be a disaster if the robot "blanks out" and fails to give instructions in some situations.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Finally, it's time to convert all the rules into JavaScript code. Here is a list of input and output information that you need.
+  </p>
+  <p>
+    <ul>
+      <li>
+        Commands to increase special powers: "1" for <b>Damage</b>, "2" for <b>Speed</b>, "3" for <b>HealthRegen</b>, and "4" for <b>Reload</b>.
+      </li>
+      <li>
+        <span class="variablename">MyTank.health</span> tells you how much health your tank currently has.
+      </li>
+      <li>
+        <span class="variablename">MyTank.powerPoint</span> tells you how many new power points are available for allocation.
+      </li>
+      <li>
+        <span class="variablename">MyTank.specialPower</span> tells you how much special power has already been allocated, with 4 properties of <span class="variablename">damage</span>, <span class="variablename">speed</span>, <span class="variablename">healthRegen</span>, and <span class="variablename">reload</span>. For example, <span class="variablename">MyTank.specialPower.damage</span> tells you how much damage power your tank has.
+      </li>
+      <li>
+          <span class="variablename">MAX_POWER</span> tells you the maximum number of power points that can be allocated to each special power. This number is 4 for beginner games, and 6 for advanced games.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="210" elementType="Coding" condition="TestFinishedSpecialPower_4_0_0_0">
+  <p>
+    Complicated? Don't worry. We'll implement the code step by step. 
+  </p>
+  <p>
+    I've added a new function, <span class="variablenamebold">upgradeSpecialPowers</span>, in your robot code, which checks if <span class="variablename">MyTank</span> has extra power points. If not, the function returns an empty string; otherwise, it simply returns "1" to increase the Damage power. 
+  </p>
+  <p>
+    <b>Challenge</b>: Change your <span class="variablename">getNewCommand</span> function to call the new function <span class="variablenamebold">upgradeSpecialPowers</span> at the beginning.
+  </p>
+  <code isHidden="false">
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+  
+  ......
+}
+  </code>
+  <cleancode>
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand();  
+}    
+  </cleancode>
+</element>
+
+<!---  1: damage, 2: speed, 3: healthRegen, 4: reload  -->
+<element elementid="220" elementType="Coding" condition="TestFinishedSpecialPower_1_4_0_0">
+  <p>
+    Great! Let's start refining the function <span class="variablename">upgradeSpecialPowers</span> now. 
+  </p>
+  <p>
+    <b>Challenge</b>: In function <span class="variablename">upgradeSpecialPowers</span>, implement the rules we discussed above. Use the code below as a guidance.
+  </p>
+  <code isHidden="false">
+//TODO
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+  
+  //  1: damage, 2: speed, 3: healthRegen, 4: reload 
+  // check if speed is less than MAX_POWER
+  if (sp.speed &lt; MAX_POWER) cmd = "2";
+  // check if damage is less than MAX_POWER
+  //h0::if damage less than MAX_POWER, set cmd to "1"::else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  ?
+  // check if reload is less than MAX_POWER
+  //h1::if reload less than MAX_POWER, set cmd to "4" 
+  ?
+  // check if healthRegen is less than MAX_POWER
+  //h2::if healthRegen less than MAX_POWER, set cmd to "3"
+  ?
+
+  return cmd;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+  </cleancode>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    Nice job! You can check out the results from the power spectrum around your tank or by printing out the special power values with <span class="variablenamebold">console.log()</span> like below.
+  </p>
+  <p>
+    <pre class="brush: js">
+console.log("speed: " + MyTank.specialPower.speed + " damage: " + MyTank.specialPower.damage + " healthRegen: " + MyTank.specialPower.healthRegen + " reload: " + MyTank.specialPower.reload);
+    </pre>
+  </p>
+</element>
+
+<element elementid="240" elementType="Info">
+  <p>
+    In some scenarios, the current rules might not be good enough. For example, If my tank's health points are really low (such as less than 2000), to keep itself alive, my tank has to regenerate its health points as fast as possible. In such cases, I'd rather allocate the power points to <b>healthRegen</b> than anything else.
+  </p>
+  <p>
+    Let's implement this idea in your robot code. 
+  </p>
+</element>
+
+<element elementid="250" elementType="Coding" condition="TestFinishedSpecialPower_0_1_4_0">
+    <p>
+      <b>Challenge</b>: In the <span class="variablename">upgradeSpecialPowers</span> function, implement the rule we discussed above - if my tank's health is less than 2000, increase healthRegen to MAX_POWER first. Use the code below as a guidance.
+    </p>
+    <code isHidden="false">
+  //TODO
+  function upgradeSpecialPowers() {
+    let cmd = "";
+    // if no power point, return blank command cmd
+    if (MyTank.powerPoint == 0 ) return cmd;
+    const sp = MyTank.specialPower;
+    
+    // if the health points are low and healthRegen &lt; MAX_POWER, increase healthRegen
+    //h0::check if health is lower than 2000 and healthRegen is not at the MAX_POWER
+    ::if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt;= MAX_POWER)
+    ::if (MyTank.health &lt; 2000 || sp.healthRegen &lt; MAX_POWER)
+    ::if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER)
+    if ( ? ) cmd = "3";
+    else if (sp.speed &lt; MAX_POWER) cmd = "2";
+    else if (sp.damage &lt; MAX_POWER) cmd = "1";
+    else if (sp.reload &lt; MAX_POWER) cmd = "4";
+    else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+    return cmd;
+  }
+  //ENDTODO
+    </code>
+    <cleancode>
+  function upgradeSpecialPowers() {
+    let cmd = "";
+    // if no power point, return blank command cmd
+    if (MyTank.powerPoint == 0 ) return cmd;
+    const sp = MyTank.specialPower;
+  
+    if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+    else if (sp.speed &lt; MAX_POWER) cmd = "2";
+    else if (sp.damage &lt; MAX_POWER) cmd = "1";
+    else if (sp.reload &lt; MAX_POWER) cmd = "4";
+    else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  
+    return cmd;
+  }
+    </cleancode>
+  </element>
+  
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    Well done!
+  </p>
+  <p>
+    <b>Summary: </b>In this tutorial, we learned how to translate pre-defined rules into code and implemented a tiny rule-based system. Now your tank is able to allocate power points to the four special powers, based on your pre-defined rules. 
+  </p>
+  <p>
+    <b>Exercise 1: </b>Instead of upgrading the special powers to MAX_POWER one by one, increase each power to a level of 2 first. And only after every power is at least two points, then update each one to MAX_POWER. 
+  </p>
+  <p>
+    <b>Exercise 2: </b>Design and implement your own rules for allocating power points to special powers. You might first write down your rules in pseudo code or a decision tree, and then translate them into JavaScript code. 
+  </p>
+  <p>
+    Again, always post your ideas or questions on our forum, under <a href="https://forum.tgame.ai/t/lesson-12-power-points-allocation/421" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

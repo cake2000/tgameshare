@@ -1,0 +1,753 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function weaponIsBetter(weaponType1, weaponType2) { 
+  const rankings = {};
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  rankings[0] = 7; // no weapon
+
+  return rankings[weaponType1] &lt; rankings[weaponType2];
+}
+ 
+function getSpecialWeapon() { 
+  let bestType = MyTank.specialWeapon.type; 
+  
+  for (let i = 0; i &lt; Weapons.length; i += 1) { 
+    const weapon = Weapons[i]; 
+    if (weaponIsBetter(weapon.type, bestType)) { 
+      bestType = weapon.type; 
+    } 
+  } 
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType); 
+  const closeBestWeapon = getClosestItem(bestWeapons); 
+  if (closeBestWeapon == null) return []; 
+  
+  const graph = createGraph(); 
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon); 
+}
+
+function getRandomCommand() {  
+  // random command  
+  const r = Math.random() * 100;  
+  if (r > 10) return "S";  
+  if (r > 8) return "U";  
+  if (r > 6) return "D";  
+  if (r > 4) return "L";  
+  if (r > 2) return "R";  
+  return "";  
+} 
+
+function getNewCommand() { 
+  let cmd = upgradeSpecialPowers(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // get a crystal 
+  let path = getCrystal(); 
+  if (path.length > 0) return path[0]; 
+  
+  // get a weapon 
+  path = getSpecialWeapon(); 
+  if (path.length > 0) return path[0]; 
+  
+  // attack white tank 
+  cmd = attackWhiteTank(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // random command 
+  return getRandomCommand();
+}
+ 
+function attackWhiteTank() { 
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  const target = getClosestItem(whiteTanks); 
+  if (!target) return ''; 
+    
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") { 
+      return "R"; 
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") { 
+      return "L"; 
+    } else { 
+      return "S"; 
+    } 
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) { 
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") { 
+      return "D"; 
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") { 
+      return "U"; 
+    } else { 
+      return "S"; 
+    } 
+  } 
+  
+  const graph = createGraph(); 
+  const path = getShortestPathCmd(graph, MyTank, target); 
+  if (path.length > 0) return path[0]; 
+  return ''; 
+} 
+ 
+function createGraph() { 
+  // create a new Set to hold blocking tile types 
+  const blockingTileTypes = ['R', 'M', 'T']; 
+  // create a new graph 
+  const graph = createNewGraph(); 
+  
+  // set values of graph, 1 = pass and 0 = blockage 
+  for (let i = 0; i &lt; graph.length; i += 1) { 
+    for (let j = 0; j &lt; graph[i].length; j += 1) { 
+      // tile type 
+      const tile = Maze[i][j]; 
+      // check if it is a blockage 
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0; 
+      else graph[i][j] = 1; 
+    } 
+  } 
+  return graph; 
+} 
+ 
+function getClosestItem(items) { 
+  // initialize variables to hold shortest distance and target 
+  let shortDis = 1000; 
+  let target = null; 
+  
+  // loop through all items 
+  for (let i = 0; i &lt; items.length; i += 1) { 
+    const pos = items[i]; 
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue; 
+    // calculate the absolute distance 
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    // update shortDis  
+    if (dis &lt; shortDis) { 
+      shortDis = dis; 
+      target = pos; 
+    } 
+  } 
+  return target; 
+} 
+ 
+function getCrystal() { 
+  const target = getClosestItem(Crystals); 
+  if (!target) return []; 
+  const graph = createGraph(); 
+  return getShortestPathCmd(graph, MyTank, target); 
+} 
+ 
+function upgradeSpecialPowers() { 
+  let cmd = ""; 
+  // if no power point, return blank command cmd 
+  if (MyTank.powerPoint == 0 ) return cmd; 
+  const sp = MyTank.specialPower; 
+  
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3"; 
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3"; 
+  else if (sp.speed &lt; MAX_POWER) cmd = "2"; 
+  else if (sp.damage &lt; MAX_POWER) cmd = "1"; 
+  else if (sp.reload &lt; MAX_POWER) cmd = "4"; 
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3"; 
+  
+  return cmd; 
+} 
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Now your tank has learned how to attack white tanks, collect crystals, allocate power points, and pick up special weapons. There is still one more important skill that your tank needs to learn: <b>attacking opponent tanks</b>! 
+  </p>
+  <p>
+    You can win a tank war game only by killing all of the opponent tanks. However, when you attack an opponent, that player return your attack. So, when should you initiate a fight with an opponent?
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Think about what you would do when you play the game manually. You would probably attack your opponent only when your tank is stronger than your opponent's tank. 
+  </p>
+  <p>
+    How much stronger do you need to be? If you couldn't kill the opponent tank in one battle, the opponent would escape and recover from the damage after a while. Therefore, until your tank is strong enough inflict fatal damages to an opponent, you should probably focus on killing white tanks in order to gain strength. 
+  </p>
+  <p>
+    Let's put down these rules, and then translate them into code, just as we did in previous tutorials.
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Here is my list of rules as an example, and you can develop your own rules over time. 
+  </p>
+  <p>
+    My tank will decide whether to attack an opponent tank based on these rules: 
+    <ul>
+      <li>
+        Rule 1: I would not attack an opponent if the health score of my tank is less than 2000 (since my tank might die during the battle).
+      </li>
+      <li>
+        Rule 2: I would not attack an opponent unless either my tank's Damage power <b>or</b> its Reload power is at maximum.
+      </li>
+      <li>
+        Rule 3: I would attack an opponent only if my tank has higher health regeneration power <b>or</b> higher health points than the opponent tank. 
+      </li>
+
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    Next, I have converted the rules above to some pseudo code below:
+  </p>
+  <p>
+    <pre class="brush: js">
+// rule #1 
+if (MyTank.health &lt;= 2000) don't attack;
+
+// rule #2 
+if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) {
+  don't attack
+}
+
+for (target in opponent tanks) {
+  // rule #3 attack target if I have better health
+  if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {
+    attack target;
+  }
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="140" elementType="Coding" condition="TestFinishedCodeIncludes_functionattackTank(;TestFinishedAnyResult">
+  <p>
+    Before we implement the rules, we have one more problem to solve: how do we move our tank towards the target? We have already implemented this logic in the <span class="variablenamebold">attackWhiteTank</span> function. So to avoid duplicate code, let's refactor the <span class="variablename">attackWhiteTank</span> function and move its core logic to a new function called <span class="variablenamebold">attackTank</span>. 
+  </p>
+  <p>
+    Test your code after the change.
+  </p>
+  <p>
+    <pre class="brush: js">
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+    </pre>
+  </p>
+  <cleancode>
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}   
+  </cleancode>
+</element>
+
+<element elementid="150" elementType="Coding" condition="TestFinishedCodeIncludes_=attackOpponent();TestFinishedAnyResult">
+  <p>
+    Now we are ready to implement the new rules. Let's do it step by step. 
+  </p>
+  <p>
+    <b>Challenge: </b>First, as usual, I've added a new function <span class="variablenamebold">attackOpponent</span> in your code. Call this function in your <span class="variablenamebold">getNewCommand</span> function.
+  </p>
+  <code isHidden="false">
+//TODO: call function attackOpponent
+function getNewCommand() {
+  let cmd = upgradeSpecialPowers();
+  if (cmd.length > 0) return cmd;
+
+  // get a crystal
+  let path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  path = getSpecialWeapon();
+  if (path.length > 0) return path[0];
+  
+  // attack opponent tank
+  cmd = attackOpponent();
+  //h3::if cmd not blank, return::check length of cmd::if (cmd.length > 0) return cmd;
+   ? 
+  
+  // attack white tank
+  cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  ......
+
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() { 
+  let cmd = upgradeSpecialPowers(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // get a crystal 
+  let path = getCrystal(); 
+  if (path.length > 0) return path[0]; 
+  
+  // get a weapon 
+  path = getSpecialWeapon(); 
+  if (path.length > 0) return path[0]; 
+  
+  // attack opponent tank
+  cmd = attackOpponent();
+  if (cmd.length > 0) return cmd; 
+
+  // attack white tank 
+  cmd = attackWhiteTank(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // random command 
+  return getRandomCommand();
+}
+  </cleancode>
+</element>
+
+<element elementid="160" elementType="Coding" condition="TestFinishedKilledOpponents_1">
+  <p>
+    <b>Challenge: </b>Next, please implement the first two rules in the function <span class="variablenamebold">attackOpponent</span>.
+  </p>
+  <code isHidden="false">
+//TODO: find an opponent tank to attack
+function attackOpponent() {
+  // rule #1: The health score of my tank has to be greater than 2000. 
+  if (MyTank.health &lt;= 2000) return "";
+
+  // rule #2: both my tank's damage power is not at maximum, and my tank's reload power is not at maximum.
+  //h0::check damage and reload powers
+  ::MyTank.specialPower.damage == MAX_POWER || MyTank.specialPower.reload == MAX_POWER
+  ::MyTank.specialPower.damage == MAX_POWER &amp;&amp; MyTank.specialPower.reload == MAX_POWER
+  ::MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER
+  if ( ? ) return "";
+
+  // get all opponent tanks
+  //h1::get the tanks in neither MyTank.color nor white
+  ::t => t.color != MyTank.color &amp;&amp; t.color != "white"
+  ::t => t.color != MyTank.color || t.color != "white"
+  ::t => t.color == MyTank.color || t.color == "white"
+  const opponents = Tanks.filter( ? );
+  if (opponents.length == 0) return "";
+  return attackTank(opponents[0]);
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function attackOpponent() {
+  // rule #1: The health score of my tank has to be greater than 2000. 
+  if (MyTank.health &lt;= 2000) return "";
+
+  // rule #2: both my tank's damage power is not at maximal, and my tank's reload power is not at maximal.
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";
+
+  // get all opponent tanks
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");
+  if (opponents.length == 0) return "";
+  return attackTank(opponents[0]);
+}
+  </cleancode>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedKilledOpponents_1">
+  <p>
+    Good job! For the last step, let's implement rule #3. 
+  </p>
+  <p>
+    <b>Challenge: </b>Walk through all opponent tanks, find the target that complies with rule #3, and attack it.
+  </p>
+  <code isHidden="false">
+function attackOpponent() {
+  // rule #1: The health score of my tank has to be greater than 2000. 
+  if (MyTank.health &lt;= 2000) return "";
+
+  // rule #2: both my tank's damage power is not at maximal, and my tank's reload power is not at maximal.
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";
+
+  // get all opponent tanks
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");
+  if (opponents.length == 0) return "";
+
+  // go through all opponent tanks
+  //h0::for loop to go through all tanks::for (let i = 0; i &lt; opponents.length; i += 1) {
+  for ( ? ) {
+    const target = opponents[i];
+    // rule #3: Either my tank's health regeneration is greater than the target tank, 
+    // or my tank has higher health score at the begin of the battle.
+    //h1::check MyTank.health and MyTank.specialPower.healthRegen
+    ::MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health
+    ::MyTank.specialPower.healthRegen > target.specialPower.healthRegen &amp;&amp; MyTank.health > target.health
+    if ( ? ) {
+      return attackTank(target);
+    }
+  }
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function attackOpponent() {
+  // rule #1: The health score of my tank has to be greater than 2000. 
+  if (MyTank.health &lt;= 2000) return "";
+
+  // rule #2: both my tank's damage power is not at maximal, and my tank's reload power is not at maximal.
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";
+
+  // get all opponent tanks
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");
+  if (opponents.length == 0) return "";
+
+  // go through all opponent tanks
+  for (let i = 0; i &lt; opponents.length; i += 1) {
+    const target = opponents[i];
+    // rule #3: Either my tank's health regeneration is greater than the target tank, 
+    // or my tank has higher health score at the begin of the battle.
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {
+      return attackTank(target);
+    }
+  }
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Nice job!
+  </p>
+  <p>
+    Now your tank will attack the first opponent tank that satisfies all 3 rules. What if there are more opponent tanks that your tank is able to attack? This could happen in a 2v2 or 3v3 game. There are a few options that you could consider:
+  </p>
+  <p>
+    <ul>
+      <li>
+        1. Choose the first opponent tank in the list.
+      </li>
+      <li>
+        2. Choose the closest opponent tank.
+      </li>
+      <li>
+        3. Choose the weakest opponent tank, such as the one with the lowest health score. 
+      </li>
+    </ul>
+  </p>
+  <p>
+    The current code uses option #1. We'll leave other options for exercises.
+  </p>
+</element>
+
+<!--element elementid="190" elementType="Info">
+  <p>
+    First, we need to add one more red tank in the test script, like the code below.
+  </p>
+  <p>
+    <pre class="brush: js">
+PlaceTank('red', 10, 7, 2, false, false);
+    </pre>
+  </p>
+</element>
+
+<element elementid="200" elementType="Coding" condition="TestFinishedKilledOpponents_1_2">
+  <p>
+    <b>challenge: </b>Find the weakest qualified opponent tank to attack.
+  </p>
+  <code isHidden="false">
+//TODO: attack the weakest qualified opponent tank
+function attackOpponent() {
+  if (MyTank.health &lt;= 2000) return "";
+
+  let weakestTarget = null;
+  
+  // go through all tanks
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const target = Tanks[i];
+
+    if (target.tankID == MyID || target.color == MyTank.color || target.r == MyTank.r &amp;&amp; target.c == MyTank.c) {
+      continue;
+    }
+
+    // rule #3: Either my tank's health regeneration is greater than the target tank, 
+    // or my tank has higher health score at the begin of the battle.
+    let toAttack = MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health;
+
+    // rule #4: Either the target tank is frozen and my My tank is not carrying a freezer, 
+    // or my tank's damage power is at maximal, or my tank's reload power is at maximal.
+    toAttack = toAttack &amp;&amp; (MyTank.specialPower.damage == MAX_POWER || MyTank.specialPower.reload === MAX_POWER);
+
+    // check if target is weaker than weakestTarget
+    //h0::if weakestTarget is blank or target.health is less or tank's damage power is less::if (toAttack &amp;&amp; (!weakestTarget || target.health &lt; weakestTarget.health || target.specialPower.damage &lt; weakestTarget.specialPower.damage)) {
+    if ( ? ) {
+      weakestTarget = target;
+      // remove break;
+      // break;
+    }
+  }
+
+  return attackTank(weakestTarget);
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function attackTank(target) {
+  if (!target) return "";
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  return attackTank(target);
+}      
+
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+  return graph;
+}
+
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = -1;
+  let target = null;
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the absolute distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  const target = getClosestItem(Crystals);
+  if (!target) return [];
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, target);
+}
+
+function upgradeSpecialPowers() {
+  let cmd = "";
+  // if no power point, return blank command cmd
+  if (MyTank.powerPoint == 0 ) return cmd;
+  const sp = MyTank.specialPower;
+
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";
+  else if (sp.speed &lt; 2) cmd = "2";
+  else if (sp.damage &lt; 2) cmd = "1";
+  else if (sp.healthRegen &lt; 2) cmd = "3";
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";
+
+  return cmd;
+}
+
+function getSpecialWeapon() {
+  const myPreference = {};
+  myPreference[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;
+  myPreference[SPECIAL_WEAPON_TYPES.NOVA] = 2;
+  myPreference[SPECIAL_WEAPON_TYPES.MISSILE] = 3;
+  myPreference[SPECIAL_WEAPON_TYPES.WAY4] = 4;
+  myPreference[SPECIAL_WEAPON_TYPES.SPLITTER3] = 5;
+  myPreference[SPECIAL_WEAPON_TYPES.FREEZER] = 6;
+  myPreference[0] = 7;
+
+  let bestType = 0;
+  if (MyTank.specialWeapon &amp;&amp; MyTank.specialWeapon.type) {
+    bestType = MyTank.specialWeapon.type;
+  }
+  for (let i = 0; i &lt; Weapons.length; i += 1) {
+    const w = Weapons[i];
+    if (myPreference[w.type] &lt; myPreference[bestType]) {
+      bestType = w.type;
+    }
+  }
+  const bestWeapons = Weapons.filter(w => w.type == bestType);
+  const closeBestWeapon = getClosestItem(bestWeapons);
+  if (closeBestWeapon == null) return [];
+
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);
+}
+
+function attackOpponent() {
+  if (MyTank.health &lt;= 2000) return "";
+
+  let weakestTarget = null;
+  
+  // go through all tanks
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const target = Tanks[i];
+
+    if (target.tankID == MyID || target.color == MyTank.color || target.r == MyTank.r &amp;&amp; target.c == MyTank.c) {
+      continue;
+    }
+
+    // rule #3: Either my tank's health regeneration is greater than the target tank, 
+    // or my tank has higher health score at the begin of the battle.
+    let toAttack = MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health;
+
+    // rule #4: Either the target tank is frozen and my My tank is not carrying a freezer, 
+    // or my tank's damage power is at maximal, or my tank's reload power is at maximal.
+    toAttack = toAttack &amp;&amp; (MyTank.specialPower.damage == MAX_POWER || MyTank.specialPower.reload === MAX_POWER);
+
+    if (toAttack &amp;&amp; (!weakestTarget || target.health &lt; weakestTarget.health || target.specialPower.damage &lt; weakestTarget.specialPower.damage)) {
+      weakestTarget = target;
+    }
+  }
+
+  return attackTank(weakestTarget);
+}
+
+function getNewCommand() {
+  const cmd1 = upgradeSpecialPowers();
+  if (cmd1.length > 0) return cmd1;
+
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // get a weapon
+  const path2 = getSpecialWeapon();
+  if (path2.length > 0) return path2[0];
+  
+  // attack opponent tank
+  const cmd2 = attackOpponent();
+  if (cmd2.length > 0) return cmd2;
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}   
+  </cleancode>
+</element-->
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>In this tutorial, your tank will attack only an opponent to which our own tank compares favorably according to our predefined rules.  
+  </p>
+  <p>
+    <b>Exercise 1: </b>In our <span class="variablename">attackOpponent</span> function, in order to identify all opponent tanks, we check only tank color. Modify the <span class="variablename">filter</span> function such that it discards opponent tanks that are on the same position as <span class="variablename">MyTank</span>.
+  </p>
+  <p>
+    <b>Exercise 2: </b>Change your code to let your tank attack the weakest opponent tank, which has the lowest health score. 
+  </p>
+  <p>
+    Post your ideas or questions on our forum, under <a href="https://forum.tgame.ai/t/lesson-14-attacking-opponent-tanks/423" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

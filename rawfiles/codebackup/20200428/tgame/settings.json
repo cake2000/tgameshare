@@ -1,0 +1,26 @@
+{
+  "public": {
+    "stripe": {
+      "testPublishableKey": "pk_test_1dp4AkKUu8TfT269VHDzDURo",
+      "livePublishableKey": "pk_live_r69GT0ddKN3eogmRCYjMl0GB"
+    }
+  },
+  "private": {
+    "stripe": {
+      "testSecretKey": "sk_test_qq2GY9tjRldmBAfO1dJXGvB6",
+      "liveSecretKey": "sk_live_QgSFSxODdQOhgYuYaXDJkPVE"
+    }
+  },
+  "galaxy.meteor.com": {
+    "env": {
+      "ROOT_URL": "https://www.tgame.ai",
+      "MONGO_URL": "mongodb://upliftingtechnology:AABB1234!@ds159090-a0.mlab.com:59090,ds159090-a1.mlab.com:59090/tgame?replicaSet=rs-ds159090",
+      "MONGO_OPLOG_URL": "mongodb://oplog-reader:AABB1234!@ds159090-a0.mlab.com:59090,ds159090-a1.mlab.com:59090/local?replicaSet=rs-ds159090&authSource=admin",
+      "GOOGLE_APPLICATION_CREDENTIALS": "./assets/app/tbotv1-3-afmvid-e88bdf1ef846.json"
+    }
+  },
+  "PrerenderIO": {
+    "token": "p2B7Ji5iBSfWWVsDu0P2",
+    "host": "www.tgame.ai"
+  }
+}

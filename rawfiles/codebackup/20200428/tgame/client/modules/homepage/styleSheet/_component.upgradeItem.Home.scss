@@ -1,0 +1,130 @@
+
+.my-coins{
+  &__available{
+    align-items: center;
+    display: flex;
+    img{
+      width: 45px;
+      height: 45px;
+      object-fit: contain;
+    }
+    span{
+      font-size: 16px;
+      color: #0a2634;
+      font-weight: 600;
+    }
+  }
+}
+
+.image-zoomed {
+  background: #fff;
+  border: 2px solid #666666;
+  border-radius: 5px;
+  padding: 6px;
+  width: 100%;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  img {
+    width: 100%;
+  }
+}
+
+.upgradeTools{
+  display: flex;
+  flex: 0 0 50%;
+  min-width: 495px;
+  &:nth-child(odd){
+    background: #daecf2;
+  }
+  &__container{
+    display: flex;
+    position: relative;
+    padding: 20px 20px;
+    margin: 0px;
+    width: 100%;
+    .images-tools{
+      padding: 5px;
+      border-radius: 5px;
+      border: 2px solid #666;
+      background-color: #fff;
+      flex: 0 0 200px;
+      &:hover {
+        cursor: zoom-in;
+      }
+      img{
+        width: 100%;
+        vertical-align: middle;
+        height: 90px;
+        object-fit: contain;
+        &.image-type-Cue{
+          transform: rotate(-25deg);
+        }
+      }
+    }
+    &__infomation{
+      flex: 1;
+      margin-left: 25px;
+      display: flex;
+      justify-content: space-around;
+      flex-flow: column;
+      .name-tools{
+        font-size: 16px;
+        font-weight: 600;
+        color: blue;
+      }
+      .price-tools{
+        display: flex;
+        align-items: center;
+        span{
+          font-weight: 600;
+        }
+        img{
+          margin-right: 10px;
+          width: 45px;
+          height: 45px;
+          object-fit: contain;
+        }
+      }
+      .choose-tools{
+        display: flex;
+        align-items: center;
+        .equiped-item{
+          font-weight: 600;
+        }
+        img{
+          width: 20px;
+          height: 18px;
+          object-fit: contain;
+        }
+        .btn {
+          &:active {
+            transform: translateY(3px);
+            border-bottom-width: 3px;
+          }
+        }
+      }
+      &__action{
+        position: absolute;
+        width: 100%;
+        background: #170c3dde;
+        height: 100%;
+        display: flex;
+        color: #fff;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 30px;
+        left: 0px;
+        justify-content: center;
+        top: 0px;
+        .message{
+          margin-bottom: 10px;
+          line-height: 20px;
+        }
+      }
+    }
+  }
+
+}

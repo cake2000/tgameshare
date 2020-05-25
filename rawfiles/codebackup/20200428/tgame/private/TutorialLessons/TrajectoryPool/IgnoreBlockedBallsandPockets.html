@@ -1,0 +1,353 @@
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome to the intermediate level lessons! So far you have built a working robot that can probably already beat many human players, but <b>there is one problem: everyone else has also got (almost) the same robot as yours!</b>
+    </p>
+    <p>
+    Don't worry. Starting from this tutorial, we'll start to add more advanced tactics to your robot, and you will have plenty of opportunities to make your robot do things differently and hopefully better!
+  </p>
+  <p>
+    First, in the getCallShot function, your robot walks through all balls and all pockets, asking for success probability of each pair. However, each call to "await calculateProbability" takes hundreds of milliseconds, so too many such inquiries will slow down the whole search process, leaving your robot with less time to search for better shots when necessary. 
+  </p>    
+  <p>
+    In this tutorial, <b>let's try to skip some unnecessary probability inquiries to accelerate the search process</b>.
+  </p>
+</element>
+  
+<element elementid="102" elementType="Info">
+  <p>
+    The first improvement we can make is to <b>skip those balls blocked from the cue ball</b>. For example, in the current test setup, ball 2 is blocked by ball 7 from the cue ball, so there is no point asking the game engine for the success probability for shooting ball 2 into any pocket at all.
+  </p>
+  <p>
+    <img src="/images/ball2blockedbyball7.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="106" elementType="Coding" condition="TestFinishedNoProbabilityInquiry2_2">
+  <p>
+    <b>Challenge:</b> please modify your getCallShot function to <b>check whether a ball is blocked from the cue ball</b>, and if so, skip that ball. Note that you can use the <b>isPathBlocked(point1, point2)</b> function to check for blockage, and you can get each ball's position from the <b>Balls</b> array. And to skip a ball, you can use the keyword <b>continue</b>, which means "instead of finishing up the current iteration, continue to the beginning of the next iteration".  
+  </p>
+  <code isHidden="true">
+async function getCallShot() {
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+
+    //TODO: skip this ball if blocked from cue ball
+    //h0::use isPathBlocked on cue ball position and target ball position::you can get ball positions using Balls[ballID] and Balls[0]
+    ::const isBlocked = isPathBlocked(ballID, 0);
+    ::const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    ::const isBlocked = isPathBlocked(Balls[ballID]);
+    const isBlocked = ? ;
+    if (isBlocked) {
+      //h1::skip current iteration::use 'continue;'
+      ? ;
+    }
+    //ENDTODO
+    
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}        
+   
+  </code>   
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; 
+        highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}       
+  </cleancode> 
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Now you might be thinking, it would be great if you could observe the code execution to know which pockets were skipped by your robot. Actually, you can use the <b>console.log()</b> function to print out any information that you'd like to review. For example, the following code will print out the value of pocketID. 
+  </p>
+  <p>
+    <pre class="brush: js">
+console.log("pocketID = " + pocketID);
+    </pre>
+  </p>
+  <p>
+    Note that you can create a string using double quote ("") or single quote ('') around it, and add to a string using the "+" operator. For another example, you can build a string like this: "1 &nbsp; " + 2 + " &nbsp; " + 3. Behind the scenes, the numbers are converted to a string first, then concatenated with the other strings.
+  </p>
+</element>
+
+<element elementid="112" elementType="Info">
+  <p>
+    You need to access the <b>developer console</b> on your browser to see the printed log. If you are using <b>Chrome</b> on a <b>Windows</b> or <b>Linux</b> machine, you can simply press <b>F12</b> to open the console. Otherwise, please checkout this reference page: <a href="http://wickedlysmart.com/hfjsconsole/" target="_blank">using the browser console</a>.
+  </p>
+  <p>
+    Once you open the developer console, you'll see a new subwindow on the right or bottom of your browser window. Please make sure the <b>Console</b> tab is selected, and you'll find your log messages in the console.
+  </p>
+  <p>
+    <img src="/images/consoletab.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+</element>  
+
+<element elementid="120" elementType="Coding" condition="TestFinishedNoProbabilityInquiry2_2">
+  <p>
+    <b>Challenge:</b> please add a line of code to print out the pocket id and ball id inside the loop for pockets, so you know for which your robot has called the calculateProbability function by checking it on the developer console.
+  </p>
+  <code isHidden="false">
+for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+  const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+  const cmd = { 
+    aimx: aimPoint.x, 
+    aimy: aimPoint.y, 
+    strength: 30, 
+    targetBallID: ballID, 
+    targetPocketID: pocketID 
+  };
+  //TODO: print out pocketID and ballID
+  //h0::you can build the message by adding up strings or variables using "+"
+  ::console.log(pocketID + ballID);
+  ::console.log("BallID = " + ballID + " pocketID = " + pocketID );
+  console.log( ? );
+  //ENDTODO  
+  const prob = await calculateProbability(cmd);
+
+  if (prob > highestProb) {
+    bestCommand = cmd; 
+    highestProb = prob;
+  }
+}    
+
+  </code>    
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; 
+        highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}     
+  </cleancode> 
+</element>
+
+
+<element elementid="130" elementType="Coding" condition="TestFinishedNoProbabilityInquiry_3_1">
+  <p>
+    Now let's make another shortcut by skipping all the target pockets that are blocked from the target ball. For example, in the current test setup, ball 3 is blocked from pocket 1 by ball 4, so no point checking the probability for pocket 1 and ball 3 right?
+  </p>
+  <p>
+    <b>Challenge:</b> please modify your getCallShot function to <b>check whether the target ball is blocked from the target pocket</b>, and if so, skip that pocket. Again, you can use the <b>isPathBlocked</b> function to check for blockage, and you can get each pocket's position using the <b>Pockets</b> array. Don't forget to check the developer console to confirm your robot is indeed skipping some pockets.
+  </p>
+  <code isHidden="false">
+for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+  //TODO: check if pocket is already blocked 
+  //h0::use isPathBlocked on ball position and pocket position::you can get pocket position using Pockets[pocketID]
+  ::const isBlocked2 = isPathBlocked(Balls[ballID], pocketID);
+  ::const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+  ::const isBlocked2 = isPathBlocked(Pockets[pocketID]);
+  const isBlocked2 = ? ;
+  if (isBlocked2) {
+    //h1::skip current iteration::use 'continue'
+    ? ;
+  }      
+  //ENDTODO
+  const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+  const cmd = { 
+    aimx: aimPoint.x, 
+    aimy: aimPoint.y, 
+    strength: 30, 
+    targetBallID: ballID, 
+    targetPocketID: pocketID 
+  };
+  console.log("BallID = " + ballID + " pocketID = " + pocketID );
+  const prob = await calculateProbability(cmd);
+
+  if (prob > highestProb) {
+    bestCommand = cmd; highestProb = prob;
+  }
+}
+  </code>    
+  <cleancode>
+
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);
+      if (isBlocked2) {
+        continue;
+      }
+            
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}   
+      
+  </cleancode> 
+</element>
+
+<element elementid="200" elementType="Conclusion">
+  <p>That's all for this lesson. Good job!</p>
+  <p><b>Summary:</b> you have reused the <b>isPathBlocked</b> function to avoid checking blocked balls and pockets, and <b>you have learned how to print log messages in the developer console to help examine your code</b>.</p>
+  <p>
+    <b>Exercise:</b> go to test script and try to change ball 8's position so that it blocks ball 6 from pocket 2 on top right. Check if your robot switches to aim at ball 9 instead. Feel free to try other tests and share them in our forum, under <a href="https://forum.tgame.ai/t/skipping-blocked-balls-and-pockets-in-call-shots/46" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+
+  

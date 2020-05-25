@@ -1,0 +1,253 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const curTank = Tanks[i];
+    if (curTank.color == "white" &amp;&amp;
+      (MyTank.r == curTank.r || MyTank.c == curTank.c)
+    ) {
+      return "S";
+    }
+  }
+  return "";
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In our previous tutorial, your gamebot tried to shoot a white tank positioned on the same row, but it failed because your tank is facing upward and the white tank is to its right. We are going to solve this problem in this tutorial. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Maybe you have already figured out a solution: first turn your tank toward the white tank, and then shoot. So here's the plan: in the <span class="variablename">getNewCommand</span> function, you have to first check whether your tank is facing the white tank's direction. If it isn't, you must turn it before firing a shot. 
+  </p>
+  <p>
+    <img src='/images/lesson2turnright.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    But how can you determine which direction your tank should turn before firing?  
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    Think about how you would do it when playing the game manually: first, you observe that the white tank is to the right of your tank; second, you check whether your tank is facing that direction. 
+  </p>
+  <p>
+    The first step can be implemented in your gamebot by comparing the positions of your tank and the white tank. 
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Please take a look at the battlefield below. Note that the column coordinate increases from left to right, and the row coordinate increases from top to bottom. 
+  </p>
+  <p>
+    <img src='/images/relativeposition.jpg' style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+  <p>
+    In this example scenario, point <b>A</b>'s row number is less than point <b>B</b>'s row number, but its column number is greater than point <b>B</b>'s column number.
+  </p>
+</element>
+
+<element elementid="160" elementType="Quiz" answerKey="C" answerReason="A:These 2 tanks are on the same row, so Tanks[0].r is the same as Tanks[1].r.|B:These 2 tanks are on the same row, so Tanks[0].r is the same as Tanks[1].r.|D:Tanks[0] is to the left of Tanks[1], so its column number is smaller.">
+  <p>
+    <b>Quiz:</b> Of the four choices (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton">C</a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton">D</a>), which one is a correct description about the picture below? Please type or click the letter of your chosen answer.
+  </p>
+  <p>
+    <img src='/images/whitetankatright.jpg' style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>Tanks[0].r &lt; Tanks[1].r
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>Tanks[0].r >Tanks[1].r
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>Tanks[0].c &lt; Tanks[1].c
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>Tanks[0].c > Tanks[1].c
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    With the help of row and column numbers, you can determine the relative position of any two points on the battlefield. You would also need to know your tank's orientation (facing direction) to determine whether you need to turn to a target tank. This information is available as another property, <span class="variablenamebold">dir</span>, of each tank object. 
+  </p>
+  <p>
+    For example, for the first tank in the <b>Tanks</b> array, its facing direction is <b>Tanks[0].dir</b>. As you might have guessed, the possible values of this property are: "U", "D", "L", and "R".
+  </p>
+</element>
+
+
+<element elementid="190" elementType="Coding" condition="TestFinishedKillTanksAt_10_5">
+  <p>
+    Let's update your robot code such that your tank would turn left or right towards the white tank on the same row before firing at it.
+  </p>
+  <p>
+    <b>Challenge:</b> Change your <span class="variablenamebold">getNewCommand</span> function such that when a white (target) tank is discovered and your tank is not facing the target tank, the function commands a direction change instead of a shot. 
+  </p>
+  <code isHidden="false">
+//TODO: turn your tank if it is not facing the target white tank
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i ++){
+    const curTank = Tanks[i];
+    
+    if (curTank.color == "white") {
+      // check if my tank and this white tank are on the same row
+      if (MyTank.r == curTank.r) {
+        // If curTank is on MyTank's right, yet MyTank is not facing right,
+        // then turn right:
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+
+        // If curTank is on MyTank's left, yet MyTank is not facing left,
+        // then turn left:
+        //h0::white tank is on the left to our tank::MyTank.c is greater than curTank.c
+        ::MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L"
+        ::MyTank.c >= curTank.c &amp;&amp; MyTank.dir != "L"
+        ::MyTank.c > curTank.c &amp;&amp; MyTank.dir == "L"
+        } else if ( ? ) {
+          return "L";
+        } else {
+          return "S";
+        }
+      } // end of row check 
+    } // end of color check
+  } // end of for loop
+  return "";
+}  
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white") {
+      if (MyTank.r == curTank.r) {
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+        } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+          return "L";
+        } else {
+          return "S";
+        }
+      }  // end of row check
+    } // end of color check
+  } // end of for loop
+  return "";
+}      
+  </cleancode>
+</element>
+
+<!-- <element elementid="200" elementType="Info">
+
+</element> -->
+
+<element elementid="220" elementType="Coding" condition="TestFinishedKillTanksAt_10_5_5_10">
+  <p>
+    Good job! Now let's use the same logic to handle the case where the white tank is on the same column as <span class="variablename">MyTank</span>. 
+  </p>
+  <p>
+    <b>Challenge:</b> Using the following code as a guide, change your code such that your tank will also fire at a white tank on the same column. When <span class="variablename">MyTank</span> is not facing that target white tank, it needs to turn up or down first.
+  </p>
+  <code isHidden="false">
+//TODO: turn up or down for white tank on the same column
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white") {
+      if (MyTank.r == curTank.r) {
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+        } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+          return "L";
+        } else {
+          return "S";
+        }
+      } else if (MyTank.c == curTank.c) { // our tank and white tank are on the same column
+        //h0::white tank is below our tank::MyTank.r is less than curTank.r
+        ::MyTank.r > curTank.r &amp;&amp; MyTank.dir != "D"
+        ::MyTank.r &lt; curTank.r || MyTank.dir != "D"
+        ::MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D"
+        if ( ? ) {
+          return "D";
+        //h1::white tank is above our tank::MyTank.r is greater than curTank.r
+        ::MyTank.r > curTank.r &amp;&amp; MyTank.dir == "U"
+        ::MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U"
+        } else if ( ? ) {
+          return "U";
+        } else {
+          return "S";
+        }
+      }  // end of column check
+    } // end of color check
+  } // end of for loop
+
+  return "";
+}  
+//ENDTODO
+
+  </code>
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white") {
+      if (MyTank.r == curTank.r) {
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+        } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+          return "L";
+        } else {
+          return "S";
+        }
+      } else if (MyTank.c == curTank.c) {
+        if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+          return "D";
+        } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+          return "U";
+        } else {
+          return "S";
+        }
+      }  // end of column check
+    } // end of color check
+  } // end of for loop
+
+  return "";
+}      
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>Well done! </p>
+  <p>
+    <b>Summary:</b> In this lesson, you've learned how to get the relative position of any two points in the battlefield based on their row and column numbers. On top of that, we've discussed how to send different commands based on different situations. Now our tank is able to shoot any white tank on the same row or column.  
+  </p>
+  <p>
+    <b>Exercise 1:</b> Currently, if there is a white tank on the same tile as your tank, your tank would still send the shooting command. Can you change your code so your tank would ignore a white tank if it is in the same row <b>and</b> same column as your tank? To test your change, you can add this line in your test script: <span class="variablename">PlaceTank('white', 5, 5, false);</span>. It should be right after the 3 existing lines calling "PlaceTank". 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Save your code as a new release. 
+    Type the name of your new release (such as "v1"), and then click <img src='/images/saveButton.jpg' style='width: auto; height: 20px; vertical-align: bottom;'/>. If another release already exists by that name, you'll be prompted to confirm or cancel your save request. <b>If you confirm, the earlier release will be overwritten.</b> If you cancel, the save does not occur, and the earlier release is preserved; you will be given an opportunity to choose a different name for your new release. 
+    <p>
+      <img src="/images/savearelease.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+  </p>
+  <p>
+    Feel free to post your questions on our forum, under <a href="https://forum.tgame.ai/t/lesson-3-shooting-at-a-white-tank-ii/400" target="_blank">this lesson's topic</a>. 
+  </p>
+</element>
+
+

@@ -1,0 +1,43 @@
+import admin from './admin';
+import games from './games';
+import GamesRelease from './gamesRelease';
+import users from './users';
+import gameRoom from './gameRoom';
+import tutorials from './tutorials';
+import tournament from './tournament';
+import notifications from './notifications';
+import stripecustomer from './stripecustomer';
+import activeGameList from './activeGameList';
+import chatSupport from './chatSupport';
+import invitationLogs from './invitationLogs';
+import gameItem from './gameItem';
+import zipCode from './zipCode';
+import languages from './languages';
+import classes from './classes';
+import userAICodeProd from './userAICodeProd';
+import evaluation from './evaluation';
+import persons from './persons';
+import lessonChatHistory from './lessonChatHistory';
+
+export default function () {
+  admin();
+  games();
+  users();
+  GamesRelease();
+  gameRoom();
+  tutorials();
+  tournament();
+  notifications();
+  stripecustomer();
+  activeGameList();
+  chatSupport();
+  invitationLogs();
+  gameItem();
+  zipCode();
+  languages();
+  classes();
+  userAICodeProd();
+  evaluation();
+  persons();
+  lessonChatHistory();
+}

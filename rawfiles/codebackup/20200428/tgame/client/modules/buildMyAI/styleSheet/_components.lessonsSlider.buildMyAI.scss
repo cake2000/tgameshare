@@ -1,0 +1,270 @@
+.buildmyAI{
+  &__lessons{
+    flex: 0 0 645px;
+    margin-right: 10px;
+    border-right: 1px none #383737;
+    background-color: #f0f1f1;
+    background-image: url(/images/dark-geometric-copy.png);
+    background-position: 0px 0px;
+    background-size: 35px;
+    background-repeat: repeat;
+    position: relative;
+    overflow: hidden;
+    &__list_menu{
+      padding: 20px;
+      .menu-all{
+        .menu-all__item{
+          -webkit-transition: max-height 1s ease-out;
+          -moz-transition: max-height 1s ease-out;
+          -ms-transition: max-height 1s ease-out;
+          -o-transition: max-height 1s ease-out;
+          transition: max-height 1s ease-out;
+          max-height: 75px;
+          height: auto;
+
+          &.expanded {
+            -webkit-transition: max-height 1s ease-in;
+            -moz-transition: max-height 1s ease-in;
+            -ms-transition: max-height 1s ease-in;
+            -o-transition: max-height 1s ease-in;
+            transition: max-height 1s ease-in;
+            max-height: 800px;
+          }
+
+          .tutorial{
+            display: flex;
+            margin-bottom: 1px;
+            padding: 15px 20px;
+            background-color: #03375a;
+            color: #fff;
+            font-size: 21px;
+            line-height: 24px;
+            align-items: center;
+            cursor: pointer;
+            .tg-icon-expand {
+              flex: 1;
+              text-align: right;
+              font-size: $tg-fs-regular;
+              &:hover{
+                color: $tg-col-hover-a;
+              };
+            }
+          }
+          .tutorial-content{
+            font-size: 19px;
+            cursor: pointer;
+            padding: 10px 30px;
+            img{
+              max-width: 100%;
+            }
+          }
+        }
+      }
+    }
+    &__header{
+      padding: 30px 15px 20px 15px;
+      display: flex;
+      position: relative;
+      &:after{
+        content: '';
+        position: absolute;
+        left: 15px;
+        bottom: 0px;
+        height: 1px;
+        width: calc(100% - 30px);
+        background-color: #b1a9a9;
+      }
+      .tg-icon-home{
+        font-size: $tg-fs-x-tiny;
+        -webkit-transition: all 400ms ease;
+        transition: all 400ms ease;
+        &:hover{
+          -webkit-transform: scale(1.2);
+          -ms-transform: scale(1.2);
+          transform: scale(1.2);
+        }
+      }
+      span{
+        color: #b1a9a9;
+        font-weight: 300;
+        font-size: $tg-fs-large;
+      }
+      &__action{
+        flex: 1;
+        text-align: right;
+        span{
+          cursor: pointer;
+          margin-left: 10px;
+        }
+        .icon-expand{
+          cursor: pointer;
+          color: #0c2333;
+        }
+      }
+    }
+    &__blocks{
+      padding: 20px 15px;
+      height: calc(100vh - 447px);
+      &__title{
+        color: #0a73bc;
+        font-size: calc(#{$tg-fs-regular} + 2px);
+      }
+      &__contents{
+        font-weight: 300;
+        line-height: 20px;
+        max-height: calc(100vh - 500px);
+        overflow: overlay;
+        br{
+          margin: 15px 0px;
+          display: inline-block;
+          width: 100%;
+        }
+        img{
+          max-width: 100%;
+        }
+        .hightLine{
+          font-weight: 400;
+        }
+        .mce-content-body{
+          padding: 0px!important;
+
+        }
+      }
+    }
+    &__nav-page{
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      padding-top: 15px;
+      margin: 20px 0px 50px;
+      position: relative;
+      &:after{
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: -10px;
+        height: 1px;
+        width: calc(100% - 30px);
+        background-color: #b1a9a9;
+      }
+      .nav-info{
+        flex: 1;
+        color: #319ae4;
+        text-align: center;
+      }
+      span{
+        font-size: $tg-fs-xxx-large;
+        cursor: pointer;
+        color: $tg-col-nav-slider;
+      }
+    }
+    &__need-help{
+      position: absolute;
+      bottom: 0px;
+      width: 100%;
+      .btn{
+        width: calc(100%);
+        padding: 10px;
+        color: #fff;
+        border-radius: 0px;
+        cursor: pointer;
+        display: inline-block;
+        text-align: center;
+        background-color: #0a73bc;
+      }
+    }
+  }
+}
+.form-help{
+  display: inline-block;
+  width: calc(100%);
+  background-color: #fff;
+  padding: 25px;
+  .group{
+    &-text{
+      input{
+        display: inline-block;
+        height: 22px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.428571429;
+        color: #333333;
+        vertical-align: middle;
+        background-color: $tg-col-light;
+        border: 1px solid #cccccc;
+        width: calc(100% - 26px);
+        &:focus{
+          border-color: #3898EC;
+          outline: 0;
+        }
+      }
+
+    }
+    &-select{
+      background: url(images/arrow-down.svg);
+      background-repeat: no-repeat;
+      background-position: calc(100% - 15px) center;
+      height: 38px;
+      overflow: hidden;
+      width: 100%;
+      background-size: 12px;
+      height: 38px;
+      overflow: hidden;
+      width: 45%;
+      margin-right: 5%;
+      float: left;
+      margin-bottom: 25px;
+      select{
+        background: transparent;
+        border: 1px solid #319ae4;
+        color:#319ae4;
+        border-radius: 0px;
+        font-size: 14px;
+        padding: 5px; /* If you add too much padding here, the options won't show in IE */
+        width: 100%;
+        height: 38px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        &::-ms-expand{
+          display: none;
+        }
+      }
+
+    }
+    &-textarea{
+      textarea{
+        display: inline-block;
+        height: 58px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.428571429;
+        color: #333333;
+        vertical-align: middle;
+        background-color: $tg-col-light;
+        border: 1px solid #cccccc;
+        width: calc(100% - 26px);
+        &:focus{
+          border-color: #3898EC;
+          outline: 0;
+        }
+      }
+
+    }
+    &-submit{
+      .btn{
+        width: 85px;
+        border-radius: 3px
+      }
+    }
+  }
+}
+@media(max-width: 940px){
+  .buildmyAI{
+    &__lessons{
+      margin-right: 0px;
+      margin-bottom: 20px;
+    }
+  }
+}

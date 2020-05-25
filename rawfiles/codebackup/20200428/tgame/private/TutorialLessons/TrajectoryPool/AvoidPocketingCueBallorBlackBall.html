@@ -1,0 +1,588 @@
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome to the intermediate level tutorials! So far you have built a working robot that can probably already beat many human players, but <b>there is one problem: everyone else has also got (almost) the same robot as yours!</b>
+    </p>
+    <p>
+    Don't worry. Starting from this tutorial, we'll start to add more advanced tactics to your robot, and <b>you will have plenty of opportunities to make your robot do things differently and hopefully better</b>!
+  </p>
+
+  <p>
+    First, if you have used your robot to play some games, you have probably found an embarrasing issue with it: <b>sometimes the cue ball or black ball is pocketed</b>, which may cause you to lose your turn or even your game. In this tutorial, let's improve your robot to try to avoid these "accidents" as much as possible.
+  </p> 
+</element>
+
+<element elementid="104" elementType="Info">
+  <p>
+    First, how does your robot check if a ball would fall in some pocket after a shot? We have provided a very useful helper function for you: <b>calculateEndState</b>. By "end state", we mean the state of a ball when all balls have stopped moving after a shot is taken. 
+  </p>
+  <p>
+      The function <b>calculateEndState</b> takes a shot command object as input, and returns the end states of all balls in an array like this (don't forget the <b>await</b> keyword): 
+      </p>
+      <pre class="brush: js">
+        const endStates = await calculateEndState(shotCmd);
+      </pre>
+      
+      <p>
+      For a ball with id <b>ballID</b>, you can find out its end state using <b>endStates[ballID]</b>, and access its properties like this:
+    <ul>
+      <li>
+        <b>endStates[ballID].inPocketID:</b> the id of the pocket or "null" if the ball with id = ballID is not in any pocket.
+      </li>
+      <li>
+        <b>endStates[ballID].x:</b> x coordinate of the ball with id = ballID (if it is not in any pocket)
+      </li>
+      <li>
+        <b>endStates[ballID].y:</b> y coordinate of the ball with id = ballID (if it is not in any pocket)
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedCueBallNotPocketed">
+  <p>
+    <b>Challenge:</b> can you modify the getCallShot function to <b>skip a pocket if the cue ball would fall in a pocket as well according to its end state</b>? 
+  </p>
+  <code isHidden="false">
+    ...
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldSkipPocketForBall(pocketID, ballID)) {
+        continue;
+      }
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+
+      //TODO: check end states of cue ball and black ball
+      //h0:: call calculateEndState to get endState
+      ::const endStates = calculateEndState(cmd);
+      ::const endStates = await calculateEndState();
+      ::const endStates = await calculateEndState(cmd);
+      const endStates = ? ;
+      
+      //skip this pocket if the cue ball would fall in a pocket
+      //h1:: check on endStates[0].inPocketID::if cue ball would be pocketed, skip this pocket
+      ::if (endStates[0].inPocketID == null) {
+      ::if (endStates[0].inPocketID !== null) {
+      if ( ? ) {
+        // skip this pocket
+        continue;
+      }
+      //ENDTODO
+
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+    ...
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+      
+function shouldSkipPocketForBall(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      if (shouldSkipPocketForBall(pocketID, ballID)) {
+        continue;
+      }
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = { 
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30, 
+        targetBallID: ballID, 
+        targetPocketID: pocketID 
+      };
+
+      const endStates = await calculateEndState(cmd);
+
+      // skip this pocket if the cue ball would fall in a pocket
+      if (endStates[0].inPocketID !== null) {
+        continue;
+      }
+
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd; highestProb = prob;
+      }
+    }
+  }
+  // return the best command we found
+  return bestCommand;
+}    
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 80
+  }; 
+}  
+  </cleancode>
+</element>
+
+
+<!-- 
+// skip this pocket if the black ball would fall in a pocket
+//h2:: check on endStates[1].inPocketID when ballID is not 1::if black ball would be pocketed but ballID is not 1, skip this pocket
+::if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+::if (ballID !== 1 &amp;&amp; endStates[1].inPocketID == null) {
+::if (ballID == 1 &amp;&amp; endStates[1].inPocketID !== null) {
+if ( ? ) {
+  continue;
+}
+
+
+// skip this pocket if the black ball would fall in a pocket
+if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+  continue;
+}       -->
+
+<element elementid="116" elementType="Info">
+  <p>
+    So far we've covered the baseline scenario, which may not be enough. Sometimes the cue ball and black ball are safe in the base case, but they might fall into some pocket when the game engine adds a random error to the shot. In the current test setup, hitting ball 3 is such as choice.
+  </p>
+  <p>
+    To handle such situations, you can call the <b>calculateEndState</b>function with a second parameter of "randomness" as <b>true</b> like shown below: 
+  </p>
+  <pre class="brush: js">
+const endStates = await calculateEndState(shotCmd, true) 
+  </pre>
+  <p>
+    When you set the second parameter to true, the game engine will simulate a shot with an random error (same as what happens in real games) and then tell you the end state of that randomized shot. So if you call the calculateEndState function with randomness for multiple times, each time you will get a different and random end state of the balls. 
+  </p>
+</element>
+<!-- 
+
+<element elementid="118" elementType="Info">
+  <p>
+    We include randomness in calculateEndState <b>by passing <i>true</i> as the second parameter</b>. The game engine will add a random shock to your shot just like in a real game, and then simulate the process of ball movements. 
+  </p>
+  <p>
+    Furthermore, the game engine <b>does not bother to show any animation on screen</b>, so it runs through this process much faster. As we might need to run a lot of simulations, it's essential that each simulation runs as fast as possible.
+  </p>
+</element> -->
+
+
+<element elementid="120" elementType="Coding" condition="TestFinishedCueBallNotPocketed">
+  <p>
+    <b>Challenge:</b> please change your code to call calculateEndState function with randomness for up to 10 times, and if in any of the ten simulations, the cue ball or black ball is pocketed, then skip this (ballID, pocketID) pair. 
+  </p>
+  <p>
+    Note that to save some computation, I'm using a useful pattern in the code below:
+    <ul>
+      <li>
+        First, I've declared a flag variable <b>isInPocket</b> and set it to false;
+      </li>
+      <li>
+        Second, inside the for-loop, if the cue ball or black ball fall into some pocket in any iteration, set isInPocket to true and break out of the loop right away;
+      </li>
+      <li>
+        At last, after the loop, check isInPocket to decide if you want to skip this pocket right away.
+      </li>
+    </ul>
+  </p>
+  <code isHidden="false">
+async function getCallShot() {
+  ...
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) {
+    ...
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      ...
+      const cmd = calculateShotCommand(ballID, pocketID);
+
+      //TODO: call calculateEndState with randomness for up to 10 times
+
+      // define a new flag variable and set it to false
+      let isInPocket = false;
+
+      //setup a for loop to run calculateEndState 10 times
+      for (let i = 0; i &lt; 10; i++) {
+        const endStates = await calculateEndState(cmd, true); // enabling randomness
+
+        // skip this pocket if the cue ball would fall in a pocket
+        if (endStates[0].inPocketID !== null) {
+          // set isInPocket flag to true
+          isInPocket = true;
+          // break out of the loop
+          break;
+        }
+  
+        // skip this pocket if the black ball would fall in a pocket
+        if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+          //h0::set isInPocket to true
+          ::isInPocket = false;
+          ::isInPocket = true;
+          isInPocket = ?;
+          //h1::break out of the loop of 10 i
+          ::continue;
+          ::break;
+          ?;
+        }      
+      }
+
+      // skip current pocket if cue ball or black ball would be pocketed
+      if (isInPocket) {
+        //h2::continue to next iteration of the loop
+        ::continue;
+        ::break;
+        ?;
+      }
+      //ENDTODO
+
+      console.log("pocketID " + pocketID + " ballID " + ballID);
+      const prob = await calculateProbability(cmd);
+      if ( prob > highestProb ) {
+        bestCommand = cmd ; 
+        highestProb = prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+
+      for (let i = 0; i &lt; 10; i ++) {
+      	const endStates = await calculateEndState(cmd, true);
+
+        // set flag to true if the cue ball would fall in a pocket
+        if (endStates[0].inPocketID !== null) {
+          isInPocket = true;
+          break;
+        }
+  
+        // set flag to true if the black ball would fall in a pocket
+        if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+          isInPocket = true;
+          break;
+        }      
+      }
+      if (isInPocket) {
+        // skip this pocket
+        continue;
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+      if ( prob > highestProb ) {
+        // found a better command: record the command and its probability
+        bestCommand = cmd ; 
+        highestProb = prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}          
+  </cleancode>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    Now our code skips ball 2 and ball 3 in current test setup since we might pocket the cue ball when shooting them. However, these two balls would be nice call shot targets, so it's a pity if we have to skip them, right?
+  </p>
+  <p>
+    If we are playing the pool game manually, we would add a back spin to the cue ball so that it would roll back after striking the target ball. So why don't we do the same thing in our code!
+  </p>
+  <p>
+    To spin the cue ball, we need to add another parameter <b>spin</b> in the shot commands. The value is between -1 and 1: negative values mean spinning back, and positve values mean spinning forward. 
+  </p>
+</element>
+
+<element elementid="140" elementType="Coding" condition="TestFinishedCueBallNotPocketed">
+  <p>
+    <b>Challenge</b>: add a <b>spin</b> parameter in your shot command if the cue ball will be in a pocket in end state. Set spin = -0.5 for now. And check the end state again, skip the scenarios that the cue ball still falls into a pocket even with a back spin.
+  </p>
+  <code isHidden="false">
+async function getCallShot() {
+  ...
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) {
+    ...
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      ...
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+      	const endStates = await calculateEndState(cmd, true);
+
+        // skip this pocket if the cue ball would fall in a pocket
+        if (endStates[0].inPocketID !== null) {
+          isInPocket = true;
+          break;
+        }
+  
+        // skip this pocket if the black ball would fall in a pocket
+        if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+          isInPocket = true;
+          break;
+        }      
+      }
+
+      //TODO: add spin to cmd, and check end state again.
+      if (isInPocket) {
+        //add back spin to cmd
+        //h0::set spin to -0.5
+        cmd.spin = ?;
+
+        const endStates = await calculateEndState(cmd); 
+
+        // skip this pocket if the cue ball would still fall in a pocket
+        if (endStates[0].inPocketID !== null) {
+          //h1::should skip this pocket::use continue
+          ? ;
+        }
+  
+        // skip this pocket if the black ball would still fall in a pocket
+        if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+          //h2::should skip this pocket::use continue
+          ? ;
+        }
+      }
+      //ENDTODO
+
+      console.log("pocketID " + pocketID + " ballID " + ballID);
+      const prob = await calculateProbability(cmd);
+      if ( prob > highestProb ) {
+        bestCommand = cmd ; 
+        highestProb = prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+        const endStates = await calculateEndState(cmd, true);
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+        (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          isInPocket = true;
+          break;
+        }
+      }
+      if (isInPocket) {
+        cmd.spin = -0.5;
+        const endStates = await calculateEndState(cmd); 
+        // skip this pocket if the cue ball would still fall in a pocket
+        if (endStates[0].inPocketID !== null) {
+          continue;
+        }
+        // skip this pocket if the black ball would still fall in a pocket
+        if (ballID !== 1 &amp;&amp; endStates[1].inPocketID !== null) {
+          continue;
+        }
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const prob = await calculateProbability(cmd);
+      if ( prob > highestProb ) {
+        // found a better command: record the command and its probability
+        bestCommand = cmd ; 
+        highestProb = prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}          
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! </p>
+  <p><b>Summary:</b> your robot now uses <b>calculateEndState</b> to check for the end states, it can avoid pocketing the cue ball or black ball in call shots illegally. You will find more use case for this function in future tutorials. </p>
+  <p>
+    <b>Exercise:</b> currently when you reset the spin to -0.5 and re-check for cue ball/black ball pocketing events, you are only checking for the base case with no randomness. Can you change your code so that it calls calculateEndState with randomness for 10 times instead? When do you think this change would matter? Share you solution and thoughts on our forum, under <a href="https://forum.tgame.ai/t/avoid-pocketing-cue-ball-or-black-ball/49" target="_blank">this lesson's topic</a>.
+  </p>
+  <!-- <p>
+    <b>Open Challenge:</b> try to adjust <b>strength</b> in the return object of <b>calculateShotCommand</b> function, and see how this variable influences the results of simulations in calculateEndState. 
+  </p> -->
+</element>
+

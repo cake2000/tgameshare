@@ -1,0 +1,353 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackWhiteTank() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+
+function getCrystal() { 
+  // if no crystals, return blank array
+  if (Crystals.length == 0) return [];
+
+  // crystal position and my tank position
+  const crystal = Crystals[0];
+
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tileType = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tileType)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+
+  return getShortestPathCmd(graph, MyTank, crystal);
+}
+
+function getRandomCommand() {
+  // random command
+  const r = Math.random() * 100;
+  if (r > 10) return "S";
+  if (r > 8) return "U";
+  if (r > 6) return "D";
+  if (r > 4) return "L";
+  if (r > 2) return "R";
+  return "";
+}
+
+function getNewCommand() {
+  // get a crystal
+  const path = getCrystal();
+  if (path.length > 0) return path[0];
+
+  // attack white tank
+  const cmd = attackWhiteTank();
+  if (cmd.length > 0) return cmd;
+
+  // random command
+  return getRandomCommand();
+} 
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! After the previous tutorial, your tank is able to pick up a crystal via the shortest path. But what if there are multiple crystals on the battle field? Which one should your tank pick up first? A simple improvement to your robot will allow it to go to the closest crystal first. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    First, let's add a few crystals to our current test setup. A new function <span class="variablenamebold">PlaceCrystal(col, row)</span> is provided for you for this purpose. Please add the following lines in your test script, right after <span class="variablename">PlaceTank('blue', 4, 5);</span>. 
+  </p>
+  <p>
+    <pre class="brush: js">
+PlaceCrystal(12, 6);
+PlaceCrystal(4, 1);
+PlaceCrystal(6, 8);
+    </pre>
+  </p>
+  <p>
+    <img src="/images/add3crystals.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedGetCrystalInOrder_0_12_6_4_1_6_8">
+  <p>
+    Since we added the three crystals in order of (12, 6), (4, 1), (6, 8), the blue tank would collect them in that order, though the first one, at (12, 6), is not the closest.  
+  </p>
+  <p>
+    Click <b>TEST</b> to observe this problem with your current robot code. 
+  </p>
+  <cleancode>
+  </cleancode>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    To change your tank such that it collects the closest crystal first, you need to iterate through the <span class="variablename">Crystals</span> array in order to determine which crystal is closest. Specifically, we need to find out the length of the shortest path from your tank to each crystal and then select the crystal with the shortest path length. To make your life easier, I have provided another helper function, <span class="variablenamebold">getShortestPathLength</span>, to calculate the length of the shortest path.
+  </p>
+</element>
+
+<element elementid="140" elementType="Coding" condition="TestFinishedGetCrystalInOrder_0_12_6_4_1_6_8">
+  <p>
+    Before writing any new code, let's first refactor the function <span class="variablenamebold">getCrystal</span> in order to make some room for the new code. We will remove the statements that create a graph and put them into a separate function <span class="variablenamebold">createGraph</span>. 
+  </p>
+  <p>
+    Use the code below as a guide. Click TEST when you finish to verify that your code still works.
+  </p>
+  <code isHidden="false">
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+  return graph;
+}
+
+function getCrystal() { 
+  // if no crystals, return blank array
+  if (Crystals.length == 0) return [];
+
+  const crystal = Crystals[0];
+  const graph = createGraph();
+
+  return getShortestPathCmd(graph, MyTank, crystal);
+}
+  </code>
+  <cleancode>
+function createGraph() {
+  // create a new Set to hold blocking tile types
+  const blockingTileTypes = ['R', 'M', 'T'];
+  // create a new graph
+  const graph = createNewGraph();
+
+  // set values of graph, 1 = pass and 0 = blockage
+  for (let i = 0; i &lt; graph.length; i += 1) {
+    for (let j = 0; j &lt; graph[i].length; j += 1) {
+      // tile type
+      const tile = Maze[i][j];
+      // check if it is a blockage
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;
+      else graph[i][j] = 1;
+    }
+  }
+  return graph;
+}
+
+function getCrystal() { 
+  // if no crystals, return blank array
+  if (Crystals.length == 0) return [];
+
+  const crystal = Crystals[0];
+  const graph = createGraph();
+
+  return getShortestPathCmd(graph, MyTank, crystal);
+}
+  </cleancode>
+</element>
+
+
+<element elementid="150" elementType="Coding" condition="TestFinishedGetCrystalInOrder_0_6_8_12_6_4_1">
+  <p>
+    Now let's add the new logic to search for the closest crystal.
+  </p>
+  <p>
+    <b>Challenge:</b> Use the code below as a guide, implement a <span class="keyword">for-loop</span> to find the nearest crystal in terms of shortest path. 
+  </p>
+  <code isHidden="false">
+//TODO: collect crystals in order of distance.
+function getCrystal() {
+  const graph = createGraph();
+  let shortestLength = 1000;
+  let target = null;
+  // loop through all crystals
+  //h0::loop through array Crystals with index variable i
+  ::for (let i = 0; i &lt; Crystals.length; i += 1) {
+  ::for (let i = 0; i &lt;= Crystals.length; i += 1) {
+  ::for (let i = 0; i &lt; Crystals.length - 1; i += 1) {
+  for ( ? ) {
+    const pos = Crystals[i];
+    const pl = getShortestPathLength(graph, MyTank, pos);
+
+    // update shortestLength and target 
+    //h1::update shortestLength if the new pl is less than shortestLength::if (pl &lt; shortestLength) {
+    if ( ? ) {
+      shortestLength = pl;
+      target = pos;
+    }
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCrystal() {
+  const graph = createGraph();
+  let shortestLength = 1000;
+  let target = null;
+  // loop through all crystals
+  for (let i = 0; i &lt; Crystals.length; i += 1) {
+    const pos = Crystals[i];
+    const pl = getShortestPathLength(graph, MyTank, pos);
+    if (pl &lt; shortestLength) {
+      shortestLength = pl;
+      target = pos;
+    }
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+  </cleancode>
+</element>
+
+<element elementid="155" elementType="Info">
+  <p>
+    Well Done! Note that the variable <span class="variablename">shortestLength</span> is initialized to <b>1000</b>. Why 1000? Why not other values? 
+  </p>
+  <p>
+    Here is the answer. We'd like to initialize <span class="variablename">shortestLength</span> to a value that is greater than any possible path length. Such that we can update its value later with the length of any real shortest path, which has smaller length. The longest path in a grid is the one traveling across all boxes. In battlefield of beginner games, the biggest path length is 13 * 13, or 169. For the advanced battlefield, the number is 19 * 19, or 361. So we can initialize <span class="variablename">shortestLength</span> to any number greater than 361, and 1000 is one of those numbers. 
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    The new code worked perfectly, and your tank has learned to pick up the closest crystal first. But there is still one problem: the function <span class="variablename">getShortestPathLength</span> is "expensive" in that it takes quite some CPU power and time to run. So if there are a lot of crystals, calling the <span class="variablename">getShortestPathLength</span> for each of them could considerably slow your tank's decision making. 
+  </p>
+  <p>
+    Can you think of a faster and "cheaper" way to <b>estimate</b> rather than calculate the path length between your tank and a target crystal? 
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    One simple method of <b>estimation</b> involves ignoring completely any blocking tiles (obstacles) on the field. Then the estimated path between any two points is equal to the distance between them, i.e. the sum of the distances between their rows and columns. For example, if two points are 5 rows apart and 6 columns apart, then the distance between them is 5 + 6 = 11. This is a much faster calculation.
+  </p>
+  <p>
+    A distance calculated in this way is called the <b>Manhattan Distance</b>. Why? Because the city of Manhattan has a grid-like street map, with a few <b>avenues</b> intersecting with many <b>streets</b>. So to travel from the intersection of 42th Street and 7th Avenue to the intersection of 50th Street and 5th Avenue, you know that you need to walk two avenue blocks and eight street blocks, for a total of 10 blocks. 
+  </p>
+  <p>
+    In math terms, the Manhattan distance between A(cA, rA) and B(cB, rB) is <span class="variablename">|cA - cB| + |rA - rB|</span>. In the example below, the distance is 2 + 5 = 7.
+  </p>
+  <p>
+    <img src='/images/manhattan.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedGetCrystalInOrder_0_4_1_6_8_12_6">
+  <p>
+    <b>challenge:</b> Change the <span class="variablenamebold">getCrystal</span> function to use the Manhattan distance, not the <span class="variablenamebold">getShortestPathLength</span> function, to search for the closest crystal.
+  </p>
+  <code isHidden="false">
+//TODO: find the closest crystal by comparing absolute distances
+function getCrystal() {
+  const graph = createGraph();
+  // initialize variables to hold shortest distance and target crystal
+  let shortestLength = 1000;
+  let target = null;
+
+  // loop through all crystals
+  for (let i = 0; i &lt; Crystals.length; i += 1) {
+    const pos = Crystals[i];
+    // calculate the Manhattan Distance from MyTank to pos
+    //h0::add absolute value of the column distance::call Math.abs() to get absolute values
+    ::const pl = Math.abs(MyTank.r - pos.r) + ?;
+    const pl = ? ;
+    // update shortestLength and target 
+    if (pl &lt; shortestLength) {
+      shortestLength = pl;
+      target = pos;
+    }
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCrystal() {
+  const graph = createGraph();
+  // initialize variables to hold shortest distance and target crystal
+  let shortestLength = 1000;
+  let target = null;
+
+  // loop through all crystals
+  for (let i = 0; i &lt; Crystals.length; i += 1) {
+    const pos = Crystals[i];
+    // calculate the Manhattan Distance from MyTank to pos
+    const pl = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    // update shortestLength and target 
+    if (pl &lt; shortestLength) {
+      shortestLength = pl;
+      target = pos;
+    }
+  }
+  if (!target) return [];
+  return getShortestPathCmd(graph, MyTank, target);
+}
+  </cleancode>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Good job! As you have noticed, the first crystal collected was the one at (4, 1), instead of the one at (6, 8). Though the crystal at (6, 8) has the shortest "shortest path" according to <span class="variablename">getShortestPathLength</span>, the crystal at (4, 1) has the shortest Manhattan Distance.
+  </p>
+  <p>
+    Because of the obstacles on field, our tank no longer travels first to the crystal with the shortest path, but we may consider this acceptable since the decisions are being made much quicker. We know that we are sacrificing some accuracy in our solution in exchange for a shorter running time. In many real-world applications, we prefer a <b>good enough</b> solution to the <b>ideal</b> solution if the ideal solution is too costly in time or other resources. We optimize our solution for our specific needs, often balancing precision, performance, reliability, cost, and other variables.
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b> In this tutorial we've reviewed the use of <span class="keyword">for-loops</span> in searching for the closest crystal. We used two different methods to calculate your tank's distance to each crystal: 1) calling the <span class="variablename">getShortestPathLength</span> function to get the length of shortest path, or 2) estimating path length using the <b>Manhattan distance</b> (sum of row distance and column distance). 
+  </p>
+  <p>
+    <b>Exercise 1: </b> Change the test script to add more crystals; then test the program with both methods for crystal collection. 
+  </p>
+  <p>
+    <b>Exercise 2: </b> Save your current robot code and play a few Smart Tank games with it. Think about possible improvements to your code. 
+  </p>
+  <p>
+    If you have any questions, don't hesitate to post them on our forum and under <a href="https://forum.tgame.ai/t/lesson-9-collecting-the-closest-crystal/406" target="_blank">this lesson's topic</a>. 
+  </p>
+</element>

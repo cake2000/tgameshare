@@ -1,0 +1,372 @@
+<qa>
+  <question key="unexpected token" />
+  <answer>
+    <p>
+      Unexpected token errors will appear when the code has an extra (or missing) character or keyword in the syntax, different from what JavaScript expects. For example, if you try to test the code below, you will see an error message on the last line, saying "syntax error: unexpected token <span class="variablename">}</span>."
+    </p>
+    <p>
+      <pre class="brush: js">
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0
+  };
+}
+}
+      </pre>
+    </p>
+    <p>
+      Sometimes, removing the unexpected token or changing it to the correct one will solve the problem. However, another common reason for this kind of errors is some extra <span class="variablenamebold">}</span> in the code above the line where the error occurs. So please make sure:
+    </p>
+    <ul>
+      <li>All function definitions are completed with a close curly bracket <span class="variablenamebold">}</span>.</li>
+      <li>All <span class="variablenamebold">{</span> and <span class="variablenamebold">}</span> are matched up.</li>
+    </ul>
+    <p>One way to pair curly brackets is to check the indentations of each <span class="variablenamebold">{</span> and <span class="variablenamebold">}</span> after <b>BEAUTIFY</b> the code. Another way is to put a comment after each <span class="variablenamebold">}</span>, such as "// end of loop pocketID". </p>
+    <p>Here are some examples of the errors, and the corrections.</p>
+    <table class="ReferenceTableLink">
+      <thead>
+        <th> Error </th><th> Fix Suggestion </th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Unexpected token <span class="variablename">function</span>: 
+            <pre class="brush: js">
+function getBreakShot() {
+...
+}
+return bestCmd;
+}
+function getCallShot() {
+...
+}
+            </pre>
+          </td>
+          <td>
+            <pre class="brush: js">
+  function getBreakShot() {
+    ...
+    return bestCmd;
+  }
+  function getCallShot() {
+    ...
+  }
+              </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <p>Unexpected token <span class="variablename">}</span></p>
+            <pre class="brush: js">
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0
+  };
+}
+}
+            </pre>
+          </td>
+          <td>
+              <pre class="brush: js">
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0
+  };
+}
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <p>Unexpected token <span class="variablename">?</span></p>
+            <pre class="brush: js">
+function getBreakShot() {
+  return {
+    aimx: ?,
+    aimy: 0
+  };
+}
+            </pre>
+          </td>
+          <td>
+            Replace <span class="variablenamebold">?</span> with your own code.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </answer>
+</qa>
+
+<qa>
+  <question key="await is only valid in async function" />
+  <answer>
+    <p>
+      The <span class"keyword">await</span> keyword is only valid inside "async" functions. If you use it outside of an "async" function's body, you will get this syntax error. Keywords <span class="keyword">await</span> and <span class="keyword">async</span> should be used in pairs: 
+      <ul>
+        <li>Any function defined with <span class="keyword">async</span> must be called with <span class="keyword">await</span>.</li>
+        <li>Any function calls any other functions with <span class="keyword">await</span> must be defined with <span class="keyword">async</span>.</li>
+      </ul>
+    </p>
+    <p>
+      <pre class="brush: js">
+// defined as an async function
+async function getCallShot() {
+  ...
+  // calling a function with await
+  const prob = await calculateProbability(cmd);
+  ...
+}
+      </pre>
+    </p>
+    <p>So there are two kinds of common errors related to <span class="keyword">await</span> and <span class="keyword">async</span>. </p>
+    <p>1) <span class="keyword">await</span> is missing when an "async" function is called. Here is a list of "async" functions that should be called with <span class="keyword">await</span>. 
+      <ul>
+        <li>getCallShot</li>
+        <li>calculateProbability</li>
+        <li>getSecondsLeft</li>
+        <li>calculateEndState</li>
+        <li>getFirstBallTouched</li>
+        <li>UpdateWorld</li>
+        <li>PlotData</li>
+        <li>SubmitData</li>
+        <li>TrainLinearModel</li>
+        <li>LoadData</li>
+        <li>WaitForAllBallStop</li>
+      </ul>
+    </p>
+    <p>
+      2) <span class="keyword">async</span> is missing in the function definition but the function calls any other functions with <span class="keyword">await</span>. So when you define your functions, remeber to add <span class="keyword">async</span> if the function itself calls any "async" functions in its statements. For example, <span class="variablename">getCallShot</span> or <span class="variablename">getCueBallPlacement</span> in our bot code. 
+    </p>
+  </answer>
+</qa>
+
+<qa>
+  <question key="is not defined" />
+  <answer>
+    <p>
+      Any variable or function needs to be defined before used. If you received an error message saying that something is not defined, you should make sure that this "something" is defined in the same or upper <a href="#" onclick="ClickToSendChat(event, 'what is scope?')" class="inlinebutton">scope</a> as where it is used. 
+    </p>
+    <p>
+      For undefined variables, there might be two reasons: 1) missing <span class="variablename">const</span> or <span class="variablename">let</span> when creating a new variable; 2) a typo of an existing variable. Remeber, variable and function names are case-sensitive.
+    </p>
+    <p>Here is a list of common errors in this category and the corresponding fix suggestions.</p>
+    <table class="ReferenceTableLink">
+      <thead>
+        <th> Error </th><th>Fix Suggestion</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <pre class="brush: js">
+ballID = legalBallIDs[k];
+            </pre>
+          </td>
+          <td>
+            <pre class="brush: js">
+const ballID = legalBallIDs[k];
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <pre class="brush: js">
+const ballID = legalBallIDs[k];
+const ballPos = Balls[ballid];
+            </pre>
+          </td>
+          <td>
+            <pre class="brush: js">
+const ballID = legalBallIDs[k];
+const ballPos = Balls[ballID];
+            </pre>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br />
+    <p>
+      If the error message says <b>some function is not defined</b>, that means you should make sure two things: 1) the function name is not mis-spelled in your definition (function names are case-sensitive.); 2) the function definition is in the top <a href="#" onclick="ClickToSendChat(event, 'what is scope?')" class="inlinebutton">scope</a>. 
+    </p>
+    <p>
+      <img src="/images/unexpectedtokenfunction.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+    <p>Here is a list of common errors in this category and the corresponding fix suggestions.</p>
+    <table class="ReferenceTableLine">
+      <thead>
+        <th> Error </th><th>Fix Suggestion</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <pre class="brush: js">
+function getBreakShot() {
+  ...
+  function getCallShot() {
+    ...
+  }
+}
+            </pre>
+          </td>
+          <td>
+            <pre class="brush: js">
+function getBreakShot() {
+  ...
+}
+
+function getCallShot() {
+  ...
+}
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <pre class="brush: js">
+function getBreakshot() {
+  ...
+}
+            </pre>
+          </td>
+          <td>
+            <pre class="brush: js">
+function getBreakShot() {
+  ...
+}
+            </pre>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </answer>
+</qa>
+
+<qa>
+  <question key="for-loop related errors" />
+  <answer>
+    <p>
+      <span class="keyword">for</span> statements are a little bit complicated. Each of them has three components, separated by <span class="variablename">;</span> : 
+    </p>
+    <ul>
+      <li>
+          <b>initialization</b> defines a new <b>index varaible</b> using the keyword <b>let</b> (executed before the first iteration starts);
+      </li>
+      <li>
+        <b>test condition</b> is checked before each iteration, and no further iterations will be executed after the condition becomes false;
+      </li>
+      <li>
+        <b>change step</b> runs at the end of each iteration;
+      </li>
+    </ul>
+    <p>
+      <img src="/images/forloopformat2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+    <p>
+      There are many kinds of errors people might make in <span class="keyword">for</span> statements. Here is a list of common errors and their corresponding fix suggestions.
+    </p>
+    <table class="ReferenceTableLink">
+      <thead>
+        <th> Error </th><th>Fix Suggestion</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <pre class="brush: js">
+for (
+  let pocketID = 0; 
+  pocketID &lt; Pockets.length - 1; 
+  pocketID = pocketID + 1
+)              
+            </pre>
+          </td>
+          <td>
+            When you loop through all elements in an array, such as <span class="variablename">Pockets</span>, you can use one of the two expressions as the test condition: 1) <span class="variablename">pocketID &lt; Pocket.length;</span> 2) <span class="variablename">pocketID &lt;= Pocket.length - 1;</span>.
+            <pre class="brush: js">
+for (
+  let pocketID = 0; 
+  pocketID &lt; Pockets.length; 
+  pocketID = pocketID + 1
+)                
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <pre class="brush: js">
+for (
+  let k = 0; 
+  k &lt; legalBallIDs.length; 
+  k + 1
+)              
+            </pre>
+          </td>
+          <td>
+            When you need an expression to update the index variable in the <b>change step</b>, one of the three options will work.
+            <ul>
+              <li class="variablename">k = k + 1;</li>
+              <li class="variablename">k += 1;</li>
+              <li class="variablename">k++;</li>
+            </ul>
+            <pre class="brush: js">
+for (
+  let k = 0; 
+  k &lt; legalBallIDs.length; 
+  k = k + 1
+)                
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <pre class="brush: js">
+for (
+  let s = 20; 
+  k &lt;= 80; 
+  s = 20
+)              
+            </pre>
+          </td>
+          <td>
+            Really update the index variable in the <b>change step</b>.
+            <pre class="brush: js">
+for (
+  let s = 20; 
+  k &lt;= 80; 
+  s = s + 20
+)                
+            </pre>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <pre class="brush: js">
+for (
+  let k = 0; 
+  k &lt; legalBallIDs.length; 
+  k = k ++
+)              
+            </pre>
+          </td>
+          <td>
+            Either <span class="variablename">k++;</span> or <span class="variablename">k = k + 1;</span>. Don't mix them together. 
+            <pre class="brush: js">
+for (
+  let k = 0; 
+  k &lt; legalBallIDs.length; 
+  k = k + 1
+)                 
+            </pre>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </answer>
+</qa>

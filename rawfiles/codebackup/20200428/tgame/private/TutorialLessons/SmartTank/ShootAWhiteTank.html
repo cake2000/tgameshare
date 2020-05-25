@@ -1,0 +1,225 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  const r = Math.random();
+  if (r > 0.5) return "R";
+  else return "L";
+} 
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! Welcome to the second lesson on the Smart Tank gamebot. In the previous tutorial, we created a "silly" robot tank that runs around and fires randomly. In this lesson, we are going to make it more "reasonable" by teaching it <b>how to aim and shoot at a white tank</b>. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    In order to aim at a white tank, we must first find out that tank's position. The coordinates of all tanks are stored in an <b>array</b> called <span class="variablenamebold">Tanks</span>.
+  </p>
+  <p>
+    <img src='/images/tankarray.png' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Any item in <span class="variablenamebold">Tanks</span> can be accessed by its index number, from zero to the array's length minus one (i.e. 0, 1, 2, ... , <span class="variablename">Tanks.length - 1</span>). 
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    Each item in <span class="variablename">Tanks</span> is an <b>object</b>. Recall that an object is a collection of properties, with each property consisting of a name and a value, separated by a ":". Multiple properties are separated by commas (","). Click <a href="#" onclick="ClickToSendChat(event, 'object')" class="inlinebutton">here</a> to review more information about objects.
+  </p>
+  <p>
+    <img src='/images/objectreview.png' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+      As illustrated above, each object in the Tanks array has 4 properties: "tankID", "color", "r" and "c".
+  </p>
+  <p>
+      For example, for the first tank in the Tanks array, its index is 0, so its color is given in the property <span class="variablenamebold">Tanks[0].color</span>, which can be "red", "blue" or "white". This tank's ID is <span class="variablenamebold">Tanks[0].tankID</span>, which uniquely identifies this tank. 
+  </p>
+  <p>
+    In addition, this tank's coordinates are given by the property <span class="variablenamebold">Tanks[0].r</span> (its row number) and <span class="variablenamebold">Tanks[0].c</span> (its column number). Both row and column numbers on the battlefield are counted from the top left corner, as illustrated below.
+  </p>
+  <p>
+    <img src='/images/battlefield.jpg' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    You can also get the row and column numbers of a tile in the battlefield by clicking on it. Note that the first number is the <b>column</b> number, and the second number is the <b>row</b> number. For example, <b>"(7, 4)" represents the tile at column 7, row 4</b>.
+  </p>
+  <p>
+    <img src='/images/coordinate.jpg' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    Now let's try to use the information given in the <span class="variablename">Tanks</span> array. First, let's print out the properties of all tanks in the current battlefield, using a <span class="variablenamebold">for-loop</span>.
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    First, here is a quick review of the <span class="variablenamebold">for-loop</span> syntax. The example below prints out all even numbers from 0 to 6.
+  </p>
+  <p>
+    <img src="/images/forloopformat2.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<!-- <element elementid="190" elementType="Info">
+  <p>
+    We are going to check each item in the array <span class="variablename">Tanks</span> by walking through the index number from 0 to Tanks.length - 1.  
+  </p>
+</element> -->
+
+<element elementid="200" elementType="Coding" condition="TestFinishedCallConsoleLog">
+  <p>
+    <b>Challenge:</b> implement the <span class="variablename">for-loop</span> that prints out the following information for each tank: <span class="variablename">tankID</span>, <span class="variablename">color</span>, <span class="variablename">r</span>, and <span class="variablename">c</span>. You can replace the old content of the function <span class="variablename">getNewCommand</span> with the template given below.
+  </p>
+  <code isHidden="false">
+//TODO
+function getNewCommand() {
+  // walk through the Tanks array
+  //h0::use i as the index number::i goes from 0 to Tanks.length - 1
+  ::for (let i = 0; i &lt; Tanks.length; i ++) {
+  ::for (let i = 0; i &lt;= Tanks.length; i ++) {
+  ::for (let i = 0; i &lt; Tanks.length - 1; i ++) {
+  for (?; ?; ?) {
+    const curTank = Tanks[i];
+    console.log("Tank " + curTank.tankID + ": color = " + curTank.color + "; r = " + curTank.r + "; c = " + curTank.c);
+  }
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i ++) {
+    const curTank = Tanks[i];
+    console.log("Tank " + curTank.tankID + ": color = " + curTank.color + "; r = " + curTank.r + "; c = " + curTank.c);
+  }
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    You can check out the information your gamebot prints out in the <b>developer console</b> of your browser. If you are using <b>Chrome</b> on a <b>Windows</b> or <b>Linux</b> computer, you can simply press <b>F12</b> or <b>Ctrl + Shift + I</b> on your keyboard to open/close the console. Otherwise, please refer to this page: <a href="http://wickedlysmart.com/hfjsconsole/" target="_blank">using the browser console</a>.
+  </p>
+  <p>
+    <img src="images/opendeveloperconsole.gif" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    You might be wondering how to identify which tank is being controlled by your gamebot. There are two ways. You can 1) refer to your tank directly using the predefined object <span class="variablenamebold">MyTank</span>, or 2) check if a tank's id (<span class="variablenamebold">tankID</span>) equals the predefined constant <span class="variablenamebold">MyID</span>. 
+  </p>
+</element>
+
+<element elementid="240" elementType="Coding" condition="TestFinishedWithCommandFirst_S">
+  <p>
+    Now we're finally ready to shoot at a white tank. 
+  </p>
+  <p>
+    <b>Challenge:</b> Change the function <span class="variablename">getNewCommand</span> to send a <b>shoot</b> command if you find a white tank on the battlefield. 
+  </p>
+  <code isHidden="false">
+//TODO
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const curTank = Tanks[i];
+    //shoot if curTank is white
+    //h0::use if statement to check color property::if (curTank.color == "white") return "S";
+    ?
+  }
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const curTank = Tanks[i];
+    if (curTank.color == "white") return "S";
+  }
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="250" elementType="Info">
+  <p>
+    Now that your gamebot knows to fire a shot whenever it discovers a white tank on the battlefield, we still need to check if that tank is on the same row or column as your tank (unless your tank is equipped with the missile weapon). So let's change your gamebot to check the row and column of the white tank before firing. 
+  </p>
+</element>
+
+
+<element elementid="260" elementType="Coding" condition="TestFinishedCodeIncludes_MyTank.r_MyTank.c;TestFinishedWithCommandFirst_S">
+  <p>
+    <b>Challenge:</b> Using the following code as a guide, please change your gamebot so that it sends a "S" command only when it discovers a white tank on the same row or column as itself. Note that you can use <b>MyTank.r</b> and <b>MyTank.c</b> to get the row and column of your gamebot's position.
+  </p>
+  <code isHidden="false">
+//TODO: return "S" if a target white tank is found
+function getNewCommand() {
+  // loop through all white tanks
+  for (let i = 0; i &lt; Tanks.length; i += 1) {
+    const curTank = Tanks[i];
+    // check if this tank is on the same row or column as MyTank
+    //h0::use the property "r" and "c" to check the row and column of curTank against MyTank::For example, compare MyTank.r against curTank.r
+    ::if (curTank.color == "white" &amp;&amp; (MyTank.r == curTank.r || MyTank.c == curTank.c))
+    ::if (curTank.color == "white" &amp;&amp; (MyTank.r != curTank.r || MyTank.c != curTank.c))
+    if (curTank.color == "white" &amp;&amp; ( ? ) ) {
+      return "S";
+    }
+  }
+  return "";
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white" &amp;&amp; (MyTank.r == curTank.r || MyTank.c == curTank.c)) {
+      return "S";
+    }
+  }
+  return "";
+}      
+  </cleancode>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    Well done! Now your gamebot can locate a white tank and return a command to shoot, but we still have one small issue: your tank may not be facing the right direction for the shot. We'll fix this problem in the next tutorial.
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial, we reviewed how to use a <span class="keyword">for-loop</span> and logical expressions to go through all the tanks in the battlefield and check for white tanks. 
+  </p>
+  <p>
+    <b>Exercise 1</b>: Think about the problem in your current code. How to change it to turn your tank to the right direction before firing at the white tank? 
+  </p>
+  <p>
+    <b>Exercise 2</b>: Can you change your gamebot to only fire at a white tank if that tank is 5 or less tiles away?
+  </p>
+  <p>
+    If you have any questions, feel free to post them on our forum, under <a href="https://forum.tgame.ai/t/lesson-2-shooting-at-a-white-tank/399" target="_blank">this lesson's topic</a>. 
+  </p>
+</element>
+

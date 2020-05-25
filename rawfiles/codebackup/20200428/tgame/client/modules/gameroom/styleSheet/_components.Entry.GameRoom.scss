@@ -1,0 +1,700 @@
+.tools-games{
+  .maxWidth300 {
+    max-width: 300px;
+  }
+  &__groups{
+    align-items: center;
+    padding: 20px 20px 10px 20px;
+    min-width: 280px;
+    background-color: #313783;// #1a1d45;// #002636;
+    display: flex;
+    margin: 0 auto;
+    flex-direction: column; 
+    &__info{
+      display: flex;
+      width: 100%;
+      align-items: center;
+      margin-bottom: 15px;
+      .change-item-button{
+        border-radius: 20px;
+        border: 1px solid transparent;
+        background: #ffdd3d;
+        color: #0a2635;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        &:hover {
+          background-color: #c5a208; 
+          color: white;
+        }
+      }
+      &__name{
+        color: #fff;
+        line-height: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        flex: 1;
+      }
+      &__img{
+        img{
+          width: 210px;
+          height: 115px;
+          object-fit: contain;
+          &.item-type-Cue{
+            height: 40px;
+          }
+        }
+      }
+      .change-Table-button{
+        border-radius: 20px;
+        border: 1px solid transparent;
+        background: #ffdd3d;
+        color: #0a2635;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        &:hover {
+          background-color: #a1860b; 
+          color: white;
+        }
+
+      }
+    }
+  }
+}
+.form-group{
+  &--host,
+  &--guest{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+  }
+  .radio-group{
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 0px;
+    width: 100%;
+    input{
+      visibility: hidden;
+      opacity: 0;
+    }
+    &--active{
+      background-color: #ffda39 !important;
+      background-image: url(img_v2/Icon-GameSetting-Checked.png);
+      background-repeat: no-repeat;
+      background-position: calc(100% - 10px) 10px;
+      background-size: 16px;
+      background-blend-mode: unset !important;
+    }
+    &:hover {
+      background-color: #e4e4e4;
+      background-image: url(img_v2/Icon-GameSetting-Checked.png);
+      background-repeat: no-repeat;
+      background-position: calc(100% - 10px) 10px;
+      background-size: 16px;
+      background-blend-mode: overlay;
+    }
+  }
+}
+.player--info__hosted{
+  margin-bottom: 10px;
+  padding: 0 10px;
+}
+.player--info__selectAI{
+  select{
+    width: calc(100% - 20px)!important;
+    margin: 10px auto 0px;
+    display: block;
+  }
+}
+
+.invite-search{
+  margin-top: 20px;
+  margin-bottom: 10px;
+  position: relative;
+  input{
+    display: block;
+    width: 100%;
+    height: 40px;
+    padding: 0px 15px;
+    margin-bottom: 0px;
+    color: #333333;
+    background: #fff;
+    border: 1px solid #9b9b9b;
+  }
+  .fa.fa-search{
+    font-size: 20px;
+    position: absolute;
+    right: 15px;
+    top: calc(50% - 10px);
+  }
+}
+.configure-groups{
+  &__header{
+    position: relative;
+    margin: 15px 0px;
+    .back-btn {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    h1{
+      font-size: 18px;
+      text-align: center;
+      font-weight: 500;
+    }
+  }
+  &__content{
+    display: flex;
+    justify-content: center;
+    // margin-bottom: 30px;
+    &_vs{
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      display: flex;
+      margin: 0 20px;
+      flex-direction: column;
+      button{
+        border: none;
+        background: transparent;
+        margin: 10px 0px;
+      }
+      .level__info__coin{
+        display: flex;
+        align-items: center;
+        span{
+          font-size: 14px;
+          font-weight: 500;
+          margin-left: 10px;
+        }
+        img{
+          width: 18px;
+        }
+      }
+      .level__info__coin2{
+        display: flex;
+        align-items: center;
+        span{
+          font-size: 14px;
+          font-weight: 500;
+          margin-left: 10px;
+        }
+        img{
+          width: 18px;
+          height: 18px;
+        }
+      }
+     
+    }
+    &__option{
+
+    }
+  }
+}
+.NetworkPlayer{
+  // min-height: 310px;
+  background: #fff;
+}
+.gamesRoomEntry{
+  &__wrapper{
+    background: #f6fbff;
+    max-width: 1024px;
+    margin: 0 auto;
+    width: 100%;  
+    &--configmode{
+      .configure-groups__content{
+        display: flex;
+        justify-content: center;
+        min-height: 365px;
+      }
+    }
+    .exit-warning{
+      color: #ff525a;
+      font-size: 14px;
+      text-align: center;
+    }
+  }
+
+}
+.gameroom-wrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+[data-tiptext] {
+  &::before {
+    content: attr(data-tiptext);
+    position: absolute;
+    opacity: 0;
+    color: #fff;
+    border-radius: 10px;
+    box-shadow: 2px 2px 1px silver;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    &::before {
+      opacity: 1;
+      background: #03233a;
+      margin-top: 35px;
+      margin-left: 20px;
+      min-width: 75px;
+      width: max-content;
+      padding: 5px;
+      height: auto;
+      font-size: 10px;
+    }
+  }
+}
+
+.page {
+  &--gamesroom {
+    position: absolute;
+    top: 69px;
+    bottom: 25px;
+    width: 100% !important;
+    height: calc(100% - 94px) !important;
+    min-height: calc(100% - 94px) !important;
+
+    background-color: #051c30; //$tg-col-basic-bg-blue;
+    // background-image: url('/images/3px-tile.png');
+    background-size: 150px;
+    overflow-y: auto;
+
+    &__configure {
+      flex: 0.8;
+      @media(max-width: 480px) {
+        padding-bottom: 50px;
+      }
+      &.minimize-chatBox {
+        flex: 1;
+      }
+      width: calc(100% - 330px);
+    }
+    
+    &.padding-top {
+      padding-top: 55px;
+    }
+
+    &__log {
+      width: 330px;
+      height: calc(100% - 168px);
+      bottom: 0;
+      position: fixed;
+      margin: 10px;
+      right: 2px;
+      border: 1px solid #b6c1c5;
+
+      &.minimize-chatBox {
+        top: unset;
+        // width: 195px;
+        height: 36px;
+        bottom: 0px;
+
+        .chatHistoryHeader {
+          display: block !important;
+
+          .chatHistoryTitle {
+            width: auto !important;
+            float: left;
+          }
+
+          .chatHistoryHeaderButton {
+            float: right;
+            font-size: 30px !important;
+            padding: 2px !important;
+            width: 35px !important;
+          }
+        }
+      }
+
+      .chatHistoryBlock {
+        overflow: hidden;
+        height: 100%;
+        background-color: $tg-col-basic-white;
+        display: flex;
+        flex-direction: column;
+
+        .chatHistoryHeader {
+          display: flex;
+          cursor: pointer;
+        }
+          // .chatHistoryTitle {
+          //   font-size: 15px;
+          //   font-family: Montserrat, sans-serif;
+          //   font-weight: bold;
+          //   padding: 10px 10px;
+          //   width: 100%;
+          // }
+
+          .chatHistoryHeaderButton {
+            width: 50px;
+            height: 35px;
+            font-size: 32px;
+            text-align: center;
+            .fa {
+              font-size: 24px;
+            }
+          }
+        .chatHistoryTitle {
+          font-size: $tg-fs-heading5;
+          font-family: $tg-ff-body;
+          font-weight: bold;
+          padding: 10px 10px;
+          width: 100%;
+          color: $tg-col-basic-navy;
+        }
+
+        .chatHistoryScroll {
+          overflow-y: auto;
+          border-top: 1px solid #e8e8e8;
+          flex: 1;
+          height: auto;
+
+          .chatHistory {
+            &__List {
+              &__Item {
+                &__Line {
+                  &--REVEAL_ELEMENT {
+                    align-items: flex-start;
+                    flex-wrap: wrap;
+                    margin-left: 10px;
+
+                    .chatHistory__List__Item__Line__User {
+                      img {
+                        width: 35px;
+                        border-radius: 50px;
+                      }
+                      margin-bottom: 10px;
+                    }
+                    .chatHistory__List__Item__Line__Content {
+                      flex: 0 0 auto;
+                      .bubble {
+                        margin-bottom: 5px;
+                        padding: 6px 10px;
+                        font-size: $tg-fs-body;
+
+                        &::before {
+                          border-style: none;
+                        }
+                      }
+
+                      &--isTyping {
+                        position: relative;
+                        text-align: center;
+                        margin-left: auto;
+                        margin-right: auto;
+
+                        &__dot {
+                          display: inline-block;
+                          width: 5px;
+                          height: 5px;
+                          border-radius: 50%;
+                          margin-right: 2px;
+                          background: #16385f;
+                          animation: wave 0.6s linear infinite;
+
+                          &:nth-child(2) {
+                            animation-delay: -1.1s;
+                          }
+
+                          &:nth-child(3) {
+                            animation-delay: -0.9s;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  &--USER_TEXT {
+                    .chatHistory__List__Item__Line__Content {
+                      align-items: flex-end;
+
+                      .bubble {
+                        margin-bottom: 5px;
+                        padding: 6px 10px;
+                        font-size: $tg-fs-body;
+
+                        &::before {
+                          border-style: none;
+                        }
+                      }
+                    }
+                  }
+                  &--SYSTEM {
+                    justify-content: center;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    .chatHistory__List__Item__Line__User {
+                      display: flex;
+                      font-weight: bold;
+                      align-items: flex-start;
+                      img {
+                        width: 30px;
+                        height: 30px;
+                        margin-right: 5px;
+                        border-radius: 50px;
+                      }
+                      span {
+                        margin: 0;
+                        color: $tg-col-basic-navy;
+                        font-size: $tg-fs-body;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        max-width: 250px;
+                      }
+                    }
+                    .chatHistory__List__Item__Line__Content {
+                      &--SYSTEM {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+
+                        .bubble {
+                          background: none;
+                          font-style: italic;
+                          color: $tg-col-basic-navy;
+                          font-size: $tg-fs-body;
+                          padding: 5px;
+
+                          &::before {
+                            border-style: none;
+                            text-align: center;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .chatHistoryAction {
+          padding: 5px;
+          min-height: 42px; // important
+          border-top: 1px solid $tg-col-basic-grey;
+          display: flex;
+          align-items: center;
+
+          &--textarea {
+            background-color: $tg-col-basic-white;
+            min-height: 20px;
+            max-height: 105px;
+            line-height: 15px;
+            font-size: 15px!important;
+            // border: 1px solid $tg-col-basic-grey;
+            border: none;
+            resize: none;
+            margin-right: 10px;
+            padding: 8px;
+            box-sizing: border-box;
+            flex: 1;
+          }
+
+          i {
+            transform: rotateZ(90deg);
+            font-size: 30px;
+            color: $tg-col-basic-dark-blue;
+          }
+        }
+      }
+    }
+
+    .option {
+      &__header {
+        margin: 20px 0;
+        &__title {
+          font-size: $tg-fs-heading3;
+          font-family: $tg-ff-body;
+          font-weight: bold;
+        }
+      }
+      &__content {
+        justify-content: space-around;
+        //padding-top: 20px;
+
+        &__center {
+          font-size: $tg-fs-heading3;
+          color: $tg-col-basic-ivory;
+          font-weight: bold;
+          vertical-align: middle;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+
+          button {
+            color: $tg-col-basic-ivory;
+            font-size: $tg-fs-body;
+            background: transparent;
+            border: none;
+            &:hover {
+              color: $tg-col-basic-aqua;
+            }
+          }
+
+          &--coin {
+
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes wave {
+  0%, 60%, 100% {
+    transform: initial;
+  }
+
+  30% {
+    transform: translateY(-6px);
+  }
+}
+
+@media(max-width: 480px) {
+
+  .minimize-chatBox {
+    width: calc(100% - 25px) !important;
+  }
+}
+
+.player {
+
+  &-increaseHeight {
+    min-height: 265px !important;
+  }
+  &--selection {
+    border: solid 1px $tg-col-basic-aqua;
+    // width: calc(50% - 20px);
+    // width: calc(50% - 84px);
+    min-width: 320px;
+    min-height: 200px;
+    padding: 15px;
+    margin: 10px;
+    height: auto;
+    cursor: pointer;
+    background-color: rgba(10, 115, 188, .1);
+    text-align: left;
+
+    &:hover {
+      border-color: $tg-col-basic-dark-blue;
+    }
+    &__title {
+      font-size: $tg-fs-heading4;
+      font-weight: bold;
+      color: $tg-col-basic-ivory;
+      padding-top: 10px;
+      padding-bottom: 5px;
+      text-align: center;
+    }
+
+    &__content {
+      height: 75px;
+      &__id {
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+      }
+    }
+
+    &__coin {
+      display: flex !important;
+      align-items: center;
+      font-size: $tg-fs-comment;
+
+      img {
+        width: 15px;
+        height: 15px;
+        margin-right: 5px !important;
+      }
+    }
+  }
+
+  &--option {
+    padding-top: 10px;
+    color: $tg-col-basic-dark-blue;
+    font-size: $tg-fs-body;
+    font-family: $tg-ff-body;
+    cursor: pointer;
+    label {
+      // margin-left: 5px;
+      // margin-right: 10px;
+      // color: $tg-col-basic-ivory;
+      // cursor: pointer;
+    }
+  }
+
+  @media(max-width: 768px) {
+    &--selection {
+      flex-basis: 100%;
+    }
+  }
+}
+.startGame{
+  text-align: center;
+}
+.button {
+  &--block {
+    padding: 30px;
+
+    .leave {
+      background-color: $tg-col-basic-dark-blue !important;
+
+      &:hover {
+        background-color: $tg-col-basic-navy !important;
+      }
+    }
+  }
+
+  &--previousGame {
+    display: inline-block;
+    text-align: center;
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+  }
+  
+  &--startgame {
+    padding: 12px 25px;
+    background-color: $tg-col-basic-light-blue;
+    color: $tg-col-basic-ivory;
+    border: 0;
+    width: 250px;
+    font-size: $tg-fs-heading5;
+    text-align: center;
+    border-radius: 15px;
+    margin: 10px;
+
+    &.disabled-button {
+      cursor: not-allowed;
+    }
+  }
+
+  &--startTournamentGame {
+    padding: 9px;
+    border: 1px solid $tg-col-basic-light-blue;
+    color: $tg-col-basic-ivory;
+    width: 50%;
+    max-width: 100%;
+    font-size: 20px;
+    border-radius: 0.25em;
+    text-align: center;
+    margin: 10px 0 20px 0;
+  }
+}
+
+.minimize-chatBox {
+  .chatHistoryAction {
+    display: none !important;
+  }
+}

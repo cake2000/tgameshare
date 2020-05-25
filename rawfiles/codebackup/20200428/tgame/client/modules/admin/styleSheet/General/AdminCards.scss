@@ -1,0 +1,51 @@
+.admin-cards {
+	&__content {
+		display:flex;
+    flex-wrap: wrap;
+		&__add-btn {
+			margin-left: 10px;
+    	margin-top: 10px;
+		}
+		&__item {
+			&--half {
+				flex-basis: 100%;
+				position: relative;
+			}
+			flex-basis: 50%;
+			&__block {
+				flex-grow: 1;
+				display: flex;
+				flex-direction: row;
+				background-color: #fff;
+				margin: 10px 10px 0px 10px;
+				padding: 10px;
+				img {
+					object-fit: cover;
+					width: 100px;
+					height: 100px;
+				}
+				&__info {
+					display: flex;
+					flex-direction: column;
+					margin-left: 10px;
+					&__title {
+						font-size: 1.3em;
+    				margin-bottom: 10px;
+					}
+					&__des {
+
+					}
+				}
+			}
+			&__footer {
+				display: flex;
+				justify-content: flex-end;
+				margin: 0px 10px 10px 10px;
+				background-color: white;
+				a {
+					margin-right: 10px;
+				}
+			}
+		}
+	}
+}

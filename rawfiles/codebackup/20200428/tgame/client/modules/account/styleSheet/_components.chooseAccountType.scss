@@ -1,0 +1,53 @@
+.choose-account-type-wrapper{
+  background-color: #272727;
+  .choose-account-type {
+    height: calc(100vh - 70px - 50px);
+    width: 100%;
+    background-image: url(images/decision-tree2-p-500.png);
+    background-position: 50% 50%;
+    background-color: #1e1e1f;
+    background-size: cover;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    .title {
+      color: #fff;
+    }
+    .account-type-card {
+      &__item {
+        display: inline-flex;
+        width: 190px;
+        height: 150px;
+        background-color: #0a73bc;
+        border: 1px solid #21abda;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        margin-top: 50px;
+        box-shadow: 0 6px 21px 4px #000;
+        transition: .3s ease;
+        
+        &:hover {
+          transform: scale(1.13);
+        }
+
+        &:first-child {
+          margin-right: 35px;
+        }
+        
+        a {
+          color: #fff;
+          span {
+            display: block;
+            font-size: 50px;
+            margin-bottom: 5px;
+          }
+        }
+
+      }
+    }
+  }
+}

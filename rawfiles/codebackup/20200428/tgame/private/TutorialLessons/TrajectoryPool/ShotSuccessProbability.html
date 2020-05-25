@@ -1,0 +1,215 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getCallShot() {
+  const aimPoint = getAimPosition(Balls[3], Pockets[1]);
+  return {
+    aimx: aimPoint.x,
+    aimy: aimPoint.y,
+    strength: 30
+  };
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}      
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial, you learned how to shoot ball 3 into either pocket 0 or 1. Now let's <b>teach your bot how to choose between these two pockets, by comparing the probability of pocketing ball 3 into each pocket</b>.
+  </p>
+  <p>
+    As a reminder, user questions and discussions can be found <a href="https://forum.tgame.ai/t/shot-success-probability/24" target="_blank">in our forum</a>. If you get stuck for too long, feel free to seek help there!
+  </p>
+</element>
+
+<element elementid="100.5" elementType="Info">
+  <p>
+    First, we need to create 2 shot command objects, <b>cmd0</b> for shooting ball 3 into pocket 0, and <b>cmd1</b> for shooting ball 3 into pocket 1. 
+  </p>
+  <p>
+    I have added cmd0 to your getCallShot function already. Can you write the code for cmd1? You can duplicate the code for cmd0 (right-click to trigger the context menu) and then modify it. Note that two new properties are added to the shot command to specify which pocket/ball we are targeting: <b class="variablenamebold">targetBallID</b> and <b class="variablenamebold">targetPocketID</b>.
+  </p>
+  <p>
+    <img src="/images/duplicatecmd0.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+  
+
+<element elementid="101" elementType="Coding" condition="TestFinishedAnyResultAsyncGetProb">
+  <p>
+    Given these 2 shot commands, now we need to ask the game engine to tell our robot the success probability for each command, using a helper function <b class="variablenamebold">calculateProbability</b> like this:
+  </p>
+  <p>
+    <pre class="brush: js">
+const probability = await calculateProbability(shotCommand);
+    </pre>
+  </p>
+  <p>
+    The returned probability is a number between 0 and 100, so a value of 40 would mean "40% probability". Note that you need to call the <span class="variablenamebold">calculateProbability</span> function with the keyword <a href="#" onclick="ClickToSendChat(event, 'how to use await?')" class="inlinebutton keyword">await</a> in front of it. This tells your bot to wait until it receives the probability value from the game engine. In addition, the <span class="variablename">getCallShot</span> function itself needs to be marked as <a href="#" onclick="ClickToSendChat(event, 'how to use async?')" class="inlinebutton keyword"><b>async</b></a>, since it contains a function call using <span class="keyword">await</span>.
+  </p>
+  <!-- <p>
+    In addition, as shown in the code given, . <b>Without these two new properties, the <span class="variablenamebold">calculateProbability</span> function won't work</b>.
+  </p> -->
+  <p>
+    <img src="/images/addprobabilitycalc.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    <b>Challenge:</b> please add the async keyword, and code to calculate <span class="variablenamebold">prob0</span> and <span class="variablenamebold">prob1</span>. Click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> when you are done.
+  </p>
+  <code isHidden="true">
+//TODO: calculate success probability for cmd1 
+// add "async" here    
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  // shot command to shoot ball 3 into pocket 0
+  const cmd0 = { 
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 0 
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  // shot command to shoot ball 3 into pocket 1
+  const cmd1 = { 
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 1 
+  };
+
+  // success probability for cmd0
+  const prob0 = await calculateProbability(cmd0);
+
+  // success probability for cmd1 (to be updated)
+  //h0::call "await calculateProbability"::write "await calculateProbability(cmd1)";
+  const prob1 = ? ;
+
+  // always return cmd0 for now
+  return cmd0;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 3, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 3, targetPocketID: 1
+  };
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  return cmd0;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+
+<element elementid="102" elementType="Info">
+  <p>
+    Your getCallShot function currently always returns <span class="variablename">cmd0</span> at the end. Now let's change it to <b>return <span class="variablenamebold">cmd0</span> if <span class="variablenamebold">prob0</span> is higher, otherwise return <span class="variablenamebold">cmd1</span></b>. Such logic can be implemented using <b>conditional statements</b>.
+  </p>
+</element>
+
+<element elementid="105" elementType="Language" languageSkills="JavaScript:IfCondition|Python:IfCondition">
+</element>
+
+<element elementid="112" elementType="Coding" condition="TestPPPocketBall_3_In_1">
+  <p>
+    <b>Challenge:</b> can you change your code to return <span class="variablename">cmd0</span> or <span class="variablename">cmd1</span> by comparing <span class="variablename">prob0</span> and <span class="variablename">prob1</span>? You can use the code below as a baseline.
+  </p>
+  <p>
+    <img src='/images/addifelse.gif' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <code isHidden="false">
+//TODO: return command with higher probability
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 3, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 3, targetPocketID: 1
+  };
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  
+  // return command with greater success probability
+
+  // new code starts here
+  //h0::compare prob0 with prob1::use the ">" comparator
+  ::if (prob0 > prob1) {
+  ::if (prob1 > prob0) {
+  ::if (prob1 == prob0) {
+  if ( ? ) {
+    return cmd0;
+  } else {
+    return cmd1;
+  }
+  // new code ends here
+}
+//ENDTODO
+  </code>
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 3, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 3, targetPocketID: 1
+  };
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  //return command with higher probability
+  if (prob0 > prob1) {
+    return cmd0;
+  } else {
+    return cmd1;
+  } // closing scope for if-else
+} // closing for function getCallShot
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+      
+<element elementid="180" elementType="Conclusion">
+  <p>Well done!</p>
+  <p>
+    <b>Summary:</b> You have learned 1) how to retrieve the success probability of a shot command using the helper function <span class="variablenamebold">await calculateProbability</span>, and 2) how to use a <b>conditional statement</b> to give your bot dynamic behavior based on the probabilities.
+  </p>
+  <p>
+    <b>Exercise 1:</b> Could you change the code in order to choose pocket 0 whenever the success probability is at least 20%, and pocket 1 otherwise? Make the change, and then test to confirm that your bot chooses to shoot ball 2 into pocket 0.
+  </p>
+  <p>
+    <b>Exercise 2:</b> Could you change the code to return <span class="variablename">cmd1</span> whenever the <span class="variablename">prob0</span> and <span class="variablename">prob1</span> are both greater than 20%, and return <span class="variablename">cmd0</span> otherwise?
+  </p>
+  
+</element>
+

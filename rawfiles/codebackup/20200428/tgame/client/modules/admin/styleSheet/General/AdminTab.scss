@@ -1,0 +1,40 @@
+.admin-tab {
+	margin-top: 20px;
+	&__header {
+		display: flex;
+		&__item {
+			margin-bottom: -1px;
+			flex-basis: 20%;
+			padding: 0.6rem;
+			span {
+				display: inline-block;
+				width: 100%;
+				text-align: center;
+				font-size: 1.2em;
+				font-weight: 500;
+			}
+			&--active {
+				background: #fff;
+				border: 1px solid #cfd8dc;
+				border-bottom-color: #fff;
+			}
+			&:hover {
+				border: solid 1px;
+				border-color: #cfd8dc #cfd8dc #ddd;
+			}
+		}
+	}
+	&__content {
+		margin-top: -1px;
+    background: #fff;
+    border: 1px solid #cfd8dc;
+		&__item {
+		}
+	}
+	&__footer {
+		padding: 0.6rem;
+		border-top-color: #fff;
+		border: 1px solid #cfd8dc;
+		margin-top: -1px;
+	}
+}

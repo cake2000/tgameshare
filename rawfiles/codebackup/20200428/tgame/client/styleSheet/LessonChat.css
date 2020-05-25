@@ -1,0 +1,744 @@
+.chatHistoryTitle {
+  position: relative;
+  width: calc(100% - 30px);
+  padding: 20px 15px;
+  color: #b1a8aa;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.chatHistoryScroll {
+  position: relative;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 265px);
+}
+.conversationHistoryScroll {
+  height: calc(100vh - 225px);
+}
+
+.chatHistoryScroll ul {
+    list-style: circle !important;
+    margin-left: 12px;
+    padding: 6px;
+}
+.chatHistoryScroll td {
+    margin-left: 5px;
+    padding: 6px;
+    margin: 5px;
+}
+.chatHistoryScroll Button {
+    background-color: #5f5fe0 !important;
+    color: #e9efe9;
+    padding: 5px;
+    float: right;
+}
+
+.chatHistoryScroll b, strong {
+    font-weight: bold !important;
+}
+.chatHistoryScroll .elementheader {
+    font-size: 17px;
+    font-weight: bold !important;
+    padding-bottom: 10px;
+    text-align: center;
+    line-height: 20px;
+}
+.chatHistory {
+  width: 100%;
+}
+.bubble{
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  display: inline-block;
+  padding: 6px 15px 6px 15px;
+  position: relative;
+  font-size: 14px;
+  max-width: 100%; /*aaaa*/
+  word-wrap: break-word;
+  color: rgb(0,0,0);
+}
+.bubble::before {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px 8px 9px 0;
+  border-color: transparent #f2f2f2 transparent transparent;
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 12px
+}
+
+.bubble .isUserTest::before {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px 8px 9px 0;
+  border-color: transparent #c1f4cb transparent transparent;
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 12px
+}
+
+.you {
+
+}
+.you::before {
+
+}
+.me {
+  float: right;
+  background-color: #0297d4;
+}
+.isUser {
+  color: #fff;
+  background-color: #0297d4;
+}
+.isUser::before {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px 0px 9px 8px;
+  content: '';
+  position: absolute;
+  right: -8px;
+  left: auto;
+  top: 12px;
+  border-color: transparent transparent transparent #0297d4;
+}
+.isUserTest {
+  background-color: #c1f4cb;
+}
+.isUserTest::before {
+  /* background-color: #c1f4cb; */
+}
+
+.me::before {
+  border-color: transparent #0297d4 transparent transparent;
+}
+.MyAISupportLabel {
+  width: 90px;
+  margin: -5px;
+  position: absolute;
+}
+.UserLable {
+  float: right;
+  width: 90px;
+  margin-right: 55px;
+  /*right: 25px;*/
+  /*position: relative;*/
+}
+/*.CodeMirror {
+  width: 200px;
+  height: 200px;
+}*/
+#divinputtext .promptForUserInput {
+  width: 100%;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+#divinputtext .CodeMirror {
+  width: 96%;
+  margin-left: 2%;
+  margin-right: 2%;
+  margin-bottom: 1%;
+  height: 47px;
+  font-size: 18px;
+}
+/*input {
+  height: '16px'
+}*/
+#inputtext {
+  width: 100%;
+  height: 46px!important;
+  font-size: 15px!important;
+  border: 1px solid #e8e8e8;
+  resize: none;
+  line-height: 26px;
+  margin-right: 10px;
+  padding: 10px 15px;
+}
+
+.sendChatButton {
+  /*margin-right: 1.5%;
+  margin-left: 1.5%;*/
+  margin-right: 10%;
+  margin-bottom: 10px;
+  padding: 13px;
+}
+.askHintButton {
+  background-color: #608B4E;
+  margin-right: 10%;
+  margin-bottom: 10px;
+  padding: 13px;
+}
+
+.firstActionButton {
+  margin-right: 2.5%;
+  margin-left: 2%;
+}
+.TalkToUsButton {
+  position: relative;
+  /*top: 10px;*/
+  margin-top: 10px;
+}
+.ScreenShotInHisstory {
+  /*max-width: 100px;*/
+  /*max-height: 100px;*/
+  border: 1px solid #EAEAEA;
+}
+.modal-lg {
+  width: 70% !important;
+}
+.screenshotimage {
+  max-width: 100%;
+  /*height: 100px;*/
+  border: 3px solid #aaaaff;
+}
+.screenshotdiv {
+  display: inline-block;
+  width: 300px;
+  position: relative;
+  vertical-align: top;
+}
+
+/* hack recurly so that the field height is controlled */
+.recurly-hosted-field {
+  height: 20px
+}
+
+.onerow {
+  /*max-width: 96%;*/
+  /*overflow-wrap: break-word;*/
+}
+
+/* .CodeMirror-scroll {
+  overflow: auto;
+  padding-bottom: 0px!important;
+  height: 50%;
+  position: relative;
+  outline: none;
+} */
+
+.jshelp {
+  border: 2px solid green;
+  padding: 8px;
+}
+
+.important {
+  border: 2px solid red;
+  padding: 8px;
+}
+
+.bubble p {
+  margin-bottom: 7px;
+  line-height: 20px;
+  text-align: justify;
+}
+
+.bubble h5 {
+  margin: 0px;
+}
+
+.bubble .syntaxhighlighter,
+.bubble .syntaxhighlighter  .container .line{
+  display: block; /* without this all code in chat window show up in one line*/
+  background: transparent!important;
+}
+.inlinebutton {
+  /*float: right;*/
+  text-decoration: underline;
+  /* color: #21abda !important; */
+}
+
+.syntaxhighlighter {
+  margin: 10px !important;
+}
+
+.gamedivshellhidden {
+  display: none;
+}
+
+.gamedivshellmodal {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sendTextTable {
+  width: 100%;
+}
+.inputTextTD {
+  width: 89%;
+}
+
+.ReferenceTableLink {
+  border: 1px solid black;
+  background-color: white;
+  margin-left: 5px;
+  table-layout: auto;
+}
+
+.ReferenceTableLink td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.ReferenceTableLink th {
+  border: 1px solid black;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.ReferenceTableLink tr {
+  border: 1px solid black;
+}
+
+.ReferenceTable {
+  border: 1px solid black;
+  background-color: #c9dbf7;
+  margin-left: 30px;
+  table-layout: auto;
+}
+
+.ReferenceTable td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.ReferenceTable th {
+  border: 1px solid black;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.ReferenceTable tr {
+  border: 1px solid black;
+}
+
+
+.ReferenceTable2 {
+  border: 1px solid black;
+  background-color: #c9dbf7;
+  margin-left: 30px;
+  table-layout: auto;
+  text-align: center;
+  vertical-align: middle;
+}
+.ReferenceTable2 td {
+  border: 1px solid black;
+  padding: 5px;
+  vertical-align: middle;
+}
+
+.ReferenceTable2 th {
+  border: 1px solid black;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.ReferenceTable2 tr {
+  border: 1px solid black;
+}
+
+.hiddenCode {
+  visibility: hidden;
+  line-height: 0px !important;
+}
+
+
+
+.ExitGameModel {
+  background-color: #1F375A !important;
+  position: absolute;
+  left: 35%;
+  top: 40%;
+  right: 35%;
+  bottom: 40%;
+}
+
+.OverwriteReleaseModel {
+  background-color: #1F375A !important;
+  position: absolute;
+  display: inline-block;
+  left: 25%;
+  top: 40%;
+  right: 25%;
+  bottom: 40%;
+  width: 50%;
+  font-size: 30px;
+}
+
+.OverwriteCurrentModel {
+  background-color: #1F375A !important;
+  position: absolute;
+  display: inline-block;
+  left: 25%;
+  top: 40%;
+  width: 50%;
+  right: 25%;
+  bottom: 40%;
+  max-width: 600px;
+  /* margin: 0, auto; */
+}
+
+.modelButton {
+  color: white;
+  background: #3572B7;
+  border-color: #3572B7;
+}
+
+.disabledButton {
+  background-color: #b1a8aa !important;
+}
+
+.MessageHeader {
+  /* position: absolute; */
+  color: #8fb2ea;
+  margin-top: 5%;
+  text-align: center;
+}
+
+
+.MessageHeader2 {
+  /* position: absolute; */
+  color: #333;
+  margin-top: 5%;
+  text-align: center;
+  font-size: 20px;
+}
+
+.ConfirmExitButton {
+  position: absolute;
+  left: 10%;
+  bottom: 10%;
+}
+
+.ReturnToGameButton {
+  position: absolute;
+  right: 10%;
+  bottom: 10%;
+}
+
+.OKButton {
+  position: absolute;
+  left: 45%;
+  bottom: 10%;
+}
+
+.ReactModal__Overlay--after-open {
+  overflow: hidden !important;
+}
+
+
+.CodeMirror-hints {
+  position: absolute;
+  z-index: 10;
+  overflow: hidden;
+  list-style: none;
+
+  margin: 0;
+  padding: 2px;
+
+  -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  border-radius: 3px;
+  border: 1px solid silver;
+
+  background: #e8db86;
+  font-size: 90%;
+  font-family: monospace;
+
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.CodeMirror-hint {
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 2px;
+  white-space: pre;
+  color: black;
+  cursor: pointer;
+}
+
+#exitModalButton {
+  position: absolute;
+  right: 0px;
+  top:0px;
+  width: 60px;
+  height: 30px;
+  background-color: #c1f4cb;
+  color: #1F375A;
+}
+
+.leftrightmargin20 {
+  margin-left: 10px;
+  margin-right: 20px;
+  margin-top: 5px;
+  padding: 7px 5px !important;
+
+}
+
+.leftrightmargin10 {
+  margin-left: 5px;
+  margin-right: 10px;
+  padding: 8px 5px !important;
+
+}
+
+.leftrightmargin5 {
+  margin-left: 10px;
+  margin-right: 5px;
+  padding: 8px 5px !important;
+  /* height: 25px; */
+}
+
+.leftrightmargin55 {
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 8px 5px !important;
+  /* height: 25px; */
+}
+
+/* .rw-widget-input {
+  height: 25px;
+}
+
+.rw-widget-picker {
+  height: 25px;
+  display: inline-block !important;
+} */
+
+/* .rw-widget {
+  height: 25px;
+} */
+
+/* .rw-widget-container {
+  height: 25px !important;
+  display: inline-block !important;
+} */
+
+.labelDropdown {
+  height: 31px !important;
+  display: inline-block !important;
+}
+
+.labelDropdown > div {
+  /* display: inline-table !important; */
+}
+
+
+.labelDropdownlesson{
+  height: 31px !important;
+  display: inline-block !important;
+  padding-top: 3px;
+}
+
+/* .labelDropdown input {
+  height: 25px !important;
+  display: inline-block !important;
+} */
+
+.rw-widget>.rw-widget-container {
+  height: 31px !important;
+  display: inline-block !important;
+  width: 120px  !important;
+}
+
+.labelDropdownFunc div {
+  /* display: inline-table !important; */
+}
+
+.alignButton {
+  top: -12px;
+  position: relative;
+  border: none !important;
+  border-radius: 4px !important;
+}
+
+.alignButtonDiv {
+  height: 42px;
+  padding-top: 3px;
+}
+
+.buildmyAI__AIcode__CodeMirror__header {
+  /* height: 5px !important; */
+  display: none !important;
+}
+
+.codeInValidError {
+  background: #dd3323;
+  color: #fff;
+}
+
+.bert-alert {
+  /* background-color:  rgba(255, 255, 255, 0.1) !important; */
+  color: yellow !important;
+}
+
+.bert-alert .bert-content > h5 {
+  font-size: 17px !important;
+}
+
+
+#MeteorToys_Toggle {
+  visibility: hidden !important;
+}
+
+.RightColumnBox {
+  flex-direction: row;
+  flex: 1;
+}
+
+.gameWrapper {
+  /* flex: 1; */
+  height: 100%;
+  min-height: 200px;
+}
+
+.warningtext {
+  font-size: 20px;
+  color: orange;
+}
+
+
+.cm-s-abcdef span.cm-comment {
+  color: #608B4E !important;
+}
+.cm-s-blackboard span.cm-comment {
+  color: #608B4E !important;
+}
+
+.reallyhighlight {
+  /* color: #dd3323; */
+}
+
+.keyword {
+  font-weight: bold;
+  font-family: Courier;
+}
+
+.variablename {
+  font-style: oblique;
+  font-family: Courier;
+  font-weight: 500;
+}
+
+.variablenamebold {
+  font-style: oblique;
+  font-family: Courier;
+  font-weight: bold;
+}
+
+.hintcontent {
+  color: blue;
+}
+
+.buttonDisabled {
+  color: grey !important;
+}
+
+.blueButton {
+  color: #fefefe;
+  border: 1px solid #236bc2;
+  background-color: #236bc2;
+  padding: 10px 15px;
+}
+
+.tutorial-video-link {
+  font-size: 18px;
+  font-family: Montserrat, sans-serif;
+  text-decoration: underline;
+  margin: auto;
+  cursor: pointer;
+}
+
+.tutorial-video-link:hover {
+  color: #fdc800;
+}
+
+.fa-play-circle-o {
+  font-size: 21px;
+  margin-right: 10px;
+}
+
+.invitationLog-title {
+  color: #fefefe;
+  margin-top: 20px;
+}
+
+.btntall {
+  height: 30px !important;
+}
+
+.CodeMirror-guttermarker-subtle {
+  color: lightgreen !important;
+}
+
+.rw-popup {
+  width: 250px !important;
+}
+
+#rw_1_input {
+  width: 20px !important;
+  margin-right: 5px !important;
+  background: transparent;
+}
+
+/* #rw_1_input > div.rw-widget-input.rw-widget-picker.rw-widget-container {
+  width: 18px !important;
+  background-size:cover;
+  background-image: url("/images/funcButton.jpg");
+  border: none;
+} */
+
+/* #rw_1_input > div.rw-widget-input.rw-widget-picker.rw-widget-container */
+
+#dropdownDIV .rw-dropdown-list .rw-widget-input.rw-widget-picker.rw-widget-container {
+  width: 18px !important;
+  margin-right: 8px;
+  /* background: lightblue; */
+  background-size:cover;
+  background-image: url("/images/funcButton.jpg");
+  border: none;
+}
+
+
+#funcButton {
+  background: lightblue;
+}
+
+.swal-content {
+  font-size: 16px;
+  position: relative;
+  float: none;
+  line-height: normal;
+  vertical-align: top;
+  text-align: left;
+  display: inline-block;
+  margin: 0;
+  padding: 0 10px;
+  font-weight: 400;
+  color: rgba(0,0,0,.64);
+  max-width: calc(100% - 20px);
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.chatHistoryScroll--responsive {
+  height: calc(100vh - 312px) !important;
+}
+
+
+.react-autosuggest__input {
+  width: 300px;
+}
+
+.playerinput {
+  width: 300px;
+}

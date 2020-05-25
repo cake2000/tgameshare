@@ -1,0 +1,182 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>The Trajectory Pool game have different features and limits depending on the game difficulty level (<b>Beginner</b> vs <b>Advanced</b>), and your robot can decide to behave differently based on the game difficulty level.</p>
+    <p>The <b>world</b> object has an attribute called <b>level</b> that tells what level of game you are playing: <b>0</b> for the beginner level and <b>1</b> for the advanced level. At advanced level, the shot strength limit is raised from 3000 to 5000, since a stronger strength is needed to break the bigger pack of balls at game start. Also, the player is allowed to set a new <b>spin</b> attribute in the shot command with any value between -1 and 1. Let's change your code to behave differently based on the current difficulty level.
+    </p>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedValidBreakShot">
+  <h5 class="elementheader">[Challenge] Adapt break shot based on game level</h5> 
+  <p><b>Test:</b> Please add a switch clause in your function <b>getBreakShot</b> to specify different strength depending on the game level.</p>
+    <code isHidden="false">
+function getBreakShot() {
+  //TODO: return different shot command based on world.level
+  switch (world.level) {
+    case 0:
+      //h0::return shot command for BEGINNER level::e.g. return { aimx: 0, aimy: 0, cueballx: 0, cuebally: 0, strength: 3000 }
+    case 1:
+      //h1::return shot command for ADVANCED level::e.g. return { aimx: 0, aimy: 0, cueballx: 0, cuebally: 0, strength: 5000, spin: -0.5 }
+  }
+  //ENDTODO
+}
+    </code>
+</element>
+    
+
+<element elementid="130" elementType="Coding" condition="RepeatingTest_3_Stops">
+  <h5 class="elementheader">[Challenge] Automatically Repeating Shots</h5>
+  <p>With your professional subscription, you can now make changes to the test setup scripts yourself. This is a very powerful tool for you. Now let me show you how to test your shot command automatically.</p>
+  <p>
+    <img src="/images/testcodetab.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>If you click the <b>Test Code</b> tab, you can see that currently the test code only has 2 function calls: "ResetTable();TakeBreakShot();". Each time you click on the <b>TEST</b> button, all balls on the table are reset to their original position and your break shot is executed once. To run it again you need to exit the simulation window and click the TEST button again. This is tedious and slow. To <b>automatically rerun the test</b> , you need to do 2 things:
+    <ul>
+      <li>
+        <b>For-loop</b>: wrap the action you want to repeat in a for-loop to repeat it, with a new line added at the end of the loop to wait until all balls have stopped: "await WaitForAllBallStop()";
+      </li>
+      <li>
+        <b>Submit result</b>: you have to call the function <b>submitResult</b> at the end, either with no parameters or pass in a result message to be displayed.
+      </li>
+    </ul>
+  </p>
+  <p>
+    For a compelte example, let's test run your break shot for 3 times. Please change your test setup script into the following. 
+  </p>
+  <code isHidden="false">
+// add a for-loop for repeating 3 times    
+for (let i=0; i&lt;3; i++) {
+  // move all balls to starting position
+  ResetTable();
+  // call your robot to take a break shot
+  TakeBreakShot();
+  // wait for all balls to stop moving
+  await WaitForAllBallStop();
+}
+// submit an optional result string message
+submitResult("Test run done");
+  </code>
+</element>
+
+
+<element elementid="140" elementType="Coding" condition="RepeatingTest_10_Stops_Counter">
+  <h5 class="elementheader">[Challenge] Calculating shot performance</h5> 
+  <p>Now you can automatically repeat the break shots, it is still not very useful if you don't keep track of the test outcome. Please modify your test code to do so with the following changes: </p>
+  <p>
+    <ul>
+      <li>
+        <b>getAllBallInfo</b>: after each shot, you can call the function <b>getAllBallInfo</b> to retrieve an array of objects as indexed by the ball ID, and each object contains a property <b>i</b> for the ball ID and a property <b>p</b> for the pocket ID that ball is in (0 to 5). If that ball is not in any pocket, then <b>p</b> will be <b>-1</b>, and you'll get 2 additional properties <b>x</b> and <b>y</b> for the position of that ball.
+      </li>
+      <li>
+        <b>label each run's outcome</b>: a shot is <b>invalid</b> if the cue ball (id=0) or black ball (id=1) is pocketed; a shot is <b>sucesssful</b> if any other ball is pocketed; a shot is just <b>valid</b> if no ball is pocketed.
+      </li>
+      <li>
+        <b>add counters</b>: now you have labels for each test, you can just use 3 counters (<b>invalidCount</b>, <b>validCount</b> and <b>sucesssfulCount</b>) to keep track of how many test runs fall into each category.
+      </li>
+    </ul>
+    Please modify your test code based on the code below and fill in the part that label each test outcome.
+  </p>
+  <code isHidden="false">
+// add 3 counters to keep track
+let invalidCount = 0;
+let validCount = 0;
+let successfulCount = 0;
+
+// run 10 times to get reliable statistics
+for (let i=0; i&lt;10; i++) {
+  ResetTable();
+  TakeBreakShot();
+  await WaitForAllBallStop();
+  // get information of all balls
+  const allInfo = getAllBallInfo();
+
+  //TODO: label test outcome based on allInfo
+  //h0::check if cue ball or black ball are pocketed::check allInfo[0].p and allInfo[1].p
+  ::if (allInfo[0].p >=0 &amp;&amp; allInfo[1].p >= 0) {
+  ::if (allInfo[0].p >=0 || allInfo[1].p >= 0) {
+  ::if (allInfo[0].p &lt;0 || allInfo[1].p &lt; 0) {
+  if ( ? ) {
+    //h1::add to invalid counter::invalidCount ++
+  } else {
+    // define a flag variable for whether shot is successful
+    let isSuccess = false;
+    //h2::go through allInfo for other balls::for-loop starting with id 2
+    ::for (let id=2; id &lt; allInfo.length; id++) {
+    ::for (const id=2; id &lt; allInfo.length; id++) {
+    ::for (let id=2; id &lt;= allInfo.length; id++) {
+    for ( ? ) {
+      //h3::check if ball is in pocket::check allInfo[id].p
+      if ( ? ) {
+        //h4::mark this test run as successful::update isSuccess
+        //h5::break out the for-loop::use the break keyword
+      }
+    }
+    if (isSuccess) {
+      //h6::increment successfulCount
+    } else {
+      //h7::increment validCount
+    }
+  }
+  //ENDTODO
+}
+
+// submit counter values
+submitResult("invalid " + invalidCount + " valid " + validCount + " success " + successfulCount);
+  </code>    
+</element>
+
+
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing our first advanced tutorial. You have learned how to use <b>world.level</b> to adapt your robot's behavior based on game's difficulty level, and also a set of tools to help you automatically repeat your test shot and keep track of the results.</p>
+    <p>
+        <b>Extra Credit:</b> please continue to test different break shot command until you are satisfied. There are literally infinite possibilities, and it will sure pay off when you have a great break shot to start a new game!
+    </p>
+</element>
+
+
+
+<!-- 
+function getBreakShot() {
+  //TODO: return different shot command based on world.level
+  switch (world.level) {
+    case 0:
+      return { aimx: 0, aimy: 0, cueballx: 0, cuebally: 0, strength: 3000 };
+    case 1:
+      return { aimx: 0, aimy: 0, cueballx: 0, cuebally: 0, strength: 5000, spin: -0.5 };
+  }
+} 
+-->
+
+
+<!-- 
+
+let invalidCount = 0;
+let validCount = 0;
+let successCount = 0;
+
+for (let i=0; i<10; i++) { 
+  ResetTable();
+  TakeBreakShot(); 
+  await WaitForAllBallStop(); 
+  const allInfo = getAllBallInfo();
+  if (allInfo[0].p >=0 || allInfo[1].p >= 0) {
+    invalidCount ++;
+  } else {
+    let isSuccess = false;
+    for (let id=2; id < allInfo.length; id++) {
+      const ballInfo = allInfo[id];
+      if (ballInfo.p >= 0) {
+        isSuccess = true;
+        break;
+      }
+    }
+    if (isSuccess) {
+      successCount ++;
+    } else {
+      validCount ++;
+    }
+  }
+} 
+submitResult("invalid " + invalidCount + " valid " + validCount + " success " + successCount);
+ -->

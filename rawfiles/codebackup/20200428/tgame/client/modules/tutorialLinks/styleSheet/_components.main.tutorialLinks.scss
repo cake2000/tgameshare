@@ -1,0 +1,313 @@
+.tg-page{
+  &--tutorialLinks{
+    // position: absolute;
+    // top: 69px;
+    // bottom: 25px;
+    // width: 100% !important;
+    // height: calc(100% - 94px) !important;
+    // min-height: calc(100% - 94px) !important;
+
+    // background-image: url(/images/dark-geometric-copy.png);
+    // background-position: 0px 0px;
+    // background-size: 35px;
+  }
+  #allTutorialsDiv {
+    height: 100%;
+    overflow: auto;
+  }
+
+  &__content{
+    &--tutorialLinks{
+      // padding: 0px 0px;
+      // opacity: 1;
+    }
+
+    &__block{
+      .breadcum--back {
+        padding-top: 10px;
+        i {
+          position: relative;
+          top: 2px;
+        }
+      }
+      &--premiumLink {
+        color: #0a8ad8;
+        cursor: pointer;
+        // text-decoration: underline;
+        padding: 5px 0;
+        font-size: 18px;
+        justify-content: center;
+        flex-direction: column;
+
+        a {
+          text-decoration: underline;
+        }
+
+        .buy-now--wrapper {
+          margin-top: 10px;
+          span {
+            text-decoration: none;
+            margin-right: 10px;
+          }
+        }
+      }
+      &--listGames{
+        margin-bottom: 0px;
+      }
+      &--selectGame{
+        flex-direction: column;
+      }
+      &__items{
+        display: flex;
+        flex: 1;
+        align-items: center;
+        width: 100%;
+        &__select{
+          display: flex;
+        }
+        &__input{
+          align-items: center;
+          display: flex;
+          flex: 1;
+        }
+        h3{
+          font-size: $tg-fs-heading4;
+          line-height: 30px;
+          font-weight: bold;
+          color:$tg-col-basic-dark-blue;
+          margin-right: 45px;
+        }
+        button{
+          display: inline-block;
+          width: 180px;
+          text-transform: capitalize;
+          margin-left: 20px;
+          padding: 12px 15px;
+          background-color: $tg-col-btn;
+          color: $tg-col-light;
+          border: 0;
+          line-height: inherit;
+          text-decoration: none;
+          cursor: pointer;
+          border-radius: 0;
+        }
+        .form-group{
+          flex: 1;
+          text-align: right;
+          &__select{
+          background: url(images/arrow-down.svg);
+          background-repeat: no-repeat;
+          background-color: $tg-col-basic-dark-blue;
+          background-position: calc(100% - 10px) center;
+          height: 34px;
+          overflow: hidden;
+          width: 200px;
+          background-size: 12px;
+          height: 36px;
+          overflow: hidden;
+            &__signup{
+              width: 100%;
+              background-color: transparent;
+            }
+          select{
+            background: transparent;
+            border: 1px solid #cccccc;
+            color:#333;
+            border-radius: 0px;
+            font-size: 12px;
+            padding: 0px 12px; /* If you add too much padding here, the options won't show in IE */
+            width: 100%;
+            height: 34px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            &:focus{
+              outline: none;
+            }
+            &::-ms-expand{
+              display: none;
+            }
+          }
+        }
+          // select{
+          //   display: block;
+          //   width: 200px;
+          //   height: 34px;
+          //   padding: 8px 12px;
+          //   font-size: 14px;
+          //   line-height: 1.428571429;
+          //   border-radius: 0;
+          //   color: $tg-col-33;
+          //   vertical-align: middle;
+          //   background-color: $tg-col-light;
+          //   border: 1px solid $tg-col-6c;
+          // }
+          input{
+            display: inline-block;
+            max-width: 200px;
+            border: 1px solid transparent;
+            padding: 0 15px;
+            text-align: left;
+            width: calc(100% - 30px);
+            height: 34px;
+            background-color: white;
+            border-color: white;
+            }
+          }
+        }
+      }
+    }
+  }
+.tutorialQuiz-background {
+  // background-color: #051c30;
+}
+.tutorialQuiz {
+  width: 800px;
+  margin: auto;
+  padding: 15px 0;
+  height: 100%;
+  line-height: 1.5;
+
+  pre {
+    overflow: visible;
+  }
+
+  &--header {
+    text-align: center;
+    font-size: $tg-fs-heading3;
+    font-weight: bold;
+    padding: 15px;
+  }
+
+  &--body {
+    padding: 10px;
+    font-size: $tg-fs-heading5;
+
+    &.tutorialQuiz-border {
+      border: 1px solid;
+      margin: 15px 0;
+      background-color: lightcyan;
+    }
+
+    &__title {
+      text-align: center;
+      padding: 10px;
+      color: orange;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    &__question {
+      padding: 10px;
+      color: $tg-col-basic-dark-blue;
+      font-weight: 500;
+    }
+
+    &__answers {
+      input {
+        margin-right: 5px;
+      }
+
+      b {
+        margin-right: 10px;
+      }
+
+      &--element {
+        display: flex;
+        align-items: baseline;
+        font-size: $tg-fs-body;
+
+        pre {
+          line-height: 15px;
+        }
+
+        div {
+          // display: flex;
+          align-items: baseline;
+        }
+      }
+    }
+  }
+
+  &--footer {
+    text-align: right;
+
+    &__button {
+      padding: 9px 15px;
+      background-color: $tg-col-basic-light-blue;
+      color: $tg-col-basic-ivory;
+      border: 0;
+      font-size: $tg-fs-heading5;
+      text-align: center;
+      margin: 15px 10px;
+
+      &:hover {
+        color: $tg-col-basic-ivory;
+        background-color: #0a73bc;
+      }
+    }
+  }
+}
+@media(max-width: 840px){
+  .tg-page{
+    &__content{
+      &__block{
+        &__items{
+          flex-direction: column;
+          &__input{
+            margin-top: 0px;
+          }
+        }
+      }
+    }
+  }
+}
+@media(max-width: 480px){
+  .tg-page{
+    &__content{
+      &__block{
+        &--listGames{
+          margin-bottom: 0px;
+        }
+        &__items{
+          flex-direction: column;
+          h3{
+            font-size: calc(#{$tg-fs-body} + 2px);
+          }
+          button{
+            padding: 9px 15px;
+          }
+          .form-group{
+            select{
+              height: 30px;
+              max-width: 200px;
+              width: 100%;
+            }
+            input{
+              height: 26px;
+            }
+          }
+          &__input{
+            margin-top: 20px;
+          }
+        }
+      }
+    }
+  }
+}
+
+#all-tutorials {
+  height: 100%;
+  overflow: auto;
+  .breadcum--back {
+    max-width: 1025px;
+    width: calc(100% - 30px);
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0 auto;
+    margin-top: 20px;
+    i {
+      position: relative;
+      top: 3px;
+    }
+  }
+}

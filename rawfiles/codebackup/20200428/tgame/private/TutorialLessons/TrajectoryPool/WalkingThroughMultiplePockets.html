@@ -1,0 +1,304 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 3, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 3, targetPocketID: 1
+  };
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  //return command with higher probability
+  if (prob0 > prob1) {
+    return cmd0;
+  } else {
+    return cmd1;
+  }
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}     
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial, you were comparing shot commands for pocket 0 and 1 using their success probabilities. <b>But what if we need to compare more than two pockets?</b> We'll consider that case in this tutorial.
+  </p>
+  <p>
+    As a reminder, this lesson's discussions are located <a href="https://forum.tgame.ai/t/walking-through-multiple-pockets/25" target="_blank">in our forum</a>. Don't be afraid to ask questions there if you get stuck for too long!
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    Before we dive into coding, let's discuss <b>how to go through a list of items and find the best</b>.
+  </p>
+  <p>
+    Suppose a cat is browsing through a row of three mushrooms and trying to <b>pick the largest one</b>. As shown in the picture below, she will walk by each mushroom, and <b>keep track of the largest mushroom seen so far</b>. By the time she has walked through all mushrooms, the largest mushroom would have been identified. 
+  </p>
+  <p>
+    <img src="/images/catpickingmushroom.jpg" style="width: 84%; height: auto; margin-left: 8%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="104" elementType="Coding" condition="TestPPPocketBall_3_In_6">
+  <p><b>Now let's apply the same idea to walk through three target pockets: 0, 1 and 2</b>. In the baseline code given to you in the Robot Code editor, we first define the shot command for each pocket (<span class="variablename">cmd0/cmd1/cmd2</span>) and calculate their success probabilities (<span class="variablename">prob0/prob1/prob2</span>). Then we define two variables, <b class="variablenamebold">bestCommand</b> and <b class="variablenamebold">highestProb</b>, to keep track of the best command (with highest probability) and its corresponding probability.</p> 
+
+  <p>
+    <img src="/images/walkthroughcmd012.jpg" style="width: 84%; height: auto; margin-left: 8%; vertical-align: top;"/>
+  </p>
+
+  <!-- <p>
+    Since highestProb is initialized to be -1, the first if-statement <b class="variablenamebold">if (prob0 > highestProb)</b> will evaluate to be true, so it's guaranteed that the bestCommand will be updated to cmd0 initially (as opposed to staying as null).
+  </p> -->
+  <!-- <p>
+    Note that <b>the keyword <a href="#" onclick="ClickToSendChat(event, 'how to use let?')" class="inlinebutton keyword">let</a> is used, since we might change the value of <span class="variablenamebold">bestCommand</span> and <span class="variablenamebold">highestProb</span></b> as we walk through the three shot commands.
+  </p> -->
+  <p>
+    <b>Challenge:</b> please complete the code in the Robot Code editor to <b>select the pocket with highest success probability</b>. 
+  </p>
+  <code isHidden="true">
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = { aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 0 };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = { aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 1 };
+  const aimPoint2 = getAimPosition(Balls[3], Pockets[2]);
+  const cmd2 = { aimx: aimPoint2.x, aimy: aimPoint2.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 2 };
+
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  const prob2 = await calculateProbability(cmd2);
+
+  // walk through commands and compare probability 
+  let bestCommand = null;
+  let highestProb = -1;
+
+  if (prob0 > highestProb) {
+    bestCommand = cmd0; 
+    highestProb = prob0;
+  }
+
+  //TODO: check on cmd1 and cmd2
+  if (prob1 > highestProb) {
+    //h0::set bestCommand to cmd1::this line should be 'bestCommand = cmd1;'
+    bestCommand = ? ; 
+    //h1::set highestProb to prob1::this line should be 'highestProb = prob1;'
+    highestProb = ? ;
+  }
+  //h2::see if prob2 is greater than highestProb
+  if ( ? ) {
+    //h3::set bestCommand to cmd2::this line should be 'bestCommand = cmd2;'
+    bestCommand = ? ; 
+    //h4::set highestProb to prob2::this line should be 'highestProb = prob1;'
+    highestProb = ? ;
+  }
+  //ENDTODO
+
+  // return the best command we found
+  return bestCommand;
+}
+  </code>
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 3, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 3, targetPocketID: 1
+  };
+  const aimPoint2 = getAimPosition(Balls[3], Pockets[2]);
+  const cmd2 = {
+    aimx: aimPoint2.x, aimy: aimPoint2.y, strength: 30,
+    targetBallID: 3, targetPocketID: 2
+  };
+
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  const prob2 = await calculateProbability(cmd2);
+
+  // walk through commands and compare probability 
+  let bestCommand = null;
+  let highestProb = -1;
+
+  if (prob0 > highestProb) {
+    bestCommand = cmd0;
+    highestProb = prob0;
+  }
+
+  if (prob1 > highestProb) {
+    bestCommand = cmd1;
+    highestProb = prob1;
+  }
+
+  if (prob2 > highestProb) {
+    bestCommand = cmd2;
+    highestProb = prob2;
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+  
+
+
+
+<element elementid="118" elementType="Coding" condition="TestPPPocketBall_2_In_5">
+  <p>
+    Now for another challenge, can you change the <span class="variablename">getCallShot</span> function to <b>shoot ball 2 into pocket 0, 1 or 5 by comparing their success probabilities and selecting the highest value</b>? Note that you will need to change all of aimPoint0/aimPoint1/aimPoint2 and cmd0/cmd1/cmd2.
+  </p>
+  <code isHidden="true">
+//TODO: shoot ball 2 into pocket 0 or 1 or 5
+async function getCallShot() {
+
+  // code to be updated:
+  //h0::change ball index from 3 to 2
+  const aimPoint0 = getAimPosition(Balls[3], Pockets[0]);
+  //h1::change target ball ID from 3 to 2
+  const cmd0 = { aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 0 };
+  
+  //h2::change ball index from 3 to 2
+  const aimPoint1 = getAimPosition(Balls[3], Pockets[1]);
+  //h3::change target ball ID from 3 to 2
+  const cmd1 = { aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 1 };
+  
+  //h4::change ball index from 3 to 2, pocket index from 2 to 5
+  const aimPoint2 = getAimPosition(Balls[3], Pockets[2]);
+  //h5::change target ball ID from 3 to 2, target pocket ID from 2 to 5
+  const cmd2 = { aimx: aimPoint2.x, aimy: aimPoint2.y, strength: 30, 
+    targetBallID: 3, targetPocketID: 2 };
+
+  // end of code to be changed
+
+  // existing code to be kept unchaged:
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  const prob2 = await calculateProbability(cmd2);
+
+
+  // walk through commands and compare probability 
+  let bestCommand = null;
+  let highestProb = -1;
+
+  if (prob0 > highestProb) {
+    bestCommand = cmd0;
+    highestProb = prob0;
+  }
+
+  if (prob1 > highestProb) {
+    bestCommand = cmd1;
+    highestProb = prob1;
+  }
+
+  if (prob2 > highestProb) {
+    bestCommand = cmd2;
+    highestProb = prob2;
+  }
+
+  // return the best command we found
+  return bestCommand;    
+}
+//ENDTODO
+  </code>
+  <cleancode>
+async function getCallShot() {
+  const aimPoint0 = getAimPosition(Balls[2], Pockets[0]);
+  const cmd0 = {
+    aimx: aimPoint0.x, aimy: aimPoint0.y, strength: 30,
+    targetBallID: 2, targetPocketID: 0
+  };
+  const aimPoint1 = getAimPosition(Balls[2], Pockets[1]);
+  const cmd1 = {
+    aimx: aimPoint1.x, aimy: aimPoint1.y, strength: 30,
+    targetBallID: 2, targetPocketID: 1
+  };
+  const aimPoint2 = getAimPosition(Balls[2], Pockets[5]);
+  const cmd2 = {
+    aimx: aimPoint2.x, aimy: aimPoint2.y, strength: 30,
+    targetBallID: 2, targetPocketID: 5
+  };
+
+  const prob0 = await calculateProbability(cmd0);
+  const prob1 = await calculateProbability(cmd1);
+  const prob2 = await calculateProbability(cmd2);
+
+
+  // walk through commands and compare probability 
+  let bestCommand = null;
+  let highestProb = -1;
+
+  if (prob0 > highestProb) {
+    bestCommand = cmd0;
+    highestProb = prob0;
+  }
+
+  if (prob1 > highestProb) {
+    bestCommand = cmd1;
+    highestProb = prob1;
+  }
+
+  if (prob2 > highestProb) {
+    bestCommand = cmd2;
+    highestProb = prob2;
+  }
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+  
+<element elementid="180" elementType="Conclusion">
+  <p>Tutorial completed!</p>
+  <p>
+    <b>Summary:</b> You have learned how to walk through a list of choices and keep track of the best one, which lays a good foundation for search algorithms to be introduced in future tutorials.
+  </p>
+  <p>
+    <b>Exercise 1:</b> Change the <span class="variablename">getCallShot</span> function to select the shot command most likely to be successful for ball 2 <b>among 4 target pockets</b>: 0, 1, 2 or 5.
+  </p>
+  <p>
+    <b>Exercise 2:</b> Change the <span class="variablename">getCallShot</span> function so that it will only update the best command if a shot's success probability is at least 30%.
+  </p>
+  <!-- <p>
+    <b>Exercise:</b> the current code calculates the probability for all 3 target pockets first. What if we want to take a shortcut and save some computation time? For example, we can return the shot command for pocket 0 or 1 if its success probability is already good enough (say greater than 50%). Can you implement this shortcut and share your solution in our forum under <a href="https://forum.tgame.ai/t/walking-through-multiple-pockets/25" target="_blank">this lesson's topic</a>. ?
+  </p>     -->
+</element>
+

@@ -1,0 +1,820 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+let dangerScores = null;    
+let graph = null;    
+const weaponRangeFuncs = {};  
+  
+function shootWith4Way(whiteTanks) { 
+  const positions = [[MyTank.c, MyTank.r]];  
+  const obs = ['T', 'R', 'M']; 
+  // get positions in current row 
+  for (let col = MyTank.c - 1; col >= 0; col -= 1) { 
+    if (obs.includes(Maze[MyTank.r][col])) break; 
+    positions.push([col, MyTank.r]); 
+  } 
+  for (let col = MyTank.c + 1; col &lt; Maze[MyTank.r].length; col += 1) { 
+    if (obs.includes(Maze[MyTank.r][col])) break; 
+    positions.push([col, MyTank.r]); 
+  } 
+  // get positions in current column 
+  for (let row = MyTank.r - 1; row >= 0; row -= 1) { 
+    if (obs.includes(Maze[row][MyTank.c])) break; 
+    positions.push([MyTank.c, row]); 
+  } 
+  for (let row = MyTank.r + 1; row &lt; Maze.length; row += 1) { 
+    if (obs.includes(Maze[row][MyTank.c])) break; 
+    positions.push([MyTank.c, row]); 
+  } 
+  
+  let bestPos = null;  
+  let mostHit = 0;  
+  // loop through the positions  
+  for (const pos of positions) {  
+    const range = get4WayRange({ c: pos[0], r: pos[1] }, MyTank.color);  
+    const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length;  
+    if (count > mostHit) {  
+      mostHit = count;  
+      bestPos = { c: pos[0], r: pos[1]};  
+    }  
+  }  
+      
+  if (mostHit > 1) {  
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) {
+      // park MyTank at bestPos if its speed is not zero by sending "P".
+      if (MyTank.speedX != 0 || MyTank.speedY != 0) return "P";
+      return "S";  
+    }
+    if (bestPos.c &lt; MyTank.c) return "L";  
+    if (bestPos.c > MyTank.c) return "R";  
+    if (bestPos.r &lt; MyTank.r) return "U";  
+    if (bestPos.r > MyTank.r) return "D";  
+  }  
+    
+  return ""; 
+}
+ 
+function shootWith3SplOrNova(whiteTanks) { 
+  const funcName = weaponRangeFuncs[MyTank.specialWeapon.type];  
+  let bestPos = null;  
+  let mostHit = 0;  
+  const obs = ['T', 'M', 'R'];  
+  const positions = [  
+    [MyTank.c, MyTank.r],   
+    [MyTank.c - 1, MyTank.r],   
+    [MyTank.c + 1, MyTank.r],   
+    [MyTank.c, MyTank.r - 1],   
+    [MyTank.c, MyTank.r + 1]  
+  ];  
+  
+  // loop through the positions  
+  for (const pos of positions) {  
+    if (pos[0] &lt; 0   
+        || pos[0] >= Maze[MyTank.r].length   
+        || pos[1] &lt; 0   
+        || pos[1] >= Maze.length  
+        || obs.includes(Maze[pos[1]][pos[0]])) {  
+      continue;  
+    }  
+    for (const dir of ['L', 'R', 'U', 'D']) {  
+      const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color);  
+      const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length;  
+      if (count > mostHit) {  
+        mostHit = count;  
+        bestPos = { c: pos[0], r: pos[1], dir: dir };  
+      }  
+    }  
+  }  
+      
+  if (mostHit > 1) {  
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) {  
+      if (MyTank.dir == bestPos.dir) return "S";  
+      else return bestPos.dir;  
+    }   
+    if (bestPos.c &lt; MyTank.c) return "L";  
+    if (bestPos.c > MyTank.c) return "R";  
+    if (bestPos.r &lt; MyTank.r) return "U";  
+    if (bestPos.r > MyTank.r) return "D";  
+  }  
+  return ""; 
+} 
+  
+  
+function attackWhiteTank() {    
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;     
+  (MyTank.r != tank.r || MyTank.c != tank.c));    
+    
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) {   
+    const cmd = shootWith4Way(whiteTanks); 
+    if (cmd.length > 0) return cmd;  
+  }  
+  
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {   
+    const cmd = shootWith3SplOrNova(whiteTanks); 
+    if (cmd.length > 0) return cmd;  
+  }  
+    
+  // if MyTank is equipped with a Freezer    
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {    
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);    
+  }    
+        
+  const target = getClosestItem(whiteTanks);    
+  return attackTank(target);    
+}
+ 
+ 
+function getNewCommand() {      
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange;  
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange;  
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange;  
+  console.log(Object.keys(weaponRangeFuncs));  
+    
+  dangerScores = getDangerScores();      
+  graph = createGraph();      
+            
+  let cmd = upgradeSpecialPowers();      
+  if (cmd.length > 0) return cmd;      
+            
+  // escape from danger      
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];      
+  if (MyTank.health &lt; 2 * totalDamage) {      
+    cmd = escapeFromDanger();      
+    if (cmd.length > 0) return cmd;      
+  }      
+          
+  // freeze opponents     
+  cmd = freezeOpponent();     
+  if (cmd.length > 0) return cmd;      
+          
+  // get a crystal        
+  let path = getCrystal();        
+  if (path.length > 0) return path[0];        
+                
+  // get a weapon        
+  path = getSpecialWeapon();        
+  if (path.length > 0) return path[0];        
+                
+  // attack opponent tank       
+  cmd = attackOpponent();       
+  if (cmd.length > 0) return cmd;        
+              
+  // attack white tank        
+  cmd = attackWhiteTank();        
+  if (cmd.length > 0) return cmd;        
+                
+  // random command        
+  return getRandomCommand();       
+}
+
+function attackTank(target) {       
+  if (!target) return "";       
+        
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {   
+    const dirs = ['U', 'D', 'L', 'R'];   
+    const funcName = weaponRangeFuncs[MyTank.specialWeapon.type];  
+    for (const dir of dirs) {   
+      const range = funcName(MyTank, dir, MyTank.color);   
+      if (range.includes(target.c + '_' + target.r)) {   
+        if (MyTank.dir != dir) return dir;   
+        else return "S";   
+      }   
+    }   
+  }   
+      
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE &amp;&amp; target.color == "white") {    
+    const rowDis = Math.abs(MyTank.r - target.r);     
+    const colDis = Math.abs(MyTank.c - target.c);    
+    let withinRange = (rowDis == 0 &amp;&amp; colDis &lt; 3);    
+    withinRange = withinRange || (colDis == 0 &amp;&amp; rowDis &lt; 3);    
+        
+    if (!withinRange) {    
+      const path = getShortestPathCmd(graph, MyTank, target);       
+      if (path.length > 0) return path[0];       
+    }    
+  }    
+        
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {       
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {       
+      return "R";       
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {       
+      return "L";       
+    } else {       
+      return "S";       
+    }       
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {       
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {       
+      return "D";       
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {       
+      return "U";       
+    } else {       
+      return "S";       
+    }       
+  }       
+            
+  const path = getShortestPathCmd(graph, MyTank, target);       
+  if (path.length > 0) return path[0];       
+  return '';       
+} 
+  
+  
+function getMissileDirs() {    
+  const delta = {      
+    U: [0, -1],      
+    D: [0, 1],      
+    L: [-1, 0],      
+    R: [1, 0],      
+  };      
+  const dirs = Object.keys(delta);      
+  const ret = [];    
+  for (let i = 0; i &lt; dirs.length; i += 1) {    
+    const d = delta[dirs[i]];    
+    if (['T', 'R'].includes(Maze[MyTank.r + d[1]][MyTank.c + d[0]]) ||     
+    ['T', 'R'].includes(Maze[MyTank.r + 2 * d[1]][MyTank.c + 2 * d[0]])) {    
+      continue;    
+    }    
+    ret.push(dirs[i]);    
+  }    
+  return ret;    
+}    
+        
+function attackOpponent() {      
+  if (MyTank.health &lt;= 2000) return "";      
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";      
+            
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");      
+  if (opponents.length == 0) return "";      
+            
+  for (let i = 0; i &lt; opponents.length; i += 1) {      
+    const target = opponents[i];      
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {      
+      if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE) {    
+        if (dangerScores[MyTank.r][MyTank.c] > 1) {    
+          const cmd = escapeFromDanger();      
+          if (cmd.length > 0) return cmd;    
+        } else {    
+          const dirs = getMissileDirs();    
+          if (dirs.includes(MyTank.dir)) return "S";    
+          else if (dirs.length > 0) return dirs[0];    
+        }    
+      }     
+      return attackTank(target);      
+    }      
+  }      
+  return "";      
+}   
+       
+function getSpecialWeapon() {        
+  let bestType = MyTank.specialWeapon.type;        
+  let candidates = Weapons;    
+  const cmd = attackOpponent();    
+  if (cmd == "") {    
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);    
+  }    
+  for (let i = 0; i &lt; candidates.length; i += 1) {        
+    const weapon = candidates[i];        
+    if (weaponIsBetter(weapon.type, bestType)) {        
+      bestType = weapon.type;        
+    }        
+  }        
+  const bestWeapons = candidates.filter(weapon => weapon.type == bestType);        
+  const closeBestWeapon = getClosestItem(bestWeapons);        
+  if (closeBestWeapon == null) return [];        
+            
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);        
+}   
+        
+function weaponIsBetter(weaponType1, weaponType2) {        
+  const rankings = {};       
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;       
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;       
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;       
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;       
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;       
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;       
+  rankings[0] = 7; // no weapon       
+            
+  const values = Object.values(MyTank.specialPower);     
+  const allPowers = values.reduce((a, b) => a + b, 0);     
+            
+  if (allPowers &lt; 4 * MAX_POWER &amp;&amp; (MyTank.specialPower.damage >= 2)) {     
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0;      
+  }     
+          
+  return rankings[weaponType1] &lt; rankings[weaponType2];       
+}    
+         
+function freezeOpponent() {     
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {     
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");      
+    const target = getClosestItem(opponents);     
+    return attackTank(target);     
+  }     
+  return "";     
+}    
+     
+function escapeFromDanger() {      
+  const delta = {      
+    U: [0, -1],      
+    D: [0, 1],      
+    L: [-1, 0],      
+    R: [1, 0],      
+  };      
+  const dirs = Object.keys(delta);      
+  let bestDir = "";      
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];      
+            
+  for (let i = 0; i &lt; dirs.length; i += 1) {      
+    const dir = dirs[i];      
+    const newc = MyTank.c + delta[dir][0];      
+    const newr = MyTank.r + delta[dir][1];      
+            
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;      
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;      
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);      
+            
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {      
+      lowestDS = dangerScores[newr][newc];      
+      bestDir = dir;      
+    }      
+  }      
+  return bestDir;        
+}     
+        
+function isShellBlockedAtPos(col, row, color) {     
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );     
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');     
+}     
+           
+function getDangerScores() {      
+  const scores = createNewGraph();      
+              
+  for (let i = 0; i &lt; Tanks.length; i += 1) {      
+    const t = Tanks[i];      
+    if (t.color == MyTank.color) continue;      
+    const dscore = 1 + t.specialPower.damage;      
+                
+    // tank facing upward      
+    if (t.dir == 'U') {      
+      for (let j = t.r - 1; j >= 0; j -= 1) {      
+        scores[j][t.c] += dscore;      
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;      
+      }      
+    } else if (t.dir == 'D') { // facing downward      
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {      
+        scores[j][t.c] += dscore;      
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;      
+      }      
+    } else if (t.dir === 'L') { // facing to the left      
+      for (let j = t.c - 1; j >= 0; j -= 1) {      
+        scores[t.r][j] += dscore;      
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;      
+      }      
+    } else if (t.dir === 'R') { // facing to the right      
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {      
+        scores[t.r][j] += dscore;      
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;      
+      }      
+    }      
+  }      
+  return scores;      
+}      
+           
+function getRandomCommand() {         
+  // random command         
+  const r = Math.random() * 100;         
+  if (r > 10) return "S";         
+  if (r > 8) return "U";         
+  if (r > 6) return "D";         
+  if (r > 4) return "L";         
+  if (r > 2) return "R";         
+  return "";         
+}        
+           
+function createGraph() {        
+  const blockingTileTypes = ['R', 'M', 'T'];        
+  graph = createNewGraph();        
+                
+  for (let i = 0; i &lt; graph.length; i += 1) {        
+    for (let j = 0; j &lt; graph[i].length; j += 1) {        
+      const tile = Maze[i][j];        
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;        
+      else graph[i][j] = 1 + dangerScores[i][j];        
+    }        
+  }        
+  return graph;        
+}        
+           
+function getClosestItem(items) {        
+  let shortDis = 1000;        
+  let target = null;        
+                
+  for (let i = 0; i &lt; items.length; i += 1) {        
+    const pos = items[i];        
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;        
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);        
+    if (dis &lt; shortDis) {        
+      shortDis = dis;        
+      target = pos;        
+    }        
+  }        
+  return target;        
+}        
+           
+function getCrystal() {        
+  const target = getClosestItem(Crystals);        
+  if (!target) return [];        
+  return getShortestPathCmd(graph, MyTank, target);        
+}        
+           
+function upgradeSpecialPowers() {        
+  let cmd = "";        
+  // if no power point, return blank command cmd        
+  if (MyTank.powerPoint == 0 ) return cmd;        
+  const sp = MyTank.specialPower;        
+                
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";  
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3";       
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";        
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";        
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";        
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";        
+                
+  return cmd;        
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    So far, when we design our strategies, we haven't considered the opponent tanks' actions much. But in real games, those tanks are controlled by equally smart game bots, and their actions might compromise your goals in various ways. For example, the opponent tanks might collect a crystal before you can reach it, and they might "collaborate" with the white tanks to attack your tank. In the next two tutorials, we will discuss <b>the impacts from the opponent tanks</b>. 
+  </p>
+  <p>
+    In this tutorial, we consider the impacts from the opponent tanks in collecting resources. 
+    <!-- And in the next one, we will explore the impacts from the opponent tanks' strengths, such as special power and weapons.  -->
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The opponent tanks compete with your tank on limited resources, such as crystals and special weapons. For example, if a crystal is much closer to an opponent tank, or some opponent tank is much faster, then it's unlikely your tank can win the race to pick up the crystal. So we need to change our strategy to avoid wasting time on such losing competitions. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Take the scenario below as an example. Although Crystal 1 on the top left is closer to your blue tank than Crystal 2, it is also closer to the opponent red tank. It's very likely that the red tank will pick up Crystal 1, so we should not waste time on Crystal 1. It's a much wiser choice to go for Crystal 2 instead. 
+  </p>
+  <p>
+    <img src="/images/oppocrystal.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    How can we implement this idea? Currently, the function <span class="variablenamebold">getClosestItem</span> is used to find the closest target when searching for a crystal, special weapon, or white tank. So it is the best place to add the new logic. 
+  </p>
+  <p>
+    But we are also use this function to find the closest opponent tank in <span class="variablename">freezeOpponent</span>, where we do not need to consider the impact from opponent tanks. So to support both scenarios, we need to add a new parameter, <span class="variablenamebold">includeOppoImp</span> to the <span class="variablename">getClosestItem</span> function, and set its default value to <span class="variablename">true</span>. 
+  </p>
+</element>
+
+<element elementid="140" elementType="Coding" condition="TestFinishedWithLog_9">
+  <p>
+    <b>Challenge: </b>As discussed, add the new parameter <span class="variablenamebold">includeOppoImp</span> to the funtion <span class="variablenamebold">getClosestItem</span>, and print out its value at the beginning of the getClosestItem function. Please also change <span class="variablenamebold">freezeOpponent</span> to call getClosestItem with 2 arguments correctly. 
+  </p>
+  <code isHidden="true">
+//TODO
+//h0::add includeOppoImp and set default value to true::includeOppoImp = true
+function getClosestItem(items, ? ) {   
+  console.log(includeOppoImp);
+
+  ......  
+} 
+
+function freezeOpponent() {   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");  
+    //h1::call getClosestItem with correct parameter values::getClosestItem(opponents, false)
+    const target = ? ; 
+    return attackTank(target);   
+  }   
+  return "";   
+} 
+//ENDTODO 
+  </code>
+  <cleancode>
+function getClosestItem(items, includeOppoImp = true) {  
+  console.log(includeOppoImp);
+
+  let shortDis = 1000;      
+  let target = null;      
+            
+  for (let i = 0; i &lt; items.length; i += 1) {      
+    const pos = items[i];      
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;      
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);      
+    if (dis &lt; shortDis) {      
+      shortDis = dis;      
+      target = pos;      
+    }      
+  }      
+  return target;      
+}  
+
+function freezeOpponent() {   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");  
+    const target = getClosestItem(opponents, false);   
+    return attackTank(target);   
+  }   
+  return "";   
+} 
+  </cleancode>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    Let's discuss our idea a bit more before coding it: if some resource is closer to the opponent tank, we'd rather try to collect something else. By "closer", we mean the opponent tank will spend less time travelling to the target resource than your tank. Since <b>time = distance / speed</b>, we can estimate the travel time using the Manhattan distance and speed of each tank.  
+  </p>
+  <p>
+    To calculate the Manhattan distance from a tank to a target, we can use this formula: <b>distance = Math.abs(tank.r - target.r) + Math.abs(tank.c - target.c)</b>. Note that we are ignoring the road blocks in between the tank and the target to simplify the distance calculation.
+  </p>
+  <p>
+    To get the travel speed of a tank, we need to check that tank's <b>speed</b> power. Assunming a unit length is the width of one tile, if <b>tank.specialPower.speed</b> is 0, then that tank will travel at a speed of <b>1/20</b> units per tick. Otherwise, that tank will travel at a speed of <b>1/(19 - tank.specialPower.speed)</b> units per tick. 
+  </p>
+  <!-- <p>
+    <ul>
+      <li>
+        distance = Math.abs(tank.r - target.r) + Math.abs(tank.c - target.c)
+      </li>
+      <li>
+        <p>if tank.specialPower.speed == 0, speed = 1/20</p>
+        <p>
+          else speed = 1/(19 - tank.specialPower.speed) 
+        </p>
+      </li>
+    </ul>
+  </p> -->
+</element>
+
+<element elementid="160" elementType="Coding" condition="TestFinishedWithLog_10">
+  <p>
+    <b>Challenge: </b>Define a new function <span class="variablenamebold">getSpeed</span>, which takes a tank as input, and returns that tank's speed based on the formulas above. In the funtion <span class="variablenamebold">getClosestItem</span>, calculate and print out <span class="variablename">MyTank</span>'s travel time to each item. 
+  </p>
+  <code isHidden="true">
+//TODO
+function getSpeed(tank) {
+  if (tank.specialPower.speed == 0) return 1/20;
+  //h0::return the speed when specialPower.speed is not zero::return 1/(19 - tank.specialPower.speed);
+  ?
+}
+
+function getClosestItem(items, includeOppoImp = true) {  
+  let shortDis = 1000;      
+  let target = null;      
+
+  for (let i = 0; i &lt; items.length; i += 1) {      
+    const pos = items[i];      
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;      
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    
+    // new code starts
+
+    //h1::calculate myTime::time = distance / speed::speed is from getSpeed::dis / getSpeed(MyTank);
+    const myTime = ? ;
+    console.log(myTime);
+
+    // new code ends
+
+    if (dis &lt; shortDis) {      
+      shortDis = dis;      
+      target = pos;      
+    }      
+  }      
+  return target;      
+}  
+//ENDTODO
+  </code>
+  <cleancode>
+function getSpeed(tank) {
+  if (tank.specialPower.speed == 0) return 1/20;
+  return 1/(19 - tank.specialPower.speed);
+}
+
+function getClosestItem(items, includeOppoImp = true) {  
+  let shortDis = 1000;      
+  let target = null;      
+
+  for (let i = 0; i &lt; items.length; i += 1) {      
+    const pos = items[i];      
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;      
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    const myTime = dis / getSpeed(MyTank);
+    console.log(myTime);
+
+    if (dis &lt; shortDis) {      
+      shortDis = dis;      
+      target = pos;      
+    }      
+  }      
+  return target;      
+}  
+  </cleancode>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    The next step is to calculate the travel time of each opponent tank and check whether any opponent will take less time than <span class="variablename">MyTank</span> to arrive at the target. If any target has such a competing opponent, we'll simply skip that target.
+  </p>
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedGetCrystalInOrder_0_13_12">
+  <p>
+    <b>Challenge: </b>Change the function <span class="variablenamebold">getClosestItem</span> to skip the item that takes some opponent tank less time to collect. Use the code below as a guidance.
+  </p>
+  <code isHidden="false">
+//TODO
+function getClosestItem(items, includeOppoImp = true) {
+  let shortDis = -1;
+  let target = null;
+
+  // Step 1: get an array of opponent tanks
+  //h0::use the "filter" function to get all opponent tanks::check each tank's color::t => t.color != "white" &amp;&amp; t.color != MyTank.color
+  const oppoTanks = Tanks.filter( ? );
+
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / getSpeed(MyTank);
+
+    // Step 2: loop through opponent tanks and see if there is one with shorter travel time
+    let flag = false;
+    if (includeOppoImp) {
+      for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+        const oppo = oppoTanks[j];
+        //h1::estimate the distance from oppo to pos::absolute differences of row and column numbers::use Math.abs to get absolute values
+        const oppoDis = ? ;
+        //h2::calculate time::time = distance / speed::const oppoTime = oppoDis / getSpeed(oppo);
+        const oppoTime = ? ;
+
+        if (oppoTime * 1.5 &lt; myTime) {
+          flag = true;
+          break;
+        }
+      }
+    }
+
+    // Step 3: if flag is true, skip current item
+    if (flag) continue;
+
+    // update shortDis 
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getClosestItem(items, includeOppoImp = true) {
+  let shortDis = -1;
+  let target = null;
+  const oppoTanks = Tanks.filter(t => t.color != "white" &amp;&amp; t.color != MyTank.color);
+
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    const myTime = dis / getSpeed(MyTank);
+
+    let flag = false;
+    if (includeOppoImp) {
+      for (let j = 0; j &lt; oppoTanks.length; j += 1) {
+        const oppo = oppoTanks[j];
+        const oppoDis = Math.abs(oppo.r - pos.r) + Math.abs(oppo.c - pos.c);
+        const oppoTime = oppoDis / getSpeed(oppo);
+
+        if (oppoTime * 1.5 &lt; myTime) {
+          flag = true;
+          break;
+        }
+      }
+    }
+    if (flag) continue;
+
+    if (shortDis === -1 || dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+  </cleancode>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Good job! Now your tank won't waste time competing for targets that takes you much longer than some opponent to travel to. 
+  </p>
+  <p>
+    Regarding the special weapons, right now, your tank targets the best weapon available in the battlefield. However, in case the best weapon is much closer to an opponent tank, your tank would ignore all other weapons. In fact, your tank probably can get another weapon betther than the one it is carrying. 
+  </p>
+  <p>
+      In next step, we'll change the <span class="variablenamebold">getSpecialWeapon</span> function so that your tank will try to examine all special weapons that are better than its current weapon, and pick the closest one among them. 
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Take the setup below as an example. With current code, the blue tank won't gather the 4-Way weapon because it is not the best weapon available according to your ranking. But the 4-Way is still better than the default weapon your blue tank is currently carrying, so the blue tank should still seek the 4-Way weapon.
+  </p>
+  <p>
+    <img src="/images/oppoweapon.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    First, please change the test script to the following: 
+  </p>
+  <p>
+    <pre class="brush: js">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7);
+PlaceTank('red', 4, 5, false);
+
+PlaceWeapon(SPECIAL_WEAPON_TYPES.LASER_GUN, 3, 3);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.WAY4, 13, 13);
+
+await SetupTickUpdates(300);
+ReportEndOfTest();
+
+    </pre>
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedGetWeaponAt_2_13_13">
+  <p>
+    <b>Challenge: </b>Change the function <span class="variablenamebold">getSpecialWeapon</span> to search through weapons that's better than what <span class="variablename">MyTank</span> currently carries. 
+  </p>
+  <code isHidden="true">
+//TODO
+function getSpecialWeapon() { 
+  // get current weapon type     
+  let curType = MyTank.specialWeapon.type;      
+
+  let candidates = Weapons;  
+  const cmd = attackOpponent();  
+  if (cmd == "") {  
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);  
+  }  
+  
+  //h0::get all weapons better than curType::call function weaponIsBetter::weapon => weaponIsBetter(weapon.type, curType)
+  const betterWeapons = candidates.filter( ? );      
+
+  const closeBestWeapon = getClosestItem(betterWeapons);      
+  if (closeBestWeapon == null) return [];      
+        
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);      
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function getSpecialWeapon() {      
+  let curType = MyTank.specialWeapon.type;      
+
+  let candidates = Weapons;  
+  const cmd = attackOpponent();  
+  if (cmd == "") {  
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);  
+  }  
+ 
+  const betterWeapons = candidates.filter(weapon => weaponIsBetter(weapon.type, curType));      
+
+  const closeBestWeapon = getClosestItem(betterWeapons);      
+  if (closeBestWeapon == null) return [];      
+        
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);      
+} 
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>In this tutorial, we discussed how to avoid wasting time when competing against opponent tanks for crystals and weapons. We assume the opponent tanks will always collect the resource closest to them, and your tank can focus on other items. 
+  </p>
+  <p>
+    <b>Exercise: </b>In the updated <span class="variablenamebold">getClosestItem</span> function, you might have noticed that we compare <span class="variablename">myTime</span> against 1.5 times of <span class="variablename">oppoTime</span>. It is because the distance is only an estimate, and we'd like to have some safety margin for estimation errors. Change "1.5" to other numbers, such as 1.2 or 2, try it out in games and observe the differences.
+  </p>
+  <p>
+    If you have any questions, please post them in the forum under <a href="https://forum.tgame.ai/t/lesson-23-competing-for-resources-against-opponents/450" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

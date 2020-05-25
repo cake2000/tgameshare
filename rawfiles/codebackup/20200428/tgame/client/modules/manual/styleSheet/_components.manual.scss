@@ -1,0 +1,45 @@
+.manual-page {
+  width: 100%;
+  height: calc(100% - 94px) !important;
+  background-image: url(images/dark-geometric-copy.png);
+  background-position: 0px 0px;
+  background-size: 35px;
+  position: absolute;
+  overflow: hidden;
+  top: 69px;
+  bottom: 25px;
+  .all-manual-game {
+    padding: 20px 15px 0px;
+  }
+  &--title {
+    padding-left: 10px;
+    h3{
+      padding: 10px 0px;
+      margin-bottom: 15px;
+      font-family: $tg-ff-form;
+      color: $tg-col-basic-navy;
+      font-size: $tg-fs-heading3;
+      line-height: 30px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid $tg-col-basic-grey;
+    }
+  }
+  &--list {
+    padding-left: 30px;
+    .game-item{
+      height: 50px;
+      &--title{
+        color: $tg-col-basic-orange;
+        margin-bottom: 5px;
+        line-height: 24px;
+        font-weight: bold;
+        font-size: calc(#{$tg-fs-heading4} - 1px);
+        cursor: pointer;
+        &:hover {
+          color: $tg-col-basic-light-blue;
+        }
+      }
+    }
+  }
+}

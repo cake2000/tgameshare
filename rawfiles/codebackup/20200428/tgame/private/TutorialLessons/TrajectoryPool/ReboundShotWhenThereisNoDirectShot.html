@@ -1,0 +1,1216 @@
+<element elementid="100" elementType="Info">
+    <p>
+        Welcome back! In previous two tutorials, we've included rebounds in search of best call shots. Today, we will discuss how to use rebounds to avoid a foul. 
+    </p>    
+</element>
+
+<element elementid="110" elementType="Info">
+    <p>
+      Right now, at the end of <b>getCallShot</b> function, if <b>bestCommand</b> is null, we assign it a command targeting the first legal ball id and pocket 0. In some cases, this might not work. For example, if the first legal ball is blocked by an opponent ball, the call shot will cause a foul. So, if we cannot find a possible call shot with positive success probability, to avoid a foul, we should try to hit a legal ball, through a direct shot, or a rebound. 
+</element>
+  
+<element elementid="120" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <p>
+        <b>Challenge: </b>If there is no call shot with positive probability, change <b>getCallShot</b> to hit a legal ball that is not blocked from the cue ball. 
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+    ...
+    // direct shots
+    if (bestCommand == null) {
+        //TODO: find a legal ball that is not blocked from the cue ball
+        for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) {
+          const ballID = legalBallIDs[k];
+          //h0::call isPathBlocked function to check blockage
+          ::const isBlocked = isPathBlocked(Balls[ballID], Balls[0]); 
+          ::const isBlocked = isPathBlocked(ballID, 0); 
+          const isBlocked = ? ; 
+          if (!isBlocked) {
+            // since we are not aiming at a specific pocket, set pocket id to -1
+            //h1::create the shot command object::aim position is the target ball's position::set strength = 50 and targetPocketID = -1
+            ::bestCommand = { aimx: ballID.x, aimy: ballID.y, strength: 50, targetBallID: ballID, targetPocketID: -1 };
+            ::bestCommand = { aimx: Balls[ballID].x, aimy: Balls[ballID].y, strength: 50, targetBallID: ballID, targetPocketID: -1 };
+            bestCommand = ? ;
+            break;
+          }
+        }
+        //ENDTODO
+    }
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);  
+    return bestCommand;
+}           
+    </code>
+    <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+    
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+        
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            const limit = 20;
+            let prob = 0; 
+            for (let i = 0; i &lt;= limit; i++) { 
+                pocketPos.y += step; 
+                const aimPos = getAimPosition(Balls[ballID], pocketPos); 
+                cmd.aimx = aimPos.x; 
+                cmd.aimy = aimPos.y; 
+                prob = await getProbForCmd(cmd) ; 
+                if (prob > 0) break; 
+            }
+            console.log("pocketID = " + pocketID + " prob = " + prob);
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                }   
+            } 
+        }
+    } 
+
+    // direct shots
+    if (bestCommand == null) { 
+        for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+            const ballID = legalBallIDs[k]; 
+            const isBlocked = isPathBlocked(Balls[ballID], Balls[0]) ;  
+            if (!isBlocked) { 
+                // since we are not aiming at a specific pocket, set pocket id to -1 
+                bestCommand = { aimx: Balls[ballID].x, aimy: Balls[ballID].y, strength: 50, targetBallID: ballID, targetPocketID: -1 } ; 
+                break; 
+            } 
+        } 
+    }
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);  
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}      
+    </cleancode>                                    
+</element>
+
+<element elementid="125" elementType="Info">
+    <p>
+        Good! But what if there is no direct shot to a legal ball? Well, then it is time to check rebounds. In last tutorial, we made reflections of pockets. Now, we are going to make reflections of balls.   
+    </p>
+</element>
+
+<element elementid="122" elementType="Info">
+    <p>
+        When we are going to hit target balls through rebounds, it looks like we aim at the reflected ball in the mirror. As shown in the picture below, the red ball is blocked by a yellow ball from the cue ball. So we aim cue ball toward the reflected ball, and ideally the cue ball will bounce back and hit the red ball. A foul will be avoid.    
+    </p>
+    <p>
+      <img src="/images/ballreflection.jpg" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>  
+    <p>
+        What's the position of the reflected ball? Similar to the calculation in the previous lesson, the length of AP equals to the length of AP', so y - a = a - y' => <b>y' = 2a - y</b>.    
+    </p>
+</element>
+
+<element elementid="140" elementType="Info">
+    <p>
+        To setup a valid test, please delete or comment out the line below in your test script, so that ball 2 will be the only legal ball. 
+    </p>
+    <pre class="brush: js">
+PlaceBallOnTable(3, 318, -419);
+    </pre>
+</element>
+
+<element elementid="142" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+      We'll use the red box shown above as the lines that balls will reflect over. The four boundaries of the red box are pre-defined in <b>Boundaries</b> variable. I've implemeneted a helper function for you to calculate all of the four reflection points over the four red boundaries. Please add and test it in your code. 
+  </p>
+  <pre class="brush: js">
+function getBallReflections(ballID) {
+  const ballPos = Balls[ballID];
+  const refOverTopY = {x: ballPos.x, y: 2 * Boundaries.TOP_Y - ballPos.y};
+  const refOverBottomY = {x: ballPos.x, y: 2 * Boundaries.BOTTOM_Y - ballPos.y};
+  const refOverLeftX = {x: 2 * Boundaries.LEFT_X - ballPos.x, y: ballPos.y};
+  const refOverRightX = {x: 2 * Boundaries.RIGHT_X - ballPos.x, y: ballPos.y};
+  // clockwise from top
+  return [refOverTopY, refOverRightX, refOverBottomY, refOverLeftX];                           
+}    
+  </pre>
+  <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+
+function getBallReflections(ballID) { 
+    const ballPos = Balls[ballID]; 
+    const refOverTopY = {x: ballPos.x, y: 2 * Boundaries.TOP_Y - ballPos.y}; 
+    const refOverBottomY = {x: ballPos.x, y: 2 * Boundaries.BOTTOM_Y - ballPos.y}; 
+    const refOverLeftX = {x: 2 * Boundaries.LEFT_X - ballPos.x, y: ballPos.y}; 
+    const refOverRightX = {x: 2 * Boundaries.RIGHT_X - ballPos.x, y: ballPos.y}; 
+    // clockwise from top 
+    return [refOverTopY, refOverRightX, refOverBottomY, refOverLeftX];                            
+}  
+
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+        
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            const limit = 20;
+            let prob = 0; 
+            for (let i = 0; i &lt;= limit; i++) { 
+                pocketPos.y += step; 
+                const aimPos = getAimPosition(Balls[ballID], pocketPos); 
+                cmd.aimx = aimPos.x; 
+                cmd.aimy = aimPos.y; 
+                prob = await getProbForCmd(cmd) ; 
+                if (prob > 0) break; 
+            }
+            console.log("pocketID = " + pocketID + " prob = " + prob);
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                }   
+            } 
+        }
+    } 
+
+    // direct shots
+    if (bestCommand == null) { 
+        for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+            const ballID = legalBallIDs[k]; 
+            const isBlocked = isPathBlocked(Balls[ballID], Balls[0]) ;  
+            if (!isBlocked) { 
+                // since we are not aiming at a specific pocket, set pocket id to -1 
+                bestCommand = { aimx: Balls[ballID].x, aimy: Balls[ballID].y, strength: 50, targetBallID: ballID, targetPocketID: -1 } ; 
+                break; 
+            } 
+        } 
+    }
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);      
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}      
+    </cleancode>                                           
+</element>
+
+<element elementid="145" elementType="Coding" condition="TestFinishedAnyResult">
+    <p>
+        <b>Challenge:</b> modify <b>getCallShot</b> function to include rebounds if <b>bestCommand</b> is still null after search of direct shots. We'll check all four directions. Another helper function <b>getFirstBallTouched</b> is pre-defined for you. We'll compare <b>firstBallTouched.colorType</b> with any of the legal balls to see if it is a legal strike.     
+    </p>
+    <code isHidden="false">
+async function getCallShot() {
+  ...
+  // direct shots
+  if (bestCommand == null) {
+    ...
+  }
+  // rebounds
+  if (bestCommand == null) {
+    for (let k = 0; k &lt; legalBallIDs.length &amp;&amp; bestCommand == null; k ++ ) {
+      //TODO: check if a ball can be hit by rebounds.
+      //h0::call getBallReflections to get all four reflections
+      ::const reflections = getBallReflections(k);
+      ::const reflections = getBallReflections(legalBallIDs[k]);
+      const reflections = ? ;
+      for (let i = 0; i &lt; reflections.length; i ++) {
+        //h1::build cmd with reflection position as aim position.::refer to calculateShotCommand function to get names of values::set strength = 50, and targetPocketID = -1
+        ::const cmd = { aimx: x, aimy: y, strength: 50, targetBallID: k, targetPocketID: -1 };
+        ::const cmd = { aimx: reflections[i].x, aimy: reflections[i].y, strength: 50, targetBallID: k, targetPocketID: -1 };
+        ::const cmd = { aimx: reflections[i].x, aimy: reflections[i].y, strength: 50, targetBallID: legalBallIDs[k], targetPocketID: -1 };
+        const cmd = ? ;
+        const firstBallTouched = await getFirstBallTouched(cmd);
+        if (firstBallTouched != null &amp;&amp; firstBallTouched.colorType == Balls[legalBallIDs[k]].colorType) {
+          bestCommand = cmd;
+          break;
+        }
+        //ENDTODO
+      }
+    }
+  }
+  if (bestCommand == null) 
+    bestCommand = calculateShotCommand(legalBallIDs[0], 0);    
+  return bestCommand;
+}           
+    </code>
+    <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+
+function getBallReflections(ballID) { 
+    const ballPos = Balls[ballID]; 
+    const refOverTopY = {x: ballPos.x, y: 2 * Boundaries.TOP_Y - ballPos.y}; 
+    const refOverBottomY = {x: ballPos.x, y: 2 * Boundaries.BOTTOM_Y - ballPos.y}; 
+    const refOverLeftX = {x: 2 * Boundaries.LEFT_X - ballPos.x, y: ballPos.y}; 
+    const refOverRightX = {x: 2 * Boundaries.RIGHT_X - ballPos.x, y: ballPos.y}; 
+    // clockwise from top 
+    return [refOverTopY, refOverRightX, refOverBottomY, refOverLeftX];                            
+}  
+
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+        
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            const limit = 20;
+            let prob = 0; 
+            for (let i = 0; i &lt;= limit; i++) { 
+                pocketPos.y += step; 
+                const aimPos = getAimPosition(Balls[ballID], pocketPos); 
+                cmd.aimx = aimPos.x; 
+                cmd.aimy = aimPos.y; 
+                prob = await getProbForCmd(cmd) ; 
+                if (prob > 0) break; 
+            }
+            console.log("pocketID = " + pocketID + " prob = " + prob);
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                }   
+            } 
+        }
+    } 
+
+    // direct shots
+    if (bestCommand == null) { 
+        for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+            const ballID = legalBallIDs[k]; 
+            const isBlocked = isPathBlocked(Balls[ballID], Balls[0]) ;  
+            if (!isBlocked) { 
+                // since we are not aiming at a specific pocket, set pocket id to -1 
+                bestCommand = { aimx: Balls[ballID].x, aimy: Balls[ballID].y, strength: 50, targetBallID: ballID, targetPocketID: -1 } ; 
+                break; 
+            } 
+        } 
+    }
+
+    if (bestCommand == null) {
+        for (let k = 0; k &lt; legalBallIDs.length &amp;&amp; bestCommand == null; k ++ ) {
+            //check if a ball can be hit by rebounds.
+            const reflections = getBallReflections(legalBallIDs[k]);
+            for (let i = 0; i &lt; reflections.length; i ++) {
+                const cmd = { aimx: reflections[i].x, aimy: reflections[i].y, strength: 50, targetBallID: legalBallIDs[k], targetPocketID: -1 };
+                const firstBallTouched = await getFirstBallTouched(cmd);
+                if (firstBallTouched != null &amp;&amp;firstBallTouched.colorType == Balls[legalBallIDs[k]].colorType) {
+                    bestCommand = cmd;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);      
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}      
+    </cleancode>                                                       
+</element>
+
+<element elementid="150" elementType="Info">
+    <p>
+      The cue ball still touched a yellow ball first. Why it doesn't work? That is because of the same reason we've encountered in last tutorial. The cue ball will spin away a little bit after it hits cushion. We can leverage <b>Grid Search</b> again to find the right aiming position. This time, let's define the <b>search domain as [0 * BallDiameter, 20 * BallDiameter], and search step is one BallDiameter</b>.   
+</element>
+
+<element elementid="160" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <p>
+        <b>Challenge:</b> Please implement <b>Grid Search</b> to find a legal strike, which means the first ball touched by cue ball is a legal ball. You need to set the <b>steps</b> for four directions, starting from top and clockwise to left.
+    </p>
+    <code isHidden="false">
+  // rebounds
+  if (bestCommand == null) {
+    //TODO: implement grid search to find a legal strike.
+    const steps = [ 
+      {x: 0, y: -BallDiameter}, // top
+      {x: BallDiameter, y: 0},  // right
+      //h0::set step value for reflections over bottom cushion::x should be 0
+      ::{x: 0, y: BallDiameter},
+      ::{x: 0, y: -BallDiameter},  
+      { ? },  // bottom
+      //h1::set step value for reflections over left cushion::y should be 0
+      ::{x: BallDiameter, y: 0},
+      ::{x: -BallDiameter, y: 0},
+      { ? }, // left
+    ];
+    const limit = 20;
+    for (let k = 0; k &lt; legalBallIDs.length &amp;&amp; bestCommand == null; k ++ ) {
+      const reflections = getBallReflections(legalBallIDs[k]);
+      //h2::stop the loop if bestCommand is no longer null
+      ::for (let i = 0; i &lt; reflections.length &amp;&amp; bestCommand == null; i ++) {
+      ::for (let i = 0; i &lt; reflections.length || bestCommand == null; i ++) {
+      ::for (let i = 0; i &lt; reflections.length &amp;&amp; bestCommand != null; i ++) {
+      for (let i = 0; i &lt; reflections.length ? ; i ++) {
+        let cmd = { aimx: reflections[i].x, aimy: reflections[i].y, strength: 50, targetBallID: legalBallIDs[k], targetPocketID: -1 };
+        for (let j = 0; j &lt;= limit; j ++) {
+          //h3::increase value of aimx in cmd::forward one step
+          ::cmd.aimx = steps[i].x;
+          ::cmd.aimx += steps[i].x;
+          ::cmd.aimx += steps[j].x; 
+          cmd.aimx ? ;
+          //h4::increase value of aimy in cmd::forward one step
+          ::cmd.aimy = steps[i].y;
+          ::cmd.aimy -= steps[i].y;
+          ::cmd.aimy += steps[i].y;
+          cmd.aimy ? ;
+          //ENDTODO
+          const firstBallTouched = await getFirstBallTouched(cmd);
+          if (firstBallTouched != null &amp;&amp; firstBallTouched.colorType == Balls[legalBallIDs[k]].colorType) {
+            bestCommand = cmd;
+            break;
+          }
+        }
+      }
+    }
+  }
+    </code>
+    <cleancode>
+const REFLECTION = { 
+    NO_REFLECTION: 0, 
+    VERTICAL_REFLECTION: 1, 
+    HORIZONTAL_REFLECTION: 2, 
+}; 
+
+function isWithinCushions(position) { 
+    if ( position.x &lt; Boundaries.LEFT_X || position.x > Boundaries.RIGHT_X ||
+        position.y &lt; Boundaries.TOP_Y || position.y > Boundaries.BOTTOM_Y) 
+        return false; 
+    return true;  
+}
+
+function isNoBallAtPosition(position) { 
+    for ( let i = 1; i &lt; Balls.length; i ++ ) { 
+        if ( getDistance(Balls[i], position) &lt; BallDiameter ) 
+            return false; 
+    } 
+    return true; 
+}
+
+function getCueBallPlacement() {
+    const legalBallIDs = world.CandidateBallList[MyID];
+    for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+        const ballID = legalBallIDs[k];
+        const ballPos = Balls[ballID];
+        for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+            const pocketPos = Pockets[pocketID];
+            const isBlocked = isPathBlocked(ballPos, pocketPos);
+            if ( !isBlocked ) {
+                const pos = getAimPosition(ballPos, pocketPos, 2 * BallDiameter);   
+                if (isNoBallAtPosition(pos) &amp;&amp; isWithinCushions(pos))
+                    return pos; 
+            }
+        }
+    }
+    return new Victor(-500, 0);
+}
+
+function calculateShotCommand(ballID, pocketID) {
+    const ballPos = Balls[ballID];
+    const pocketPos = Pockets[pocketID];
+    const aimPosition = getAimPosition(ballPos, pocketPos);
+    return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+    const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+    if (isBlocked2) return true;  
+    const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+    const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+    if (Math.abs(cutAngle) > 90) return true; 
+    if (pocketID == 1 || pocketID == 4) { 
+        const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+        if (Math.abs(angle) > 45) return true; 
+    } 
+    return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+    // initialize the cache if it is not defined 
+    if( typeof getProbForCmd.probCache == 'undefined' ) 
+        getProbForCmd.probCache = {}; 
+    // convert shot command to a string 
+    const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+    // if cmdStr is in the cache, return the corresponding probability 
+    if ( cmdStr in getProbForCmd.probCache ) 
+        return getProbForCmd.probCache[cmdStr]; 
+    // otherwise, calculate and store into cache 
+    const prob = await calculateProbability(cmd); 
+    getProbForCmd.probCache[cmdStr] = prob ; 
+    return prob; 
+} 
+
+async function refineCommand(cmd) { 
+    // Initialization 
+    let center = 50, step = 16; 
+    let leftBoundary = 0, rightBoundary = 100; 
+    
+    while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+        // center 
+        cmd.strength = center; 
+        const centerProb = await getProbForCmd(cmd); 
+        // left 
+        const leftStrength = Math.max(leftBoundary, center - step); 
+        cmd.strength = leftStrength; 
+        const leftProb = await getProbForCmd(cmd); 
+        // right 
+        const rightStrength = Math.min(rightBoundary, center + step); 
+        cmd.strength = rightStrength; 
+        const rightProb = await getProbForCmd(cmd); 
+        if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+            // optimal point is within current range 
+            // reduce steps to search more carefully 
+            step /= 2; 
+            leftBoundary = leftStrength; 
+            rightBoundary = rightStrength; 
+        } else { 
+            center = leftProb > rightProb ? leftStrength : rightStrength; 
+        } 
+    } 
+    cmd.strength = center; 
+    const prob = await getProbForCmd(cmd); 
+    return {cmd: cmd, prob: prob}; 
+} 
+
+function getBallReflections(ballID) { 
+    const ballPos = Balls[ballID]; 
+    const refOverTopY = {x: ballPos.x, y: 2 * Boundaries.TOP_Y - ballPos.y}; 
+    const refOverBottomY = {x: ballPos.x, y: 2 * Boundaries.BOTTOM_Y - ballPos.y}; 
+    const refOverLeftX = {x: 2 * Boundaries.LEFT_X - ballPos.x, y: ballPos.y}; 
+    const refOverRightX = {x: 2 * Boundaries.RIGHT_X - ballPos.x, y: ballPos.y}; 
+    // clockwise from top 
+    return [refOverTopY, refOverRightX, refOverBottomY, refOverLeftX];                            
+}  
+
+async function getCallShot() {
+    // place holder for best command and its probability
+    let bestCommand = null;
+    let highestProb = -1;
+
+    // array of ball IDs that can be legally targeted
+    const legalBallIDs = world.CandidateBallList[MyID];
+
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+        const ballID = legalBallIDs[k];
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+        if (isBlocked) continue;
+    
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+            if (shouldBeSkipped(pocketID, ballID)) continue;
+            
+            const cmd = calculateShotCommand(ballID, pocketID);
+            let isInPocket = false;
+            for (let i = 0; i &lt; 10; i ++) {
+                const endStates = await calculateEndState(cmd, true);
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+                (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    isInPocket = true;
+                    break;
+                }
+            }
+            if (isInPocket) {
+                cmd.spin = -0.5;
+                const endStates = await calculateEndState(cmd); 
+                if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+                    (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+                    continue;
+                }
+            }
+        
+            console.log("BallID = " + ballID + " pocketID = " + pocketID );
+            const probWithCmd = await refineCommand(cmd);
+            if ( probWithCmd.prob > highestProb ) {
+                // found a better command: record the command and its probability
+                bestCommand = probWithCmd.cmd ; 
+                highestProb = probWithCmd.prob ;
+            }
+        }
+    }
+    // if the probability is greater than 40%, we won't search for a rebound.
+    if (highestProb > 40) return bestCommand;
+    
+    // rebounds
+    for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+        const ballID = legalBallIDs[k]; 
+        const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);  
+        if (isBlocked) continue;  
+        
+        for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {  
+            // horizontal reflections 
+            let cmd = calculateShotCommand(ballID, pocketID, REFLECTION.HORIZONTAL_REFLECTION); 
+            let pocketPos = getReflectedPos(pocketID, REFLECTION.HORIZONTAL_REFLECTION);
+            const step = pocketPos.y > 0 ? CushionWidth/2 : -CushionWidth/2;
+            const limit = 20;
+            let prob = 0; 
+            for (let i = 0; i &lt;= limit; i++) { 
+                pocketPos.y += step; 
+                const aimPos = getAimPosition(Balls[ballID], pocketPos); 
+                cmd.aimx = aimPos.x; 
+                cmd.aimy = aimPos.y; 
+                prob = await getProbForCmd(cmd) ; 
+                if (prob > 0) break; 
+            }
+            console.log("pocketID = " + pocketID + " prob = " + prob);
+            if (prob > 0) { 
+                const probWithCmd = await refineCommand(cmd); 
+                if ( probWithCmd.prob > highestProb ) { 
+                    bestCommand = probWithCmd.cmd ;  
+                    highestProb = probWithCmd.prob ; 
+                }   
+            } 
+        }
+    } 
+
+    // direct shots
+    if (bestCommand == null) { 
+        for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) { 
+            const ballID = legalBallIDs[k]; 
+            const isBlocked = isPathBlocked(Balls[ballID], Balls[0]) ;  
+            if (!isBlocked) { 
+                // since we are not aiming at a specific pocket, set pocket id to -1 
+                bestCommand = { aimx: Balls[ballID].x, aimy: Balls[ballID].y, strength: 50, targetBallID: ballID, targetPocketID: -1 } ; 
+                break; 
+            } 
+        } 
+    }
+
+    // rebounds 
+    if (bestCommand == null) { 
+      // implement grid search to find a legal strike. 
+        const steps = [  
+          {x: 0, y: -BallDiameter}, // top 
+          {x: BallDiameter, y: 0},  // right 
+          {x: 0, y: BallDiameter},  // bottom 
+          {x: -BallDiameter, y: 0}, // left 
+        ]; 
+        const limit = 20; 
+        for (let k = 0; k &lt; legalBallIDs.length &amp;&amp; bestCommand == null; k ++ ) { 
+            const reflections = getBallReflections(legalBallIDs[k]); 
+            for (let i = 0; i &lt; reflections.length &amp;&amp; bestCommand == null; i ++) { 
+                let cmd = { aimx: reflections[i].x, aimy: reflections[i].y, strength: 50, targetBallID: legalBallIDs[k], targetPocketID: -1 }; 
+                for (let j = 0; j &lt;= limit; j ++) { 
+                    cmd.aimx += steps[i].x; 
+                    cmd.aimy += steps[i].y; 
+                    const firstBallTouched = await getFirstBallTouched(cmd); 
+                    if (firstBallTouched != null &amp;&amp; firstBallTouched.colorType == Balls[legalBallIDs[k]].colorType) { 
+                        bestCommand = cmd; 
+                        break; 
+                    } 
+                } 
+            } 
+        } 
+    }
+  
+    if (bestCommand == null) 
+        bestCommand = calculateShotCommand(legalBallIDs[0], 0);      
+    return bestCommand;
+}
+    
+function getReflectedPos(pocketID, refType) { 
+    // if no reflection, return pocket position from Pockets  
+    if (refType == REFLECTION.NO_REFLECTION) 
+        return Pockets[pocketID]; 
+    // if asked for side pockets' vertical reflection,  
+    // return pocket position from Pockets  
+    if ((pocketID == 1 || pocketID == 4) &amp;&amp; refType == REFLECTION.VERTICAL_REFLECTION) 
+        return Pockets[pocketID]; 
+        
+    // horizontal reflections 
+    if (refType == REFLECTION.HORIZONTAL_REFLECTION) { 
+        // for pocket 0, 1, and 2, reflect over the bottom cushion 
+        // for pocket 3, 4, and 5, reflect over the top cushion 
+        const a = pocketID &lt; 3 ? Boundaries.BOTTOM_Y : Boundaries.TOP_Y; 
+        // calculate coordinates of the reflected point 
+        const ppy = 2 * a - Pockets[pocketID].y ; 
+        return new Victor(Pockets[pocketID].x, ppy); 
+    } else { // vertical reflections 
+        // for pocket 2 and 3, reflect over the left cushion 
+        // for pocket 0 and 5, reflect over the right cushion  
+        const a = (pocketID == 2 || pocketID == 3) ? Boundaries.LEFT_X : Boundaries.RIGHT_X; 
+        const ppx = 2 * a - Pockets[pocketID].x; 
+        return new Victor(ppx, Pockets[pocketID].y); 
+        }   
+    } 
+    
+function getBreakShot() {
+    return { 
+        cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+    }; 
+}                  
+    </cleancode>
+</element>
+
+<element elementid="200" elementType="Conclusion">
+    <p><b>Summary:</b> In this tutorial, we discussed how to use rebounds to avoid a foul. </p>
+    <p>
+        <b>Exercise:</b> We used multiple layers of for-loops to search for a legal strike. In the <b>test condition</b> of the first two layers, we checked if bestCommand is still null (k &lt; legalBallIDs.length &amp;&amp; bestCommand == null). While-loops are very good at handling condition changes. Could you change the for-loops to while-loops?
+    </p>
+    <p>
+        <b>Open Challenge:</b> In <b>getCallShot</b> function, to separate each step from other code, we loop through <b>legalBallIDs</b> several times. Could you <b>refactor</b> your code and make this function more efficient?
+    </p>
+    <p>So far, you've implemented several tactics in <b>getCallShot</b> and <b>getCueBallPlacement</b> functions. Please take some time and have a review on these tactics. You don't have to include all of them in your robot code. You can configure your robots based on your preferences, and a balance between speed and accuracy. </p>
+    <p>Save your code to a new version and try it out in our Pool games. </p>
+    <p>From next tutorial, we will start another very exciting journey! </p>
+</element>
+  
+  

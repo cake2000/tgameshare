@@ -1,0 +1,115 @@
+<qa>
+    <question key="sendCommand" />
+    <answer>
+        <p>In the Dodge Ball game, your robot calls the <b>sendCommand</b> function to send commands to the game engine to control your car. The following commands are supported:</p>
+        <p>
+            <table class="ReferenceTable">
+                <thead>
+                    <th> Cmd </th> <th>Description</th> <th>Equivalent Manual Input</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>F</td>
+                        <td>Speed up car forward</td>
+                        <td>Press the up arrow key</td>
+                    </tr>
+                    <tr>
+                        <td>NF</td>
+                        <td>Stop speeding up forward</td>
+                        <td>Release the up arrow key</td>
+                    </tr>
+
+                    <tr>
+                        <td>B</td>
+                        <td>Speed up car backward</td>
+                        <td>Press the down arrow key</td>
+                    </tr>
+                    <tr>
+                        <td>NB</td>
+                        <td>Stop speeding up backward</td>
+                        <td>Release the down arrow key</td>
+                    </tr>
+                        
+                    <tr>
+                        <td>L</td>
+                        <td>Turn left until max angle</td>
+                        <td>Press the left arrow key</td>
+                    </tr>
+                    <tr>
+                        <td>NL</td>
+                        <td>Stop turning left</td>
+                        <td>Release the left arrow key</td>
+                    </tr>
+
+                    <tr>
+                        <td>R</td>
+                        <td>Turn right until max angle</td>
+                        <td>Press the right arrow key</td>
+                    </tr>
+                    <tr>
+                        <td>NR</td>
+                        <td>Stop turning right</td>
+                        <td>Release the right arrow key</td>
+                    </tr>
+                    <tr>
+                        <td>S</td>
+                        <td>Shoot ball forward</td>
+                        <td>Press the SPACE key</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+    </answer>
+</qa>
+
+
+
+<qa>
+    <question key="MyInfo" />
+    <answer>
+        <p><b>MyInfo</b> is a read-only reference object for your robot to find out information about the car. Below is a full list of attributes attached to MyInfo: </p>
+        <p>
+            <table class="ReferenceTable">
+                <thead>
+                    <th>Attribute</th> <th>Description</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>x</td>
+                        <td>Horizontal position in top-down view, with x=0 being the center of the arena.</td>
+                    </tr>
+                    <tr>
+                        <td>z</td>
+                        <td>Vertical position in top-down view, with x=0 being the center of the arena.</td>
+                    </tr>
+                    <tr>
+                        <td>angle</td>
+                        <td>Car's forward direction in top-down view in degrees, with 0 degree pointing to the right on the screen, and 90 degrees pointing up.</td>
+                    </tr>
+                    <tr>
+                        <td>hasCapturedBall</td>
+                        <td>Whether the car has a ball with it</td>
+                    </tr>
+                    <tr>
+                        <td>myBallColor</td>
+                        <td>Color index of my ball in preview image</td>
+                    </tr>
+                    <tr>
+                        <td>myCarColor</td>
+                        <td>Color index of my car in preview image</td>
+                    </tr>
+                    <tr>
+                        <td>opponentBallColor</td>
+                        <td>Color index of opponent's ball in preview image</td>
+                    </tr>
+                    <tr>
+                        <td>opponentCarColor</td>
+                        <td>Color index of opponent's car in preview image</td>
+                    </tr>
+                </tbody>
+            </table>
+        </p>
+    </answer>
+    </qa>
+
+        

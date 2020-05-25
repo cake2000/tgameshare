@@ -1,0 +1,167 @@
+<element elementid="100" elementType="Info">
+  <p>
+    Before continuing with the tutorial, let's have a review on the concept of <b>object</b> in JavaScript.
+  </p>
+  <p>
+    An <b>object</b> is used to represent a real-world object, such as a car or a movie, in the computer world. 
+  </p>
+  <p>
+    <img src="/images/redcar2seats.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>  
+  <p>
+    Just as we describe a real-world object using specific attributes (properties) such as color and shape, a JavaScript object also has its own properties. Each property is associated with a corresponding value, and a "<span class="variablenamebold">:</span>" is expected between the property name and value. For example, when we describe a car by saying that "its color is red and it has two seats", we can represent that car with a JavaScript object with two properties:
+  </p>
+  <pre class="brush: js">
+car = {         // start of object definition
+  color: "red", // a comma is needed between properties
+  seatCount: 2  // properties can span multiple lines
+};              // end of object definition
+  </pre>
+  <p>
+    Note that <b>an object starts with "{" and ends with "}", with properties separated by commas (,)</b>. 
+  </p>    
+</element>
+
+<!--element elementid="110" elementType="Info">
+  <p>
+    <b>Behavior</b> is more about what the object can do. When a car <b>runs</b>, its position is changed as a result. Some behaviors are more abstract. For example, a movie can <b>rename</b> itself by changing its title. These behaviors can be represented in JavaScript as <b>method functions</b> attached to the object like this:
+  </p>
+  <pre class="brush: js">
+let car = {
+  color: "red",
+  seatCount: 2,
+  // define behavior as part of object creation
+  run: function() {
+    // change position of car
+  }
+};
+// trigger a method
+car.run();
+
+let movie = {
+  title: "Frozen",
+  length: 120
+};            
+// attach new behavior to object 
+movie.rename = function(newTitle) {
+  this.title = newTitle;
+};
+  </pre>  
+</element-->
+
+<element elementid="110" elementType="Info">
+  <p>You can read or write object properties in two ways:</p>
+  <pre class="brush: js">
+objectName.propertyName
+  </pre>
+  <p>or</p>
+  <pre class="brush: js">
+objectName["propertyName"]
+  </pre>
+  <p>
+    So for our car object, you can read or change its color using <b>car.color</b> or <b>car["color"]</b>.
+  </p>
+</element>
+
+
+<element elementid="120" elementType="Info">
+  <p>There are a couple of key facts to remember about objects:
+    <ul>
+      <li>
+        An object can be empty, as represented by {}. 
+      </li>
+      <li>
+        You can modify an object's properties:
+        <pre class="brush: js">
+car.color = "blue";
+        </pre>
+      </li>
+      <!--li>
+        It's perfectly fine for an object to have no method function defined, as we often just need to store some attributes in an object.
+      </li-->
+      <li>
+        The value of a property can be another object itself. For example, we can add a property "wheel" to the car object, and the wheel object can be have 2 properties of its own: "diameter" and "color":
+        <pre class="brush: js">
+car.wheel = {
+    diameter: 17, color: "silver"
+};
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="126" elementType="Quiz" answerKey="A" answerReason="We use comma ',' to separate between properties, not ';'.">
+  <p>
+    <b>Quiz</b>: Out of the four choices below, which one is NOT correct about JavaScript objects?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> A JavaScript object is a collection of properties, separated by ";".
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> Each property of an object has a corresponding value, and a ":" is expected between the property name and the value.
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> An object definition starts with "{" and ends with "}".
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> An object definition can span multiple lines. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="127" elementType="Quiz" answerKey="D" answerReason='Correct syntax is car["posx"]'>
+  <p>
+    <b>Quiz</b>: an object <b class="variablenamebold">car</b> is defined as below.
+  </p>
+  <pre class="brush: js">
+car = {
+  color: "red",
+  speed: 50,
+  posX: 0,
+  posY: 0
+};
+  </pre>
+  <p>
+    Out of the four choices below, which one has syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush: js">
+car.wheel = {
+  color: "black", radius: 9
+};
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>
+        <pre class="brush: js">
+car["speed"];
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>
+        <pre class="brush: js">
+car.poxY;
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush: js">
+car[posX];
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="SkillLearned" skill="Object">
+  <p>
+    That's all you need to know about objects for now, and let's go back to our game bot tutorial.
+  </p>
+</element>

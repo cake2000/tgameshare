@@ -1,0 +1,468 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Sometimes as a penalty to your opponent's foul, you get to place the cue ball anywhere on the table so long as it doesn't touch any other ball. In this tutorial, we'll implement a new function <b>getCueBallPlacement</b>, which specifies where you want to place the cue ball with <b>x</b> and <b>y</b> coordinates.</p>
+</element>
+
+
+<element elementid="120" elementType="Info" >
+  <h5 class="elementheader">Start Simple</h5>
+  <p>For first step, let's simply try to place the cue ball right behind ball 3, facing pocket 5, as shown in the picture below. Please think about how to calculate this position before continuing.
+  </p>
+  <p>
+      <img src="/images/cueballplacebehind53.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="121" elementType="Coding" condition="TestPPPocketBall_3_In_5">
+    <h5 class="elementheader">Reusing getAimPosition</h5>
+    <p>
+      Yes, this position is exactly what <b>getAimPosition</b> returns to us. But we can't simply place the cue ball at the aim position: if the cue ball position is the same as the aim position, then the game engine won't know what to do when we ask it to shoot the cue ball towards the aim position! 
+    </p>
+    <p>
+      To solve the issue, you need to pass in a third parameter <b>ShiftDistance</b> to the function <b>getAimPosition</b>. This will return a new position that's further away from the target ball as illustrated below.
+    </p>
+    <p>
+        <img src="/images/cueballplacebehind53.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>    
+    <p>
+        <b>Challenge:</b> implement the <b>getCueBallPlacement</b> function below to put the cue ball behind ball 3 facing pocket 5.
+    </p>
+    <code isHidden="false">
+// add this new function below getCallShotCommand
+function getCueBallPlacement() {
+  //TODO: calculate cue ball position
+  //h0::use getAimPosition with a ShiftDistance
+  ::const cueballPos = getAimPosition(world.Balls[3], world.Pockets[5], -1);
+  ::const cueballPos = getAimPosition(world.Balls[3], world.Pockets[5], 1);
+  const cueballPos = ?;
+  //ENDTODO
+  return cueballPos;  
+}
+  </code>
+</element>
+
+
+
+
+<element elementid="140" elementType="Coding" condition="TestFinishedFirstTouchBall_2">
+  <h5 class="elementheader">Worst of Best Strategy</h5> 
+  <p>Now let's teach your robot to decide which ball to shoot using a simple strategy called <b>worst of best</b>.</p>
+  
+  <p>We first calculate each ball's distance to the nearest corner pocket as its <b>min_distance</b>. If a ball has long min_distance, that means this ball is not so close to any of the 4 corner pockets, so it's harder to pocket that ball in general. Therefore, we can just pick the ball with the <b>maximum min_distance</b> and get that ball pocketed now.</p>
+  </p>
+  <p>
+      <img src="/images/comparingdistanceto4corners.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>    
+  <p>
+      To calculate the distance between 2 positions, you can use the <b>distance</b> method like this:
+  </p>
+  <p>
+      <pre class="brush: js">
+const dist = position1.distance(position2);      
+      </pre>
+  </p>
+
+  <p><b>Challenge</b>: please complete the getCueBallPlacement function below to place the cue ball behind the ball with the longest distance to its nearest corner pocket. If done correctly, your robot should place cue ball behind ball 2 towards pocket 5 (left bottom).</p>
+  <code isHidden="false">
+function getCueBallPlacement() {
+  // get array of ball IDs that we can shoot
+  const legalBallIDs = world.CandidateBallList[myID];
+  // array of IDs for 4 corner pockets
+  const cornerPocketIDs = [0, 2, 3, 5];
+
+  let bestBallID = -1;
+  let bestPocketID = -1;
+  //use maxDistance to keep track of max minDistance
+  let maxDistance = -1;
+
+  for (let i=0; i &lt; legalBallIDs.length; i++){
+    const ballID = legalBallIDs[i];
+    const ballPos = world.Balls[ballID];  
+
+    // keep track of minDistance and pocketID for that
+    let pocketIDAtMinDistance = -1;
+    let minDistance = 1000000;
+
+    // go through all corner pockets for this ball
+    for (let k=0; k &lt; cornerPocketIDs.length; k++){
+      const pocketID = cornerPocketIDs[k];
+      const pocketPos = world.Pockets[pocketID]; 
+
+      //TODO: update minDistance 
+      //h0::set dist to distance between ballPos and pocketPos::
+      ::const dist = pocketPos.distance(ballPos);
+      ::const dist = pocketPos - ballPos;
+      ::const dist = pocketPos.distanceTo(ballPos);
+      const dist = ?;
+      //h1::check if dist is the smallest so far::compare dist against minDistance
+      ::if (dist &lt; minDistance)
+      ::if (dist > minDistance)
+      if ( ? ) {
+        //h2::update minDistance to dist
+        ::minDistance = dist;
+        ::dist = minDistance;
+        //h3::update pocketIDAtMinDistance to pocketID
+        ::pocketIDAtMinDistance = pocketID;
+        ::pocketID = pocketIDAtMinDistance;
+      }
+    }
+
+    //h4::check if minDistance is no longer 1000000 and > maxDistance::use &amp;&amp; to combine 2 conditions
+    ::if (minDistance &lt; 1000000 &amp;&amp; minDistance > maxDistance) {
+    ::if (minDistance &lt; 1000000 || minDistance > maxDistance) {
+    if ( ? ) {
+      //h5::update maxDistance::set it to minDistance
+      //h6::update bestBallID::set it to ballID
+      //h7::update bestPocketID::set it to pocketIDAtMinDistance
+    }
+    //ENDTODO
+  }
+
+  const cueballPos = getAimPosition(world.Balls[bestBallID], world.Pockets[bestPocketID], 1);
+  return cueballPos;
+}
+  </code>
+</element>
+        
+<!-- 
+<element elementid="150" elementType="Coding" condition="TestPPPocketBall_2_In_0">
+  <h5 class="elementheader">Fix the blocking issue</h5> 
+  <p>
+    Now that your robot has successfully identified ball 2 as the trouble boy in this setup, we just need to fix the problem that the nearest corner pocket may be blocked by other balls. So even though we put cue ball behind ball 2 towards pocket 5, the <b>getCallShot</b> function finds there is no way to shoot into pocket 5 directly. Therefore, we need to exclude these pockets when calculating the min_distance. 
+  </p>
+  <p>
+      <img src="/images/cueballwouldbeblocked.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+
+  <p>
+    So how to check if the path from a ball to a pocket is blocked by other balls? One way to do it is to measure the distance from all other balls to the line segment between the target ball and the target pocket. If for any ball on the table (<b>isPocket</b> == false) the distance is less than the ball diameter (world.BallDiameter), then that ball is a blocker. To measure the distance from a point P1 to a line segment between point P2 and P3, you can call the following helper function:
+  </p>
+  <p>
+      <pre class="brush: js">
+const dist = distToSegment(P1, P2, P3);          
+      </pre>
+    </p>
+  
+  <p><b>Challenge:</b> please complete the function <b>isBlocked</b> to check if the path from the target ball to the target pocket is blocked by any other balls, and also use this function to ignore blocked pockets in <b>getCueBallPlacement</b>. When you click <b>TEST</b>, your robot should now choose to shoot ball 2 at pocket 0 (top left).</p>
+  <code isHidden="false">
+// new function to check if the path is blocked    
+function isBlocked(targetBallID, pocketID) {
+  const ballPos = world.Balls[targetBallID];  
+  const pocketPos = world.Pockets[pocketID];
+  const allBallIDs = Object.keys(world.Balls);
+
+  // go through each of the balls 
+  for (let k=0; k &lt; allBallIDs.length; k++) {
+    const otherBallID = allBallIDs[k];
+    const otherBall = world.Balls[allBallIDs[k]];
+
+    //TODO: check if this ball is blocking the way  
+    //h0::ignore this ball if it is cue ball or the target ball::use "continue"
+    //h1::ignore this ball if it is already in pocket::check if the inPocket property is true
+    //h2::set dist to be distance from otherBall to the path
+    const dist = ? ;
+    //h3::return true if dist is smaller than ball diameter
+    if ( ? ) return true;
+    //ENDTODO
+  }
+
+  return false;
+} 
+
+function getCueBallPlacement() {
+  let bestBallID = -1;
+  let bestPocketID = -1;
+  const legalBallIDs = world.CandidateBallList[myID];
+  const cornerPocketIDs = [0, 2, 3, 5];
+
+  let maxDistance = -1;
+  for (let j=0; j &lt; legalBallIDs.length; j++){
+    const ballID = legalBallIDs[j];
+    const ballPos = world.Balls[ballID];  
+
+    let pocketIDAtMinDistance = -1;
+    let minDistance = 1000000;
+    for (let k=0; k &lt; cornerPocketIDs.length; k++){
+      const pocketID = cornerPocketIDs[k];
+      const pocketPos = world.Pockets[pocketID]; 
+      
+      //TODO: ignore blocked pockets
+      //h4::call isBlocked to check if path is blocked::use continue to skip this pocket
+      ::if (isBlocked(ballID, pocketID)) continue;
+      ::if (isBlocked(ballID, pocketID)) break;
+      //ENDTODO
+
+      const dist = pocketPos.distance(ballPos);
+      if (dist &lt; minDistance) {
+        minDistance = dist; pocketIDAtMinDistance = pocketID;
+      }
+    }
+
+    if (minDistance > maxDistance &amp;&amp; minDistance &lt; 1000000) {
+      maxDistance = minDistance;
+      bestBallID = ballID;
+      bestPocketID = pocketIDAtMinDistance;
+    }
+  }
+  
+  var shotCmd = getCallShotCommand(bestPocketID, bestBallID);
+  return { x: shotCmd.aimx, y: shotCmd.aimy };
+}        
+  </code>
+            
+</element>
+     -->
+
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Now your robot has implemented all 3 key functions getBreakShot, getCallShot and getCueBallPlacement, you are ready to <b>release a first version of your robot</b> to play against other human or robot players! </p>
+    <p>Here is how you manage robot code releases:
+      <ul>
+        <li>
+          To <b>save a new release</b>, you can type (or select from the dropdown) the name of the release (such as "version1"), and then click save. If there is a release with that name already, then you'll be prompted to confirm overwriting it or cancel it. 
+        </li>
+        <li>
+          To <b>load a released version</b> of your code into the editor, you can type in the release name, and then click load. 
+        </li>
+        <li>
+            Note that new changes made after saving or loading a release <b>will not be saved to that release</b> unless you explicitly save to that release again. This way all your edits are auto-saved into a code draft, and it will not overwrite any release by accident.
+        </li>
+      </ul>
+    </p>
+    <p>
+      <b>Extra Credit:</b> can you try some other ways to pick a good spot to place the cue ball? For example, try to find 2 balls that are close, so after you pocket one of them, the cue ball will then be close to shoot the other one, increasing the chance of two good shots in a roll. 
+    </p>
+  </element>
+    
+<!-- 
+
+
+  step 3: avoid blocker
+
+function getCallShotCommand(pocketID, ballID) {  
+  const targetBallPos = world.Balls[ballID];   
+  console.log("targetBallPos " + JSON.stringify(targetBallPos));
+  debugger;
+  const pocketPos = world.Pockets[pocketID].clone();  
+  console.log("pocketPos " + JSON.stringify(pocketPos));
+  const ballD = world.BallDiameter;    
+  const dirBallToPocket = pocketPos.subtract(targetBallPos);   
+  console.log("dirBallToPocket " + JSON.stringify(dirBallToPocket));
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD);   
+  console.log("dirAimToBall " + JSON.stringify(dirAimToBall));
+  let aimPos = targetBallPos.subtract(dirAimToBall);   
+  console.log("aimPos " + JSON.stringify(aimPos));
+  const cueballPos = world.Balls[0]; 
+  console.log("cueballPos " + JSON.stringify(cueballPos));
+  
+  console.log("aimPos.distance(cueballPos) " + aimPos.distance(cueballPos));
+  //TODO: fix issue when aimPos is same as cueballPos 
+  if (aimPos.distance(cueballPos) <= 0.01) {
+    aimPos = targetBallPos;
+  }
+  
+  return {   
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1200,   
+    targetBallID: ballID, targetPocketID: pocketID  
+  };   
+}  
+  
+// add this new function below getCallShotCommand 
+
+
+function isBlocked(ballID, pocketID) {
+  const ballPos = world.Balls[ballID];  
+  const pocketPos = world.Pockets[pocketID]; 
+  const allBallIDs = Object.keys(world.Balls);
+
+  for (let k=0; k < allBallIDs.length; k++) {
+    if (allBallIDs[k] == 0 || allBallIDs[k] == ballID) continue;
+    const otherBallPos = world.Balls[allBallIDs[k]];
+    
+    const dist = distToSegment(otherBallPos, ballPos, pocketPos);
+    if (dist <= world.BallDiameter) 
+      return true;
+  }
+  return false;
+}
+
+function getCueBallPlacement() { 
+  let bestBallID = -1; 
+  let bestPocketID = -1; 
+  const legalBallIDs = world.CandidateBallList[myID]; 
+  const cornerPocketIDs = [0, 2, 3, 5]; 
+  
+  let maxDistance = -1; 
+  for (let j=0; j < legalBallIDs.length; j++){ 
+    const ballID = legalBallIDs[j]; 
+    const ballPos = world.Balls[ballID];   
+  
+    //TODO: find the best ball and pocket to aim at 
+    let pocketIDAtMinDistance = -1; 
+    let minDistance = 1000000; 
+    for (let k=0; k < cornerPocketIDs.length; k++){ 
+      const pocketID = cornerPocketIDs[k]; 
+      const pocketPos = world.Pockets[pocketID];
+      if (isBlocked(ballID, pocketID)) continue;
+      
+      const dist = pocketPos.distance(ballPos); 
+      if (dist < minDistance) { 
+        minDistance = dist; pocketIDAtMinDistance = pocketID; 
+      } 
+    } 
+  
+    if (minDistance > maxDistance && minDistance < 1000000) { 
+      debugger;
+      maxDistance = minDistance; 
+      bestBallID = ballID; 
+      bestPocketID = pocketIDAtMinDistance; 
+    } 
+  } 
+    
+  var shotCmd = getCallShotCommand(bestPocketID, bestBallID); 
+  return { x: shotCmd.aimx, y: shotCmd.aimy }; 
+}  
+  
+  
+  
+async function getCallShot() { 
+  const legalBallIDs = world.CandidateBallList[myID];  
+    
+  let bestShotCommand = null; 
+  let maxProb = -1; 
+    
+  for (let j=0; j < legalBallIDs.length; j++) { 
+    const ballID = legalBallIDs[j]; 
+      
+    for (let pocketID=0; pocketID < 6; pocketID ++) { 
+      let cmd = getCallShotCommand(pocketID, ballID); 
+      const probability = await calculateProbability(cmd); 
+      console.log("* * prob for ball " + ballID + " pocket " + pocketID + " is " + probability); 
+      if (probability > maxProb) { 
+        maxProb = probability; bestShotCommand = cmd; 
+      } 
+    }   
+  } 
+  return bestShotCommand; 
+} 
+                    
+function getBreakShot() { 
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };  
+}
+
+
+
+
+
+
+
+  step 2: choose ball 2 by longest min_distance
+
+
+function getCueBallPlacement() { 
+  let bestBallID = -1; 
+  let bestPocketID = -1; 
+  const legalBallIDs = world.CandidateBallList[myID]; 
+  const cornerPocketIDs = [0, 2, 3, 5]; 
+  
+  let maxDistance = -1; 
+  for (let j=0; j < legalBallIDs.length; j++){ 
+    const ballID = legalBallIDs[j]; 
+    const ballPos = world.Balls[ballID].clone();   
+  
+    //TODO: find the best ball and pocket to aim at 
+    let pocketIDAtMinDistance = -1; 
+    let minDistance = 1000000; 
+    for (let k=0; k < cornerPocketIDs.length; k++){ 
+      const pocketID = cornerPocketIDs[k]; 
+      const pocketPos = world.Pockets[pocketID];
+      
+      const dist = pocketPos.distance(ballPos); 
+      if (dist < minDistance) { 
+        minDistance = dist; pocketIDAtMinDistance = pocketID; 
+      } 
+    } 
+  
+    if (minDistance > maxDistance) { 
+      maxDistance = minDistance; 
+      bestBallID = ballID; 
+      bestPocketID = pocketIDAtMinDistance; 
+    } 
+  } 
+    
+  var shotCmd = getCallShotCommand(bestPocketID, bestBallID); 
+  return { x: shotCmd.aimx, y: shotCmd.aimy }; 
+}  
+
+
+
+
+  step 1 shoot ball 3 to pocket 5
+function getCallShotCommand(pocketID, ballID) {  
+  const targetBallPos = world.Balls[ballID];   
+  console.log("targetBallPos " + JSON.stringify(targetBallPos));
+  
+  const pocketPos = world.Pockets[pocketID].clone();  
+  console.log("pocketPos " + JSON.stringify(pocketPos));
+  const ballD = world.BallDiameter;    
+  const dirBallToPocket = pocketPos.subtract(targetBallPos);   
+  console.log("dirBallToPocket " + JSON.stringify(dirBallToPocket));
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD);   
+  console.log("dirAimToBall " + JSON.stringify(dirAimToBall));
+  let aimPos = targetBallPos.subtract(dirAimToBall);   
+  console.log("aimPos " + JSON.stringify(aimPos));
+  const cueballPos = world.Balls[0]; 
+  console.log("cueballPos " + JSON.stringify(cueballPos));
+  
+  console.log("aimPos.distance(cueballPos) " + aimPos.distance(cueballPos));
+  //TODO: fix issue when aimPos is same as cueballPos 
+  if (aimPos.distance(cueballPos) <= 0.01) {
+    debugger;
+    aimPos = targetBallPos;
+  }
+  
+  return {   
+    aimx: aimPos.x, aimy: aimPos.y, strength: 1200,   
+    targetBallID: ballID, targetPocketID: pocketID  
+  };   
+}  
+  
+// add this new function below getCallShotCommand 
+function getCueBallPlacement() { 
+  const ballID = 3; 
+  const pocketID = 5; 
+  
+  //TODO: reuse the shot command for cue ball placement 
+  const shotCmd = getCallShotCommand(pocketID, ballID);
+  return {x: shotCmd.aimx, y: shotCmd.aimy};
+} 
+  
+  
+  
+async function getCallShot() { 
+  const legalBallIDs = world.CandidateBallList[myID];  
+    
+  let bestShotCommand = null; 
+  let maxProb = -1; 
+    
+  for (let j=0; j < legalBallIDs.length; j++) { 
+      const ballID = legalBallIDs[j]; 
+      
+    for (let pocketID=0; pocketID < 6; pocketID ++) { 
+      let cmd = getCallShotCommand(pocketID, ballID); 
+      const probability = await calculateProbability(cmd); 
+      console.log("* * prob for ball " + ballID + " pocket " + pocketID + " is " + probability); 
+      if (probability > maxProb) { 
+        maxProb = probability; bestShotCommand = cmd; 
+      } 
+    }   
+  } 
+  return bestShotCommand; 
+} 
+                    
+function getBreakShot() { 
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };  
+}
+
+-->

@@ -1,0 +1,234 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  return "S"; 
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! I am TBot. You might know me already if you‘ve taken the tutorials for our Trajectory Pool game. This time I am going to show you how to build a gamebot for another exciting game, <b>Smart Tank</b>. 
+  </p>
+  <p>Before we start, a quick note: To continue my tutorial at any time, you can type "<b>next</b>" in the box below and then press <b>Enter</b>. You can also click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/>.
+  </p>
+</element>
+
+<element elementid="110" elementType="InfoToNew">
+  <p>In case you are new to our tutorials, here is a quick overview. </p>
+  <p>
+    First, I'd like to show you the layout of this webpage. There are three sub-windows on this page. On the left side of the page is our <b>chat room</b>; the top right window is your <b>code editor</b>; and the bottom right window is the game simulator that runs your robot code when you click the "<b>TEST</b>" button. 
+  </p>
+  <p>
+    <img src='/images/webpagewindows.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="InfoToNew">
+  <p>
+    Next, let's clarify our two primary goals for these tutorials: (1) you are going to improve your skills of JavaScript programming; (2) you will use JavaScript to create a tank gamebot. 
+  </p>
+  <p>
+    A programming language is just like any other language that you learn, except that a programming language is used to "talk" to computers. Computer programming languages contain much smaller vocabularies than human-to-human languages, and their rules of syntax and semantics are much stricter and more predictable. We have to follow these programming-language rules precisely, not missing even a single punctuation mark, in order for computers to correctly carry out our instructions.
+  </p>
+  <p>
+    In the lessons to come, we will be using these <b>keywords</b>:
+  </p>
+  <p>
+    <b class="keyword">function, return, if, else, for, continue, break, const, let</b>
+  </p>
+  <p>
+    We will learn to use the following symbols as well:
+  </p>
+  <p>
+    <b class="keyword">. ; ' " : , () [] {} + - = == += -= != || &amp;&amp; &lt; > &lt;= >= ++</b>
+  </p>
+  <p>
+    You don't need to remember them now; we will explain each and every one in the following tutorials. If you are curious, you can click on <a href="#" onclick="ClickToSendChat(event, 'JavaScript keywords')" class="inlinebutton">JavaScript keywords</a> or <a href="#" onclick="ClickToSendChat(event, 'JavaScript symbols')" class="inlinebutton">JavaScript symbols</a> to take a peek. 
+  </p>
+</element>
+
+<element elementid="130" elementType="InfoToNew">
+  <p>
+    After a quick introduction to JavaScript, let's switch to the <b>game engine</b> on which your game bot will run. If you have played any Nintendo Switch game, you will have noticed that our game engine is pretty much like the Nintendo Switch console, and your game bot program is like an automated controller that controls the game characters.
+  </p>
+  <p>
+    <img src="/images/gameEngine.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    In the Smart Tank game, the game engine takes care of many basic tasks of the game, such as setting up the battlefield, generating white tanks, enforcing game rules, etc. During a tank game, the game engine will tell your bot the current game state, and then your bot will tell the game engine what its next move will be. Such communication is carried out using the <b>interface functions (i.e., commands)</b> that we will introduce over time.
+  </p>
+</element>
+
+<!-- <element elementid="140" elementType="UserOKWithScratch" answerKey="AB">
+  <p>
+    In case you already know how to program in <a href="https://scratch.mit.edu/" target="_blank">Scratch</a>, but JavaScript is new to you, I can show you how the JavaScript code maps to Scratch blocks. Please choose between the following two options by typing or clicking on <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a> or <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>?
+  </p>
+  <p>
+      <ul>
+        <li>
+          <b><a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a></b>: Sure, please use Scratch examples to help explain JavaScript.
+        </li>
+        <li>
+          <b><a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a></b>: No, I don't think that Scratch examples would help me learn JavaScript.
+        </li>
+      </ul>
+  </p>
+</element> -->
+
+<element elementid="150" elementType="Info">
+  <p>
+    For every tutorial you will find a corresponding topic in our forum. Feel free to check out the discussions in the forum and ask questions. The topic for this lesson is <a href="https://forum.tgame.ai/t/lesson-1-a-random-walker/398" target="_blank">here</a>.
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>If you have not played the Smart Tank game yet, please <a href="/gamesBoard">play a few practice games</a> before continuing with this tutorial. You need to understand the basic rules of the game, and get used to the game's fast pace.
+  </p>    
+
+  <p>After you have familiarized yourself with the game, type <b>"n"</b> for "next" or click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to continue.</p> 
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    As you know from playing the tank game manually, each tank accepts five basic commands: <b>move up</b>, <b>move down</b>, <b>move left</b>, <b>move right</b>, and <b>shoot</b>. 
+  </p>
+    <p>
+    Similarly, your gamebot can control its tank using these same commands. Throughout the game, the game engine will keep asking your gamebot "what would you like to do now?", by calling its <span class="variablenamebold">getNewCommand</span> function. So your gamebot needs to implement all its strategies using this function.
+  </p>
+  <p>
+    Note that <b>this is quite different from the pool game</b>. In the pool game, the game engine only asks your gamebot for its shot command at the start of each turn, and your gamebot may spend tens of seconds to find an optimal shot. However, because the smart tank game is a real time combat game, your gamebot needs to issue new commands very frequently. Therefore, the game engine keeps on querying your gamebot for new commands, at a frequency of around <b>60 times per second</b>!
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Let's have a quick review of function definitions. As shown below, there are four parts in a function definition: the keyword "<span class="keyword">function</span>", the function name (<span class="variablename">getNewCommand</span> in this case), the parameter list inbetween a pair of <span class="variablename">()</span>, and the function body block inside <span class="variablename">{}</span>. Click <a href="#" onclick="ClickToSendChat(event, 'function')" class="inlinebutton">here</a> for more information about functions. 
+  </p>
+  <p>
+    <img src="/images/functionreview.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="190" elementType="Coding" condition="TestFinishedWithCommandFirst_S">
+  <p>
+    As shown in the code editor, in its current state, the function <span class="variablename">getNewCommand</span> always returns the letter "S", which represents the <b>shoot</b> command. 
+  </p>
+  <p>
+    Please click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button at top right to see what your tank will do. 
+  </p>
+  <cleancode>
+function getNewCommand() {
+  return "S"; 
+}
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    You might be wondering why the blue tank keeps on firing. As discussed earlier, the game engine calls your <span class="variablename">getNewCommand</span> function <b>repeatedly on every tick</b>. It's a common practice for a game engine to divide each second into 60 equal-length segments, called <b>ticks</b>. And the game engine would query your gamebot on every tick, giving your tank an opportunity to react immediately to any new event. Your tank is not that different from a self-driving car, which can adjust its behavior based on road conditions, movement of other cars, and any other emergency, <b>in real time</b>.  
+  </p>
+  <p>
+    But why doesn't your tank fire 60 times a second? That is because your tank's firing frequency is limited by its <b>reload time</b>, so the game engine is rejecting most of your gamebot's request to fire. We will discuss how to shorten your tank's reload time by enhancing its <b>reload</b> power. 
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Now let's try some other commands.
+  </p>
+  <p>
+    The letters representing the movement commands are: "<b>U</b>" for moving up, "<b>D</b>" for moving down, "<b>L</b>" for moving to the left, and "<b>R</b>" for moving to the right. They correspond to the four arrow keys you use when playing the game manually.
+  </p>
+  <p>
+    <img src='/images/udlr.jpg' style="width: 74%; height: auto; margin-left: 3%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedWithCommandFirst_R">
+  <p>
+    <b>Challenge:</b> Change the function <span class="variablename">getNewCommand</span> such that it always returns the command "<b>R</b>". Test and see what will happen. 
+  </p>
+  <cleancode>
+function getNewCommand() {
+  return "R"; 
+}
+  </cleancode>
+</element>
+
+<element elementid="240" elementType="Info">
+  <p>
+    Your tank ran to the right until it was blocked by the wall of rocks. In future tutorials, you will gradually enhance your gamebot such that it decides which command to send based upon what's happening in the game world in real time. Now, just for fun, let's temporarily program your gamebot to give out commands randomly. 
+  </p>
+
+</element>
+
+<element elementid="250" elementType="Info">
+  <p>
+    Recall that the function <span class="variablenamebold">Math.random()</span> returns a random number between 0 and 1. We can use such random numbers to generate random commands. 
+  </p>
+  <p>
+    For our next challenge, you will need to define a <b>variable</b> to hold the random number returned by <span class="variablename">Math.random()</span>, and write a <span class="keyword">conditional statement</span> to return different commands based on the value of this random number. If you'd like to review the <span class="keyword">conditional statement</span>, please click <a href="#" onclick="ClickToSendChat(event, 'conditional')" class="inlinebutton">here</a>. 
+  </p>
+</element>
+
+<element elementid="270" elementType="Coding" condition="TestFinishedWithCommands_R_L">
+  <p>
+    <b>Challenge:</b> Follow the steps given below in order to change <span class="variablename">getNewCommand</span> function. Try to complete your code on your own before looking at the sample code provided below. 
+  </p>
+  <p>
+    <ul>
+        <li>
+          Step 1: generate a random number between 0 and 1, and store it in a variable named <b>r</b>;
+        </li>
+        <li>
+          Step 2: if the random number <b>r</b> is greater than 0.5, send command "R", otherwise send command "L";
+        </li>
+      </ul>
+  </p>
+  <code isHidden="false">
+//TODO: return a command based on the value of a random number
+function getNewCommand() {
+  //h0::generate a random number between 0 and 1 and store it in the variable r::call function Math.random() to get a random number between 0 and 1::const r = Math.random();
+  const r = ?
+  
+  if (r > 0.5) 
+    return "R";
+  //h1::otherwise, send "L"::else return "L";
+  ?
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {
+  const r = Math.random();
+  if (r > 0.5) 
+    return "R";
+  else 
+    return "L";
+}      
+  </cleancode>
+</element>
+<!-- 
+<element elementid="280" elementType="Info">
+  <p>
+    Well done! Now that your function is working, you also need to ensure that it is properly formatted. We have two tools to assist you with formatting. One is the "<b>BEAUTIFY</b>" button, which reformats your code, adding the correct number of spaces in front of each line to align all statements in one block. Another tool is the <b>highlighter for matching brackets</b>, which allows you to see whether each closing bracket is matched with the correct open bracket, and vice versa.
+  </p>
+  <p>
+    <img src="/images/beautifyformat.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element> -->
+
+<element elementid="500" elementType="Conclusion">
+  <p>Congratulations! Now you have a very simple robot tank that randomly walks left or right.</p>
+  <p>
+    <b>Summary:</b> In this tutorial, we reviewed JavaScript knowledge about <span class="keyword">function</span>, <span class="keyword">variable</span>, and <span class="keyword">conditional statement</span>, as well as <span class="variablenamebold">Math.random()</span> for random number generation. In addition, you learned how to control your tank with the five basic commands: "U", "D", "L", "R", and "S".  
+  </p>
+  <p>
+    <b>Exercise 1:</b> Change your game bot to send all five commands ("R", "L", "U", "D" and "S") with an equal probability of <b>20%</b>, by comparing the random number <b>r</b> with different thresholds. For example, you can tell your game bot to send the command "U" when r is between 0.8 and 1, and send the command "D" when r is between 0.6 and 0.8, etc.
+  </p>
+  <p>
+    <b>Exercise 2:</b> Following up from exercise 1, please store the random command into a variable named "cmd". Use the "console.log" function to print out this cmd before returning it. Clear the console before you run the test, and after running the test, check how many times your "getNewCommand" function is executed using the information on the console log. 
+  </p>  
+</element>

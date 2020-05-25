@@ -1,0 +1,380 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackWhiteTank() { 
+  for (let i = 0; i &lt; Tanks.length; i += 1){ 
+    const curTank = Tanks[i]; 
+    if (curTank.color != "white") continue; 
+  
+    if (MyTank.r == curTank.r) { 
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") { 
+        return "R"; 
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") { 
+        return "L"; 
+      } else { 
+        return "S"; 
+      } 
+    } else if (MyTank.c == curTank.c) { 
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") { 
+        return "D"; 
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") { 
+        return "U"; 
+      } else { 
+        return "S"; 
+      } 
+    } 
+  } 
+  return ""; 
+}  
+ 
+function createGraph() { 
+  // create a new Set to hold blocking tile types 
+  const blockingTileTypes = ['R', 'M', 'T']; 
+  // create a new graph 
+  const graph = createNewGraph(); 
+  
+  // set values of graph, 1 = pass and 0 = blockage 
+  for (let i = 0; i &lt; graph.length; i += 1) { 
+    for (let j = 0; j &lt; graph[i].length; j += 1) { 
+      // tile type 
+      const tile = Maze[i][j]; 
+      // check if it is a blockage 
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0; 
+      else graph[i][j] = 1; 
+    } 
+  } 
+  return graph; 
+} 
+
+function getCrystal() { 
+  const graph = createGraph(); 
+  // initialize variables to hold shortest distance and target crystal 
+  let shortestLength = 1000; 
+  let target = null; 
+  
+  // loop through all crystals 
+  for (let i = 0; i &lt; Crystals.length; i += 1) { 
+    const pos = Crystals[i]; 
+    // calculate the Manhattan Distance from MyTank to pos 
+    const pl = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    // update shortestLength and target  
+    if (pl &lt; shortestLength) { 
+      shortestLength = pl; 
+      target = pos; 
+    } 
+  } 
+  if (!target) return []; 
+  return getShortestPathCmd(graph, MyTank, target); 
+}
+
+function getRandomCommand() { 
+  // random command 
+  const r = Math.random() * 100; 
+  if (r > 10) return "S"; 
+  if (r > 8) return "U"; 
+  if (r > 6) return "D"; 
+  if (r > 4) return "L"; 
+  if (r > 2) return "R"; 
+  return ""; 
+} 
+ 
+function getNewCommand() { 
+  // get a crystal 
+  const path = getCrystal(); 
+  if (path.length > 0) return path[0]; 
+  
+  // attack white tank 
+  const cmd = attackWhiteTank(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // random command 
+  return getRandomCommand(); 
+}       
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back! If you have released your robot code and played a few games, you might have noticed that your tank mostly just runs around randomly, and it only attacks those white tanks on the same row or column as itself. In this tutorial, you will change your tank to aggressively chase and attack white tanks. 
+  </p>
+  <p>
+    Specifically, we will change the function <span class="variablenamebold">attackWhiteTank</span> to search for the closest tank and then attack it. 
+  </p>
+  <p>
+    <img src="/images/add3tanks.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Since searching for the closest tank is very similar to searching for the closest crystal, we should reuse our existing logic for picking up crystals as much as possible, instead of "reinventing the wheel".
+  </p>
+  <p>
+    First, let's <b>refactor</b> our code by moving some code from <span class="variablename">getCrystal</span> to a new function <span class="variablenamebold">getClosestItem</span>. This new function will be more generic, as it can be used for searching through either all crystals or all white tanks. 
+  </p>
+</element>
+
+<element elementid="130" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+    <b>Challenge: </b>Refactor your current code as follows. Create a separate function <span class="variablenamebold">getClosestItem</span>, which takes an array <b>items</b> as input, and returns the one item in this array that's closest to <span class="variablename">MyTank</span>. 
+  </p>
+  <p>
+    click <b>TEST</b> after finish coding. Note that this test will take about 30 seconds to finish.
+  </p>
+  <code isHidden="false">
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = 100;
+  let target = null;
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the Manhattan distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    // update shortDis 
+    if (dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  const target = getClosestItem(Crystals);
+  if (!target) return [];
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, target);
+}
+  </code>
+  <cleancode>
+function getClosestItem(items) {
+  // initialize variables to hold shortest distance and target
+  let shortDis = 100;
+  let target = null;
+
+  // loop through all items
+  for (let i = 0; i &lt; items.length; i += 1) {
+    const pos = items[i];
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;
+    // calculate the Manhattan distance
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);
+    // update shortDis 
+    if (dis &lt; shortDis) {
+      shortDis = dis;
+      target = pos;
+    }
+  }
+  return target;
+}
+
+function getCrystal() {
+  const target = getClosestItem(Crystals);
+  if (!target) return [];
+  const graph = createGraph();
+  return getShortestPathCmd(graph, MyTank, target);
+}    
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Now we're ready to update the <span class="variablenamebold">attackWhiteTank</span> function to identify the nearest tank and then run towards it using the shortest path. 
+  </p>
+  <p>
+    When will your tank fire at a white tank? When your tank is on the same row or column as any white tank, and there is no obstable blocking it. But what if there is no white tank on that row or column? We need to add some new logic to find the closest white tank and go after it.
+  </p>
+</element>
+
+<!-- <element elementid="150" elementType="Info">
+  <p>
+    Our new logic needs to handle 3 scenarios: 1) If the white tank is within scope of <span class="variablename">MyTank</span>, and <span class="variablename">MyTank</span> is facing it, shoot; 2) If the white tank is within scope of <span class="variablename">MyTank</span> and <span class="variablename">MyTank</span> is NOT facing it, turn to it; 3) If the white tank is out of the scope, go along the shortest path to chase it. 
+  </p>
+</element> -->
+
+<element elementid="160" elementType="Info">
+  <p>
+    To determine whether you can shoot directly from one point on the battlefield to another, I have defined a helper function named <span class="variablenamebold">isShellBlocked(pos1, pos2)</span>. The function takes two positions as input and returns <b>true</b> if either the two points are not located on the same row or column or an obstacle lies between them. 
+  </p>
+  <!-- <p>
+    Now we are ready to code the logic above. 
+  </p> -->
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedKillTanksAt_4_1_6_8_12_6">
+  <p>
+    <b>Challenge: </b>Use the code below as a guide to implement the logic discussed above. Note that we need to compare <span class="variablename">MyTank</span> against white tanks only. Therefore we must use <span class="variablenamebold">filter</span> to select the subset of white tanks first. 
+  </p>
+  <code isHidden="false">
+//TODO
+function attackWhiteTank() {
+
+  // filter for white tanks among all tanks that are not overlapping with MyTank
+  const whiteTanks = Tanks.filter(tank => 
+    tank.color == 'white' &amp;&amp; 
+    // not at the same tile with MyTank
+    //h0::check row and column numbers and make sure that 'tank' is not at the same tile with 'MyTank'::row numbers are different or column numbers are different
+    ::(MyTank.r == tank.r &amp;&amp; MyTank.c == tank.c)
+    ::(MyTank.r != tank.r || MyTank.c != tank.c)
+    ::(MyTank.r != tank.r &amp;&amp; MyTank.c != tank.c)
+    ( ? )
+  );
+  // get the one white tank that's closest
+  const target = getClosestItem(whiteTanks);
+  if (!target) return '';
+  
+  // check if MyTank and target are on the same row or column and shells are not blocked
+  //h1::if on the same row and shells are not blocked
+  ::if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+  ::if (MyTank.r == target.r || !isShellBlocked(MyTank, target)) {
+  ::if (MyTank.r == target.r || isShellBlocked(MyTank, target)) {
+  if (MyTank.r == target.r ? ) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  //h2::if on the same column and shells are not blocked
+  ::} else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+  ::} else if (MyTank.c == target.c || !isShellBlocked(MyTank, target)) {
+  ::} else if (MyTank.c == target.c || isShellBlocked(MyTank, target)) {
+  } else if ( ? ) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  // no direct shot possible, so search for shortest path
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function attackWhiteTank() {
+  const whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp; 
+  (MyTank.r != tank.r || MyTank.c != tank.c));
+  const target = getClosestItem(whiteTanks);
+  if (!target) return '';
+  
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {
+      return "R";
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {
+      return "L";
+    } else {
+      return "S";
+    }
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {
+      return "D";
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {
+      return "U";
+    } else {
+      return "S";
+    }
+  }
+
+  const graph = createGraph();
+  const path = getShortestPathCmd(graph, MyTank, target);
+  if (path.length > 0) return path[0];
+  return '';
+}  
+  </cleancode>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Bravo! Now your tank can seek and attack white tanks anywhere on the battlefield. 
+  </p>
+  <p>
+    In our current setup, all the white tanks are standing still. What if they were moving around? Would your tank be able to chase the moving white tanks? 
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    The answer is YES! You may have noticed that only the first command from the <span class="variablename">path</span> array returned by <span class="variablename">getShortestPathCmd</span> is used; the rest of the commands are discarded. This means that on every call to the <span class="variablename">getNewCommand</span> function, <b>your tank re-calculates the shortest path based on the most updated tank positions</b>. 
+  </p>
+  <p>
+    Let's make the white tanks move around and have a test.
+  </p>
+</element>
+
+<element elementid="200" elementType="Coding" condition="TestFinishedTanksKilled_3">
+  <p>
+    <b>Challenge: </b>In your test script, make the white tanks alive by setting the last parameter for the <span class="variablenamebold">PlaceTank</span> function from <i>false</i> to <i>true</i>. Recall that the function <span class="variablename">PlaceTank</span> is defined as follows, and the last parameter, <span class="variablenamebold">addAI</span>, controls whether we want to add an AI controler to each white tank. 
+  </p>
+  <p>
+    <pre class="brush: js">
+function PlaceTank (color, c, r, addAI = true) {
+  ...
+}
+    </pre>    
+  </p>
+  <p>
+    Go ahead and change your <b>test script</b> as below and click <b>TEST</b>.
+  </p>
+  <code isHidden="false">
+PlaceTank('blue', 4, 5);
+PlaceTank('white', 12, 6, true);
+PlaceTank('white', 4, 1, true);
+PlaceTank('white', 6, 8, true);
+
+await SetupTickUpdates(1800);
+
+</code>
+  <cleancode>
+RemoveAllTanks();
+
+const tiles = {
+  R: [[4, 2], [9, 3], [5, 7], [6, 7], [8, 7], [8, 8], [10, 9], [11, 6], [11, 7]],
+  M: [[3, 2], [7, 3], [5, 5], [6, 5], [6, 6], [9, 6], [10, 6], [10, 7], [2, 9], [2, 10], [8, 9], [9 ,9]],
+  T: [[6, 2], [3, 3], [4, 3], [6, 3], [8, 3], [5, 6], [8, 6], [9, 7], [9, 8], [10, 8], [11, 8], [11, 9],
+                [3, 9], [3, 10], [6, 11], [6, 12], [9, 11], [10, 11], [11, 11], [8, 12], [9, 12], [10, 12], [11, 12]],
+};
+const keys = Object.keys(tiles);
+for (let j = 0; j &lt; keys.length; j += 1) {
+  const key = keys[j];
+  const positions = tiles[key];
+  for (let i = 0; i &lt; positions.length; i += 1) {
+    const pos = positions[i];
+    PlaceTile(key, pos[0], pos[1]);
+  }
+}
+
+PlaceTank('blue', 4, 5);
+PlaceTank('white', 12, 6, true);
+PlaceTank('white', 4, 1, true);
+PlaceTank('white', 6, 8, true);
+
+await SetupTickUpdates(1800);
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>Now your tank is fairly effective. It is able to chase and attack white tanks and then collect crystals. Save a new version of your code and try it out for a few games.
+  </p>
+  <p>
+    <b>Exercise 1: </b>Place more white tanks at random places in your battlefield and see if your tank can chase and kill them all. 
+  </p>
+  <p>
+    <b>Exercise 2: </b>Can you change your robot code such that you will not chase a white tank if it is too far away (if its Manhattan distance is more than 10 from your tank, for example)? 
+  </p>
+  <p>
+    If you have any questions, don't hesitate to post them on our forum and under <a href="https://forum.tgame.ai/t/lesson-11-chasing-white-tanks/408" target="_blank">this lesson's topic</a>.     
+  </p>
+</element>

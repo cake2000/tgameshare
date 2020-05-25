@@ -1,0 +1,76 @@
+.type-account{
+  padding-top: 38px;
+  padding-bottom: 38px;
+  background-color: #0a73bc;
+  background-image: url(http://uploads.webflow.com/5908c1bccf5d4459cc8cad29/590b6652cc0f752bed00201a_concrete-wall-2%20copy.png);
+  background-position: 0px 0px;
+  background-size: 298px;
+}
+.games-section{
+  padding-top: 28px;
+  padding-bottom: 20px;
+  background-color: $tg-col-basic-dark-blue;
+  background-image: url(/images/checkered-pattern.png);
+  background-position: 50% 50%;
+  background-repeat: repeat;
+}
+.title{
+  font-family: $tg-ff-body;
+  color: $tg-col-basic-ivory;;
+}
+.pricing-games{
+  &__block{
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+
+    &:hover{
+      transform: scale(1.04);
+    }
+    .heading{
+      color: $tg-col-basic-orange;
+      font-size: $tg-fs-heading4;
+    }
+    .text{
+      line-height: 20px;
+      padding: 10px 20px;
+      color: $tg-col-basic-ivory;
+      font-size: $tg-fs-body;
+    }
+    .games-sign-up-button{
+      background-color: #0a73bc;
+      padding: 13px 0px;
+      cursor: pointer;
+      margin: 10px auto;
+      border-radius: 3px;
+      max-width: 220px;
+      color: #fff;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .pricing-games{
+    align-items: center;
+    &__block{
+      img{
+        width: 180px;
+      }
+      .text{
+        font-size: $tg-fs-body;
+        line-height: 20px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-games{
+    flex-direction: column;
+    align-items: center;
+    &__block{
+      width: 100%;
+    }
+  }
+}
+

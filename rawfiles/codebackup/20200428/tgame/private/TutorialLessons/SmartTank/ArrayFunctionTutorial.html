@@ -1,0 +1,497 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function attackWhiteTank() { 
+  for (let i = 0; i &lt; Tanks.length; i += 1){ 
+    const curTank = Tanks[i]; 
+    if (curTank.color != "white") continue; 
+  
+    if (MyTank.r == curTank.r) { 
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") { 
+        return "R"; 
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") { 
+        return "L"; 
+      } else { 
+        return "S"; 
+      } 
+    } else if (MyTank.c == curTank.c) { 
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") { 
+        return "D"; 
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") { 
+        return "U"; 
+      } else { 
+        return "S"; 
+      } 
+    } 
+  } 
+  return ""; 
+}  
+
+function getCrystal() { 
+  const graph = createGraph(); 
+  // initialize variables to hold shortest distance and target crystal 
+  let shortestLength = 1000; 
+  let target = null; 
+  
+  // loop through all crystals 
+  for (let i = 0; i &lt; Crystals.length; i += 1) { 
+    const pos = Crystals[i]; 
+    // calculate the Manhattan Distance from MyTank to pos 
+    const pl = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c); 
+    // update shortestLength and target  
+    if (pl &lt; shortestLength) { 
+      shortestLength = pl; 
+      target = pos; 
+    } 
+  } 
+  if (!target) return []; 
+  return getShortestPathCmd(graph, MyTank, target); 
+}
+ 
+ 
+function createGraph() { 
+  // create a new Set to hold blocking tile types 
+  const blockingTileTypes = ['R', 'M', 'T']; 
+  // create a new graph 
+  const graph = createNewGraph(); 
+  
+  // set values of graph, 1 = pass and 0 = blockage 
+  for (let i = 0; i &lt; graph.length; i += 1) { 
+    for (let j = 0; j &lt; graph[i].length; j += 1) { 
+      // tile type 
+      const tile = Maze[i][j]; 
+      // check if it is a blockage 
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0; 
+      else graph[i][j] = 1; 
+    } 
+  } 
+  return graph; 
+} 
+
+function getRandomCommand() { 
+  // random command 
+  const r = Math.random() * 100; 
+  if (r > 10) return "S"; 
+  if (r > 8) return "U"; 
+  if (r > 6) return "D"; 
+  if (r > 4) return "L"; 
+  if (r > 2) return "R"; 
+  return ""; 
+} 
+ 
+ 
+function getNewCommand() { 
+  // get a crystal 
+  const path = getCrystal(); 
+  if (path.length > 0) return path[0]; 
+  
+  // attack white tank 
+  const cmd = attackWhiteTank(); 
+  if (cmd.length > 0) return cmd; 
+  
+  // random command 
+  return getRandomCommand(); 
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Before we enhance your tank further, I'd like to introduce to you some very useful functions for arrays. They'll prove very useful in our future tutorials.
+  </p>
+</element>
+
+<element elementid="105" elementType="Info">
+  <p>
+    Your robot code uses quite a few <b>pre-defined arrays</b>, such as <span class="variablename">Balls</span> and <span class="variablename">Pockets</span> in the Trajectory Pool game, or <span class="variablename">Tanks</span> and <span class="variablename">Crystals</span> in the Smart Tank game. The <b>Array</b> is a very common data structure in all popular programming languages, and the JavaScript's array library provides many helper functions to make arrays easy to use.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    I'll introduce four array functions in this tutorial. For more functions, you can check <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">this reference page</a>. 
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>array.includes(element)</b>: checks if the array contains the given element.
+      </li>
+      <li>
+        <b>array.find(test_function)</b>: returns the first element that satisfies the given test.
+      </li>
+      <li>
+        <b>array.filter(test_function)</b>: returns a new array with all elements satisfying the given test.
+      </li>
+      <li>
+        <b>array.reduce(reducer_function[, initial_value])</b>: runs the given reducer function on each array element and returns a single result value. The initial_value is optional. 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    An example usage of the function <span class="variablenamebold">includes</span> is shown below. This function returns <span class="keyword">true</span> if the given element is indeed included in the array, or <span class="keyword">false</span> otherwise. 
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = ['a', 'b', 'c', 'd'];
+
+// expected output: false
+console.log(array1.includes('f')); 
+
+// expected output: true
+console.log(array1.includes('c')); 
+    </pre>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    Another example comes from tutorial 8. In there we have defined an array <span class="variablenamebold">blockingTileTypes</span> that contains three tile types: 'R', 'M' and 'T'. Given any tile in the battlefield, to determine whether it will block the tank, we simply need to call <span class="variablenamebold">includes</span> to check <b>whether the array "blockingTileTypes" includes</b> this tile's type.
+  </p>
+  <p>
+    <pre class="brush:js">
+const graph = createNewGraph(); 
+const blockingTileTypes = ['R', 'M', 'T']; 
+  
+for (let i = 0; i &lt; graph.length; i += 1) { 
+  for (let j = 0; j &lt; graph[i].length; j += 1) { 
+    const tile = Maze[i][j]; 
+    if (blockingTileTypes.includes(tile)) graph[i][j] = 0; 
+    else graph[i][j] = 1; 
+  } 
+} 
+    </pre>
+  </p>
+</element>
+
+<element elementid="140" elementType="Quiz" answerKey="B" answerReason="Although ‘Blue’ is the second element in the colorsAvailable array, 'blue' is not included in that array at all. So the second if-clause is evaluated, and it turns out to be true. ">
+  <p>
+    <b>Quiz:</b> Out of the three choices, which one is the output of the code below? Note that JavaScript is case sensitive; upper and lower case letters are treated as different. For example, 'A' is not the same as 'a'.
+  </p>
+  <p>
+    <pre class="brush:js">
+const colorsAvailable = ['Red', 'Blue', 'Pink'];
+if (colorsAvailable.includes('blue')) {
+  console.log("We have the blue color!!");
+} else if (!colorsAvailable.includes('white')) {
+  console.log("We don't have the white color!");
+} else {
+  console.log("What color do you like?");
+}
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> We have the blue color!!
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> We don't have the white color!
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> What color do you like?
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    The next two functions, <b>find</b> and <b>filter</b>, are very special, as they take another function as their input argument. 
+    <!-- In JavaScript, functions are first-class objects. Like other objects, they can also be stored in variables and passed into other functions.  -->
+  </p>
+  <p>
+    For example, in the code below, we first define a new function, <span class="variablenamebold">checkID</span>, that simply checks whether an item's id is greater than 1. Then we use this test function as the argument in calling the <span class="variablename">students.filter</span> function. This way, every element in the <span class="variablenamebold">students</span> array runs through the <span class="variablenamebold">checkID</span> function, and a new array of items is created containing the subset of items with id greater than 1. 
+  </p>
+  <p>
+    <pre class="brush:js">
+function checkID(item) {
+  return item.id > 1;
+}
+const students = [ {id: 0, name: "Sam"}, 
+  {id: 1, name: "Mia"}, {id: 2, name: "John"} ];
+const s1 = students.filter(checkID);
+
+// expected output: 2
+console.log(s1.length);
+    </pre>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    There are actually two other ways to define the test function used in the filter or find function. One way is to create an <b>unnamed function</b> and store it in a variable:
+  </p>
+  <p>
+    <pre class="brush:js">
+const checkID = function(a) {
+  return item.id > 1;
+}
+    </pre>
+  </p>
+  <p>
+    The other way is to use <b>arrow function expressions</b> like this: <span class="variablenamebold"> (parameters) => { return test_result; } </span>. For example, you can simplify the search for items with id greather than 1 like this:
+  </p>
+  <p>
+    <pre class="brush:js">
+const s1 = students.filter( (item) => { return item.id > 1;} );
+    </pre>
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    In fact, we can further simplify the syntax when the test is a boolean expression like this: <span class="variablenamebold">parameters => expression</span>. For example, this is what you can write:
+  </p>
+  <p>
+    <pre class="brush:js">
+const students = [ {id: 0, name: "Sam"}, 
+  {id: 1, name: "Mia"}, {id: 2, name: "John"} ];
+const s1 = students.filter( item => item.id > 1 );
+console.log(s1.length);
+    </pre>
+  </p>
+  <p>
+    Note that we no longer need to write <b>return</b> when we use the boolean expression format.
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    In summary, we've introduced three ways to define the test function, with the last one being much more concise.
+  </p>
+  <p>
+    <ul>
+      <li>
+        <pre class="brush:js">
+function checkID(item) {
+  return item.id > 1;
+}
+const s1 = students.filter(checkID);         
+        </pre>
+      </li>
+      <li>
+        <pre class="brush:js">
+const checkID = function(item) {
+  return item.id > 1;
+}
+const s1 = students.filter(checkID);         
+        </pre>
+      </li>
+      <li>
+        <pre class="brush:js">
+const s1 = students.filter(item => item.id > 1);         
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="Quiz" answerKey="C" answerReason="'return' should not be used in the arrow function format.">
+  <p>
+    <b>Quiz:</b> Out of the four choices below, which one has syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush:js">
+function isBigEnough(value) {
+  return value >= 10;
+}
+const filtered = [12, 5, 8, 130, 44].filter(isBigEnough);
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 
+        <pre class="brush:js">
+const isBigEnough = function(value) {
+  return value >= 10;
+}
+const filtered = [12, 5, 8, 130, 44].filter(isBigEnough);
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 
+        <pre class="brush:js">
+const filtered = [12, 5, 8, 130, 44].filter( value => return value >= 10; );
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush:js">
+const filtered = [12, 5, 8, 130, 44].filter( (value) => value >= 10 );
+
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Great! Now we know an efficient way to define a function and use it as a parameter of another function. This makes calling array functions much easier. Here is an example for using an arrow function with the <span class="variablename">array.find</span> funciton.
+  </p>
+  <p>
+    <pre class="brush:js">
+const students = [ {id: 0, name: "Sam"}, {id: 1, name: "Mia"}, {id: 2, name: "John"} ];
+const s2 = students.find( item => item.id > 1 );
+// expected output: Mia
+console.log(s2.name);
+    </pre>
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    The difference between <span class="variablename">filter</span> and <span class="variablename">find</span> is the following: <span class="variablename">filter</span> returns a new array that contains all elements satisfying the test condition, while <span class="variablename">find</span> returns only the first element satisfying the condition. If there is no item in the array that satisfies the test condition, <span class="variablename">filter</span> returns an empty array <span class="variablename">[]</span>, and <span class="variablename">find</span> returns <span class="variablename">undefined</span>.
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    The arrow function is used in many places in your robot code. Look at the command below, for example, which defines the variable <span class="variablename">MyTank</span>. Basically it searches through all tanks for the one tank whose <span class="variablename">tankID</span> property has a value of <span class="variablenamebold">MyID</span>.
+  </p>
+  <p>
+    <pre class="brush: js">
+const MyTank = Tanks.find(t => t.tankID == MyID);
+    </pre>
+  </p>
+</element>
+
+<!-- <element elementid="240" elementType="Info">
+  <p>
+    <span class="variablename">MyTank</span> can also be defined with a <span class="variablename">for</span> loop, shown as below. We can see that function <span class="variablename">find</span> makes the code much simple.  
+  </p>
+  <p>
+    <pre class="brush: js">
+let MyTank = null;
+for (let i = 0; i &lt; Tanks.length; i += 1) {
+  const t = Tanks[i];
+  if (t.tankID == MyID) {
+    MyTank = t;
+    break;
+  }
+}
+    </pre>
+  </p>
+</element> -->
+
+<element elementid="250" elementType="Quiz" answerKey="A" answerReason="Only choice A uses the array function syntax properly">
+  <p>
+    <b>Quiz:</b> Of the four choices below, which one correctly selects all white tanks from the <b>Tanks</b> array?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush:js">
+const whiteTanks = Tanks.filter(t => t.color == 'white');
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 
+        <pre class="brush:js">
+const whiteTanks = Tanks.filter(Tanks.color == 'white');
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 
+        <pre class="brush:js">
+const whiteTanks = Tanks.filter(color == 'white');
+
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush:js">
+const whiteTanks = Tanks.find(t.color == 'white');
+
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="260" elementType="Info">
+  <p>
+    Now, let's move on to the last function <span class="variablenamebold">reduce</span>, which applies an operation <b>cummulatively</b> across all elements of an array. Let's look at an example first. 
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+const sum = array1.reduce( (a, b) => a + b, 0 );
+    </pre>
+  </p>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    In the example above, <span class="variablename">array1.reduce</span> takes a <b>reducer function</b> <span class="variablename">(a, b) => a + b</span> and apply it to each element in the array. The second parameter <span class="variablename">0</span> is the initial value. 
+  </p>
+  <p>
+    During the reduce process, we first run the reducer between the initial value 0 and the first element of 1, and get an intermediate result of 1. Now we run the reducer again, taking this intermediate result and the second element of 2 as input, and that produces another intermediate result of 3. We continue this process until we run through all elements.
+  </p>
+    <p>
+    The code above is equivalent to the code below.
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+let sum = 0; // initial value is 0
+for (let i = 0; i &lt; array1.length; i += 1) {
+  sum = array1[i] + sum;
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="280" elementType="Quiz" answerKey="C" answerReason="The reduce function subtracts each element in array1 from the initial value of 18, so result is 8.">
+  <p>
+    <b>Quiz:</b> Out of the four choices below, which one is the value of the variable <b>result</b>?
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+const result = array1.reduce( (a, b) => a - b, 18 );
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 18
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 10
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 8
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> -8
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial you have been introduced to all four of the array functions you need for now: <span class="variablenamebold">includes</span>, <span class="variablenamebold">find</span>, <span class="variablenamebold">filter</span>, and <span class="variablenamebold">reduce</span>. Though there are several forms for calling them, you should try to use the more elegant <b>arrow functions</b> whenever you can.
+    <!-- We'll learn another one called <span class="variablenamebold">reduce</span> in future tutorials. -->
+  </p>
+  <p>
+    <b>Exercise 1: </b>Use the <span class="variablename">filter</span> function to select all red and white tanks. 
+  </p>
+  <p>
+    <b>Exercise 2: </b>Use the <span class="variablename">filter</span> function to select all tanks not located on the same row as <span class="variablename">MyTank</span>. 
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="https://forum.tgame.ai/t/lesson-10-array-methods/407" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

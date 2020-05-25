@@ -1,0 +1,197 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+
+function getCallShot() {
+  return {
+    aimx: getRandomNumber(-800, 800), 
+    aimy: getRandomNumber(-400, 400), 
+    strength: 50
+  };
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>Now you have implemented two key functions <b class="variablename">getBreakShot</b> and <b class="variablename">getCallShot</b>. Though they are still extremely simple, you are ready to <b>release the first version of your game bot</b> to play against other human or robot players! </p>
+  <p>
+    If at any time something in this lesson is unclear to you, please check out <a href="https://forum.tgame.ai/t/managing-your-robot-releases/28" target="_blank">this lesson's discussion</a> in our forum. 
+  </p>
+</element>
+
+<element elementid="101" elementType="Info">
+  <p>
+    Managing code releasees is always an important part of the work of programming. <b>A release is a specific copy of your code</b>. Normally you want to create a new release each time you have completed some major improvements to your code.
+  </p>
+  <p>
+    <img src="/images/coderelease.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+    As shown above, three control buttons ("Save", "Load" and "Delete") are provided at the upper-right of the code editor for managing bot code releases.
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>Here are more details on how to use these control buttons.
+    <ul>
+      <li>
+        <p> 
+          To <b>save your code into a new release</b>
+        </p>
+        <p id="save">
+          Type the name of the release (such as "v1"), and then click <img src='/images/saveButton.jpg' style='width: auto; height: 20px; vertical-align: bottom;'/>. If another release already exists by that name, you'll be prompted to confirm or cancel your request to save. <b>If you confirm, the earlier release will be overwritten.</b> If you cancel, the saving does not occur, and the earlier release is preserved; you will have to choose a new name for your new release. 
+        </p> 
+        <p>
+          <img src="/images/savearelease.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+        </p>
+        <p>
+          Whenever you have completed a major update to your bot code, it is a good idea to copy the entire code and email it to yourself as a safe copy. This will ensure that you have an extra ("safe") copy in case you should accidentally overwrite the release in the future.
+        </p>
+      </li>
+      <li>
+        <p>
+          To <b>load an existing release</b> of your bot code into the editor
+        </p>
+        <p id="load">
+          Type in the release name, select the release you want to load from the dropdown, and then click <img src='/images/loadButton.jpg' style='width: auto; height: 20px; vertical-align: bottom;'/>. (To list all existing release versions, you can click the input box and type the <b>space</b> key.) Next, you'll be prompted to confirm or cancel your command to load. 
+        </p>
+        <p>
+            <img src="/images/loadarelease.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+          </p>
+        <p>
+          Note that loading a release will <b>completely replace</b> the current code in your editor, so do it with care. Also, as a protection for previous releases, changes you make in the editor are not automatically saved back into the last-loaded release unless you explicitly save them to that release. Instead, <b>your edits are auto-saved into a draft in the editor</b>.
+        </p>
+      </li>
+      <li>
+        <p>
+          To <b>delete an existing release</b> of your bot code
+        </p>
+        <p id="delete">
+          Type in the release name, or select the release you want to delete, and then click <img src='/images/deleteButton.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/>. <b>Since this is unrecoverable, please do it with extreme caution.</b> 
+        </p>
+      </li>
+    </ul>
+  </p>
+  <p>
+    <b>Action:</b> Following the above instructions, create a release of your bot code now.
+  </p>
+</element>
+
+<element elementid="200" elementType="Conclusion">
+    <p>
+      Congratulations! Now you have a very silly game bot, and you can select your own robot for practice or online games. Go ahead and try a practice game with your newly "born" game bot!
+    </p>
+    <p>
+      <b>Exercise 1:</b> Try to release your code into a new version called "test", then delete that version. 
+    </p>
+    <p>
+      <b>Exercise 2:</b> Try to remove the return clause from your getCallShot function, then load the released code into the editor to restore your code.
+    </p>
+      
+</element>
+
+<!-- <element elementid="110" elementType="Conclusion"> -->
+  <!-- <p>
+    I hope you have enjoyed playing games and learning through our tutorials. If you are looking for more fun, stay tuned for our <b>Professional</b> account subscription plan, which will be released around mid year 2018. Here are a preview of the key features of the professional account (please click for details.): 
+    <ul>
+      <li>
+        <p>
+          <a href="#" onclick="ToggleVisibility(event, 'tournaments')" class="inlinebutton"><b>Eligibility for Tournaments</b></a>
+        </p>
+        <p id="tournaments" style="display: none">
+          Your robot will be able to compete with other human and robot players in our world-wide online tournaments and get an official <b>rating</b> for its skill level. As you improve your robot's "skills", it will win more games in tournaments and improve its rating. And of course, trophies are awarded to best players in each rating group.
+        </p>
+      </li>
+      <li>
+        <p>
+          <a href="#" onclick="ToggleVisibility(event, 'tutorials')" class="inlinebutton"><b>More Advanced Tutorials</b></a>
+        </p>
+        <p id="tutorials" style="display: none">
+          We will add more tutorials to help you build a stronger robot, using many common computer algorithms and machine learning models in the field of artificial intelligence. If you are interested in AI, building a better robot is the best project for you to get your hands dirty.
+        </p>
+      </li>
+      <li>
+        <p>
+          <a href="#" onclick="ToggleVisibility(event, 'testscripts')" class="inlinebutton"><b>Customize Test Scripts</b></a>
+        </p>
+        <p id="testscripts" style="display: none">
+          You will be able to modify the test scripts used in all tutorials to customize the test for your robot, such as where to place the balls. Even more, you can <b>create your own test cases</b> based on game situations that you feel your robot could have done better. This will also enable you to repeatedly test run your robot to generate training data for machine learning models.
+        </p>
+      </li>
+      <li>
+        <p>
+          <a href="#" onclick="ToggleVisibility(event, 'chat')" class="inlinebutton"><b>1:1 Chat Room</b></a>
+        </p>
+        <p id="chat" style="display: none">
+          Besides the public forum, you will be able to chat with us in private for any questions or concerns you may have. I'll be available to engage with you at any time, and whenever I couldn't provide a satisfactory answer for you, supporting staff from TuringGame will step in to help.
+        </p>
+      </li>
+    </ul>
+  </p>
+  <p>
+    We are working hard to finalize our system for these exciting new features, and we'll let you know when they are ready. Now without further ado, why don't you go to the Games section and start a practice game with your robot?
+  </p> -->
+<!-- </element> -->
+          
+
+<!-- 
+
+function getCueBallPlacement() {
+  let legalBallIDs = world.CandidateBallList[MyID]; 
+  for (let k=0; k < legalBallIDs.length; k++) {
+    const ballPos = Balls[legalBallIDs[k]];
+    for (let pocketID=0; pocketID <=5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+function getBreakShot() {
+  return { cueballx: 0, cuebally: 0, aimx: 0, aimy: 0, strength: 80 }; 
+}
+
+async function getCallShot() {
+  let bestCommand = null;
+  let highestProb = -1;
+  let legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0 ; k < legalBallIDs.length ; k ++ ) {
+    const ballID = legalBallIDs[k];
+    for (let pocketID = 0; pocketID <= 5 ; pocketID ++) {
+      const cmd = calculateShotCommand(ballID, pocketID);
+      const prob = await calculateProbability(cmd);
+      if ( prob > highestProb ) {
+        bestCommand = cmd ; 
+        highestProb = prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+function calculateShotCommand(ballID, pocketID) {
+  let ballPos = Balls[ballID];
+  let pocketPos = Pockets[pocketID];
+  let aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+
+
+ -->
+
+
+
+
+
+
+
+

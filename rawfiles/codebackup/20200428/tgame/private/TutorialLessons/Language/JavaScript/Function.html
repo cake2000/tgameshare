@@ -1,0 +1,273 @@
+<element elementid="110" elementType="Info">
+  <p>
+      <b>A function is a block of code created to perform a particular task or calculate a value</b>. It can take some optional input parameters and (optionally) return some object or value as output.
+  <p>    
+    <b>A function definition contains 4 parts</b>: 1) the <span class="variablenamebold">function</span> keyword, 2) the function's name, 3) a list of input parameters enclosed by a paif of "()", and 4) some code statements enclosed by a pair of "{}". 
+  </p>
+  <p>
+    Function names can only contain letters, digits, underscores, and dollar signs. The names are case-sensitive (e.g. getTotal is different from gettotal).
+  </p>
+  <p>
+    <img src="/images/function4parts.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p AScratchExample>
+    In Scratch, a function is similar to the <b>Define() block</b>: 
+  </p>
+  <p>
+    <img src='/images/defineblock.png' style='width: auto; height: 65px; vertical-align: bottom;'/>
+  </p>
+</element>
+
+<element elementid="115" elementType="Info">
+  <p>
+    Sometimes a function needs to return some information to the user of the function. That's what a <b class="variablenamebold">return</b> statement does. 
+  </p>
+  <p>
+    For instance, the following function adds 2 to the input number <b class="variablenamebold">a</b>, and then returns the result. 
+  </p>
+  <pre class="brush: js">
+function plus2(a) {
+  return a + 2;
+}
+  </pre>
+</element>
+
+<element elementid="120" elementType="Quiz" answerKey="D" answerReason="A:The parameter list in between '()' is missing.|B:Function statements along with '{}' are missing.|C:The 'function' keyword is missing.|">
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 4 choices below, <b>which one is a complete function definition that contains all 4 parts?</b>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> function A {} 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> function B()
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> func C() {}
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> function D() {}
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="122" elementType="Quiz" answerKey="C" answerReason="" optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Good job. Let's take another quiz to get more familiar with function definitions. 
+  </p>
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 3 choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+function plus(a, b) 
+  return a + b;
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> the function is correctly defined 
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> the function name should be capitalized
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> a "{" is missing at the end of first line 
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="125" elementType="Quiz" answerKey="B" answerReason="" optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Great! Here is the final question on function definition:
+  </p>
+  <p>
+    Out of the 3 choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+function double[a] { 
+  return 2 * a;
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> this function is correctly defined 
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> the square brackets after "double" should be changed to a pair of parentheses
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> this function has no input prameters
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    A JavaScript function <b>runs</b> (performs a task) when you <b>call</b> it by appending a parameter list (can be an empty list) to it,  like this:
+  </p>
+  <p>
+    <pre class="brush: js">
+// define the plus2 function with one input parameter      
+function plus2(a) {
+  return a + 2;
+}
+        
+// call the "plus2" function with a parameter of 3 
+x = plus2(3); // "x" will take the value 5
+    </pre>
+  </p>
+  <p>
+    Note that the number 3 is assigned to the variable <b class="variablenamebold">a</b> inside the plus2 function, so it returns the value of 3 + 2 as the output. And if you input 7 to the function, then <b class="variablenamebold">a</b> is set to 7, and the function plus2 will return 9.
+  </p>
+  <p>
+      <img src='/images/callplus2.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<!--element elementid="150" elementType="Info">
+  <p>
+    Furthermore, functions can be used the same way as we use variables, in all types of formulas, assignments, and calculations. Note that when we define a function as a variable, we need to append ";" after "}", because overall the statement is a variable declaration.
+  </p>
+  <p>
+    <pre class="brush: js">
+const subtract = function(x, y) {
+  return x - y;
+};
+// call subtract function with 2 parameters
+// and print the result using the function console.log
+console.log(subtract(result, 2));
+    </pre>
+  </p>
+</element-->
+
+<!-- <element elementid="160" elementType="Info">
+  <p>
+    Now you might be wondering why we like to use functions. The biggest benefit is that <b>a function can be defined once and used over and over again</b>. We can use the same function many times with different parameters to produce different results. 
+  </p>
+  <p>
+    <pre class="brush: js">
+output1 = plus2(44); // set a to 44, so output1 is 46
+output2 = plus2(5); // set a to 5, so output2 is 7
+    </pre>
+  </p>
+</element> -->
+
+<element elementid="162" elementType="Quiz" answerKey="B" answerReason="A:The keyword 'function' is not allowed in a function call;|B:This is the correct syntax of a function call.|C:'a=' and 'b=' are unnecessary, should be removed.|">
+  <p>
+    <b class="reallyhighlight">Quiz:</b> 
+  </p>
+  <pre class="brush: js">
+function plus(a, b) {
+  return a + b;
+}
+  </pre>
+  <p>
+    The function "plus" is defined as above, taking 2 input numbers (represented by a and b), and returns their sum. Which choice below is a correct function call?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 
+        <pre class="brush: js">
+const c = function plus(3, 5);
+        </pre>
+      </li>
+      <!-- <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 
+        <pre class="brush: js">
+const c = plus(a, b);
+        </pre>
+      </li> -->
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>
+        <pre class="brush: js">
+const c = plus(3, 5);
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>
+        <pre class="brush: js">
+const c = plus(a=3, b=5);
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<!--element elementid="165" elementType="Quiz" answerKey="C" answerReason="A:The code has some syntax error.|B:'double' is unnecessary after keyword 'function'. |C:|D:You can assign f1 to a new variable. Functions can be used the same way as we use variables.|" optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Great. Here is another one.
+  </p>
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 4 choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+const f1 = function double(a) {
+  return 2 * a;
+}
+const f2 = f1;
+const v1 = f2(4);
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> the code above is correct 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> function name 'double' is necessary
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> a ";" is expected after "}" 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> you cannot assign f1 to a new variable f2
+      </li>
+    </ul>
+  </p>
+</element-->     
+
+<!-- <element elementid="172" elementType="Quiz" answerKey="D" answerReason="" optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Good job. Let's take another quiz to get more familiar with function calls. 
+  </p>
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 4 choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+function(a, b) {
+  if (a &lt; b) {
+    return a;
+  } else {
+    return b;
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> the function definition is correct 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> the function name is missing
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> the function name is missing; and a } is missing before "return b;"
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> the function name is missing; and a } is missing after "return b;"
+      </li>
+    </ul>
+  </p>
+</element> -->
+
+<element elementid="200" elementType="SkillLearned" skill="Function">
+  <p>
+    Great job! Now you understand what a function is and how to call it. Let's go back to our game bot tutorial.
+  </p>
+</element>

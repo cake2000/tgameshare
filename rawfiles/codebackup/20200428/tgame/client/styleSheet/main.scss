@@ -1,0 +1,127 @@
+@import "settings/settings.reset";
+@import "settings/settings.colors";
+@import "settings/settings.fonts";
+@import "settings/settings.global";
+@import "settings/settings.vendor";
+@import "general.layout";
+
+
+// General
+@import "{}/client/modules/core/styleSheet/components.Notification";
+@import "{}/client/modules/core/styleSheet/components.TopNavBar.Main";
+@import "{}/client/modules/core/styleSheet/components.Footer";
+@import "{}/client/modules/core/styleSheet/components.Page40x";
+@import "{}/client/modules/core/styleSheet/components.InviteModal";
+@import "{}/client/modules/core/styleSheet/components.Menu.core";
+@import "{}/client/modules/core/styleSheet/components.Modal";
+@import "{}/client/modules/core/styleSheet/components.TournamentNotificationModal";
+
+
+// Home Page
+@import "{}/client/modules/homepage/styleSheet/components.about.Home";
+@import "{}/client/modules/homepage/styleSheet/components.accountType.Home";
+@import "{}/client/modules/homepage/styleSheet/components.contact.Home";
+@import "{}/client/modules/homepage/styleSheet/components.FeaturesSection.Home";
+@import "{}/client/modules/homepage/styleSheet/components.GamesSection.Home";
+@import "{}/client/modules/homepage/styleSheet/components.TopBanner.Home";
+
+
+//  My AI  Page
+@import "{}/client/modules/tutorialLinks/styleSheet/components.listTutorial.tutorialLinks";
+@import "{}/client/modules/tutorialLinks/styleSheet/components.main.tutorialLinks";
+
+// Account  Page
+@import "{}/client/modules/account/styleSheet/components.Main.Account";
+@import "{}/client/modules/account/styleSheet/components.myAccount.Account";
+@import "{}/client/modules/account/styleSheet/components.formAccount.Account";
+@import "{}/client/modules/account/styleSheet/components.upgradeAccountModal.Account";
+@import "{}/client/modules/account/styleSheet/components.paymentModal.Account";
+@import "{}/client/modules/account/styleSheet/components.chooseAccountType";
+
+// new Sign In  page
+@import "{}/client/modules/account/styleSheet/components.signin";
+
+
+// GameBoard  Page
+@import "{}/client/modules/gamesboard/styleSheet/components.Game.GamesBoard";
+@import "{}/client/modules/gamesboard/styleSheet/components.Main.GamesBoard";
+@import "{}/client/modules/gamesboard/styleSheet/components.Opponent.GamesBoard";
+
+// Build My AI  Page
+@import "{}/client/modules/buildMyAI/styleSheet/components.Main.buildMyAI";
+@import "{}/client/modules/buildMyAI/styleSheet/components.lessonsSlider.buildMyAI";
+@import "{}/client/modules/buildMyAI/styleSheet/components.CodeMirror.buildMyAI";
+@import "{}/client/modules/buildMyAI/styleSheet/components.LessonChat.buildMyAI";
+
+// new lesson page
+@import "{}/client/modules/lessonpage/styleSheet/components.Main.lessonpage";
+@import "{}/client/modules/lessonpage/styleSheet/components.CodeMirror.lessonpage";
+// @import "{}/client/modules/lessonpage/styleSheet/summernote-bs4.scss";
+@import "{}/client/modules/lessonpage/styleSheet/summernote-lite.scss";
+// @import "{}/client/modules/lessonpage/styleSheet/summernote.scss";
+
+
+// new factory page
+@import "{}/client/modules/factory/styleSheet/_components.Main.factorypage";
+@import "{}/client/modules/factory/styleSheet/_components.CodeMirror.factorypage";
+@import "{}/client/modules/factory/styleSheet/summernote-lite.scss";
+@import '{}/client/modules/factory/styleSheet/_components.ManageTestsPopup';
+
+
+// Game Room  Page
+@import "{}/client/modules/gameroom/styleSheet/components.Entry.GameRoom";
+@import "{}/client/modules/gameroom/styleSheet/components.Tournament.GameRoom";
+@import "{}/client/modules/gameroom/styleSheet/components.Network.GameRoom";
+
+@import "{}/client/modules/support/styleSheet/components.Main.Support";
+@import "{}/client/modules/gameguide/styleSheet/components.Main.GameGuide";
+
+
+@import "{}/client/modules/blog/styleSheet/components.Main.Blog";
+@import "{}/client/modules/forum/styleSheet/components.Main.Forum";
+
+@import "{}/client/modules/loading/styleSheet/components.LoadingPage";
+
+// Chat Support Page
+
+@import "{}/client/modules/chat/styleSheet/components.chatConversation";
+
+// Invitation Logs Page
+@import "{}/client/modules/invitationLogs/styleSheet/components.InvitationLog";
+
+// Teacher Page
+@import "{}/client/modules/teacherPage/styleSheet/components.TeacherPage";
+@import "{}/client/modules/teacherPage/styleSheet/components.NewClass";
+
+// modal video
+@import '../../../node_modules/react-modal-video/scss/modal-video.scss';
+
+// player page
+@import '{}/client/modules/homepage/styleSheet/_component.playerHome';
+@import '{}/client/modules/homepage/styleSheet/_component.upgradeItem.Home';
+
+// modal registered section
+@import '{}/client/modules/gameroom/styleSheet/_components.Registered.GameRoom';
+// tournamentDetails page
+@import '{}/client/modules/tournamentDetails/styleSheet/components.TournamentSectionInfo';
+
+// ranking page
+@import '{}/client/modules/rankingPage/styleSheet/_components.RankingPage';
+@import '{}/client/modules/rankingPage/styleSheet/_components.ChallengePopup';
+// tournamentDetails page
+@import '{}/client/modules/tournamentDetails/styleSheet/components.TournamentSectionInfo';
+
+// manual game page
+@import '{}/client/modules/manual/styleSheet/components.manual';
+
+// manual game detail page
+@import '{}/client/modules/manualDetail/styleSheet/components.manualDetail';
+
+// Message activity
+@import '{}/client/modules/messageActivity/styleSheet/components.messageActivity';
+
+
+// Update New 12/2018
+@import "{}/client/modules/core/styleSheet/components.MainLayout";
+@import "{}/client/modules/core/styleSheet/components.VerificationEmailTopNavbar";
+@import "{}/client/modules//homepage/styleSheet/components.modalShopping";

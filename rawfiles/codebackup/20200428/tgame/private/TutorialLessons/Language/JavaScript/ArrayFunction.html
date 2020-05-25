@@ -1,0 +1,246 @@
+<element elementid="100" elementType="Info">
+  <p>
+    We use arrays a lot in our bot code, such as <span class="variablename">Balls</span> and <span class="variablename">Pockets</span> in Trajectory Pool game, and <span class="variablename">Tanks</span> in Smart Tank game. Array is a very common and important data structure in programming languages. So JavaScript standard library provides many facilitative functions to help us use arrays more efficiently.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Your will see the following array functions in our tutorials. For more functions, you can check <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">here</a>. 
+  </p>
+  <p>
+    <ul>
+      <li>
+        includes: checks if the array includes a certain element.
+      </li>
+      <li>
+        find: returns the value of the first element that satisfies the given test function.
+      </li>
+      <li>
+        filter: creates and returns a new array whose elements pass the given test function.
+      </li>
+      <li>
+        reduce: runs the given reducer function on each array element and returns a single result value.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    An example of function <span class="variablenamebold">includes</span> is shown as below. It returns <span class="keyword">true</span> or <span class="keyword">false</span> based on the array and parameter values. 
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+console.log(array1.includes(0)); // expected output: false
+console.log(array1.includes(3)); // expected output: true
+    </pre>
+  </p>
+</element>
+
+<element elementid="130" elementType="Quiz" answerKey="B" answerReason="'blue' is not in array2, 'Blue' does. So the second if clause is evaluated, and it is true. ">
+  <p>
+    <b>Quiz:</b> out of the four choices below, which one is the output of the code below?
+  </p>
+  <p>
+    <pre class="brush:js">
+const array2 = ['Red', 'Blue', 'Pink'];
+if (array2.includes('blue')) {
+  console.log("We have a blue!!");
+} else if (!array2.includes('white')) {
+  console.log("We don't have white!");
+} else {
+  console.log("What's color do you like?");
+}
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> We have a blue!!
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> We don't have white!
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> What's color do you like?
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> None of above
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    The other three functions are not this straight forward. Each of them takes a function as a parameter. In JavaScript, functions are first-class objects. Like other objects, they can also be stored in variables and passed into other functions. For example, as shown below, <span class="variablename">students.filter</span> takes <span class="variablename">filterFunc</span> as its parameter and returns a new array of objects having id == 1. 
+  </p>
+  <p>
+    <pre class="brush:js">
+function filterFunc(a) {
+  return a.id == 1;
+}
+const students = [ {id: 0, name: "Sam"}, {id: 1, name: "Mia"} ];
+const s1 = students.filter(filterFunc);
+console.log(s1[0].name);
+// expected output: Mia
+    </pre>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    In last example, there are other ways to define the filter function. One way is to store the function in a variable like below.
+  </p>
+  <p>
+    <pre class="brush:js">
+const filterFunc = function(a) {
+  return a.id == 1;
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Another way is to use <b>arrow function expressions</b>. The format is <span class="variablenamebold"> (parameters) => { statements } </span>. So the filter function could be written directly in <span class="variablename">students.filter()</span> like this.
+  </p>
+  <p>
+const s1 = students.filter( (a) => { return a.id == 1;} );
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    If the function only has one statement, such as returning <span class="keyword">true</span> or <span class="keyword">false</span> based on an expression, we can make its definition even simpler, like <span class="variablenamebold"> (parameters) => expression </span>. If there is only one parameter, the parentheses are not required. So the code example can be re-written to this:
+  </p>
+  <p>
+    <pre class="brush:js">
+const students = [ {id: 0, name: "Sam"}, {id: 1, name: "Mia"} ];
+const s1 = students.filter( a => a.id == 1 );
+console.log(s1[0].name);
+    </pre>
+  </p>
+</element>
+
+<element elementid="180" elementType="Quiz" answerKey="C" answerReason="'return' is redundant and should not be there.">
+  <p>
+    <b>Quiz:</b> out of the four choices below, which one has syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>
+        <pre class="brush:js">
+function isBigEnough(value) {
+  return value >= 10;
+}
+const filtered = [12, 5, 8, 130, 44].filter(isBigEnough);
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 
+        <pre class="brush:js">
+const isBigEnough = function(value) {
+  return value >= 10;
+}
+const filtered = [12, 5, 8, 130, 44].filter(isBigEnough);
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 
+        <pre class="brush:js">
+const filtered = [12, 5, 8, 130, 44].filter( value => return value >= 10; );
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>
+        <pre class="brush:js">
+const filtered = [12, 5, 8, 130, 44].filter( (value) => value >= 10 );
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Great! Now we know an effecient way to define a function and use it as a parameter of another function. It makes calling array functions much easier and straight forward. We've seen the example for function <span class="variablename">filter</span>. Here is another example for function <span class="variablename">find</span>.
+  </p>
+  <p>
+    <pre class="brush:js">
+const students = [ {id: 0, name: "Sam"}, {id: 1, name: "Mia"} ];
+const s2 = students.find( a => a.id == 1 );
+console.log(s2.name);
+    </pre>
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    The difference bwtween function <span class="variablename">filter</span> and <span class="variablename">find</span> is: <span class="variablename">filter</span> returns a new array that has all elements satisfying the expression; but <span class="variablename">find</span> only returns the first object. 
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Function <span class="variablenamebold">reduce</span> is a little bit complicated. Let's see an example. 
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+const sum = array1.reduce( (a, b) => a + b, 0 );
+    </pre>
+  </p>
+</element>
+
+<element elementid="220" elementType="Info">
+  <p>
+    In the example above, <span class="variablename">array1.reduce</span> takes function <span class="variablename">(a, b) => a + b</span> as a parameter and apply it to each element in the array. <span class="variablename">0</span> is the initial value. The code is the same as below.
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+let sum = 0; // initial value is 0
+for (let i = 0; i &lt; array1.length; i += 1) {
+  sum += array1[i];
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="230" elementType="Quiz" answerKey="C" answerReason="The reduce function subtract each element in array1 from the initial value 18, so sum is 8.">
+  <p>
+    <b>Quiz:</b> out of the four choices below, which one is the value of sum?
+  </p>
+  <p>
+    <pre class="brush:js">
+const array1 = [1, 2, 3, 4];
+const sum = array1.reduce( (a, b) => a - b, 18 );
+    </pre>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 18
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 10
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 8
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> -8
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="500" elementType="SkillLearned" skill="ArrayFunction">
+  <p>
+    Exellent! That's all you need to know about array functions for now. 
+  </p>
+</element>

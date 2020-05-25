@@ -1,0 +1,956 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+let dangerScores = null;   
+let graph = null;   
+const weaponRangeFuncs = {}; 
+
+function attackWhiteTank() {   
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;    
+  (MyTank.r != tank.r || MyTank.c != tank.c));   
+    
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {   
+    const funcName = weaponRangeFuncs[MyTank.specialWeapon.type]; 
+    let bestPos = null; 
+    let mostHit = 0; 
+    const obs = ['T', 'M', 'R']; 
+    const positions = [ 
+      [MyTank.c, MyTank.r],  
+      [MyTank.c - 1, MyTank.r],  
+      [MyTank.c + 1, MyTank.r],  
+      [MyTank.c, MyTank.r - 1],  
+      [MyTank.c, MyTank.r + 1] 
+    ]; 
+  
+    // loop through the positions 
+    for (const pos of positions) { 
+      if (pos[0] &lt; 0  
+          || pos[0] >= Maze[MyTank.r].length  
+          || pos[1] &lt; 0  
+          || pos[1] >= Maze.length 
+          || obs.includes(Maze[pos[1]][pos[0]])) { 
+        continue; 
+      } 
+      for (const dir of ['L', 'R', 'U', 'D']) { 
+        const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color); 
+        const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length; 
+        if (count > mostHit) { 
+          mostHit = count; 
+          bestPos = { c: pos[0], r: pos[1], dir: dir }; 
+        } 
+      } 
+    } 
+      
+    if (mostHit > 1) { 
+      if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) { 
+        if (MyTank.dir == bestPos.dir) return "S"; 
+        else return bestPos.dir; 
+      }  
+      if (bestPos.c &lt; MyTank.c) return "L"; 
+      if (bestPos.c > MyTank.c) return "R"; 
+      if (bestPos.r &lt; MyTank.r) return "U"; 
+      if (bestPos.r > MyTank.r) return "D"; 
+    } 
+  } 
+  
+  // if MyTank is equipped with a Freezer   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);   
+  }   
+      
+  const target = getClosestItem(whiteTanks);   
+  return attackTank(target);   
+}
+ 
+function attackTank(target) {      
+  if (!target) return "";      
+      
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {  
+    const dirs = ['U', 'D', 'L', 'R'];  
+    const funcName = weaponRangeFuncs[MyTank.specialWeapon.type]; 
+    for (const dir of dirs) {  
+      const range = funcName(MyTank, dir, MyTank.color);  
+      if (range.includes(target.c + '_' + target.r)) {  
+        if (MyTank.dir != dir) return dir;  
+        else return "S";  
+      }  
+    }  
+  }  
+    
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE &amp;&amp; target.color == "white") {   
+    const rowDis = Math.abs(MyTank.r - target.r);    
+    const colDis = Math.abs(MyTank.c - target.c);   
+    let withinRange = (rowDis == 0 &amp;&amp; colDis &lt; 3);   
+    withinRange = withinRange || (colDis == 0 &amp;&amp; rowDis &lt; 3);   
+      
+    if (!withinRange) {   
+      const path = getShortestPathCmd(graph, MyTank, target);      
+      if (path.length > 0) return path[0];      
+    }   
+  }   
+      
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {      
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {      
+      return "R";      
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {      
+      return "L";      
+    } else {      
+      return "S";      
+    }      
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {      
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {      
+      return "D";      
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {      
+      return "U";      
+    } else {      
+      return "S";      
+    }      
+  }      
+          
+  const path = getShortestPathCmd(graph, MyTank, target);      
+  if (path.length > 0) return path[0];      
+  return '';      
+}
+
+function getNewCommand() {     
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange; 
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange; 
+  console.log(Object.keys(weaponRangeFuncs)); 
+  
+  dangerScores = getDangerScores();     
+  graph = createGraph();     
+          
+  let cmd = upgradeSpecialPowers();     
+  if (cmd.length > 0) return cmd;     
+          
+  // escape from danger     
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];     
+  if (MyTank.health &lt; 2 * totalDamage) {     
+    cmd = escapeFromDanger();     
+    if (cmd.length > 0) return cmd;     
+  }     
+        
+  // freeze opponents    
+  cmd = freezeOpponent();    
+  if (cmd.length > 0) return cmd;     
+        
+  // get a crystal       
+  let path = getCrystal();       
+  if (path.length > 0) return path[0];       
+              
+  // get a weapon       
+  path = getSpecialWeapon();       
+  if (path.length > 0) return path[0];       
+              
+  // attack opponent tank      
+  cmd = attackOpponent();      
+  if (cmd.length > 0) return cmd;       
+            
+  // attack white tank       
+  cmd = attackWhiteTank();       
+  if (cmd.length > 0) return cmd;       
+              
+  // random command       
+  return getRandomCommand();      
+}
+
+function getMissileDirs() {   
+  const delta = {     
+    U: [0, -1],     
+    D: [0, 1],     
+    L: [-1, 0],     
+    R: [1, 0],     
+  };     
+  const dirs = Object.keys(delta);     
+  const ret = [];   
+  for (let i = 0; i &lt; dirs.length; i += 1) {   
+    const d = delta[dirs[i]];   
+    if (['T', 'R'].includes(Maze[MyTank.r + d[1]][MyTank.c + d[0]]) ||    
+    ['T', 'R'].includes(Maze[MyTank.r + 2 * d[1]][MyTank.c + 2 * d[0]])) {   
+      continue;   
+    }   
+    ret.push(dirs[i]);   
+  }   
+  return ret;   
+}   
+      
+function attackOpponent() {     
+  if (MyTank.health &lt;= 2000) return "";     
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";     
+          
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");     
+  if (opponents.length == 0) return "";     
+          
+  for (let i = 0; i &lt; opponents.length; i += 1) {     
+    const target = opponents[i];     
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {     
+      if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE) {   
+        if (dangerScores[MyTank.r][MyTank.c] > 1) {   
+          const cmd = escapeFromDanger();     
+          if (cmd.length > 0) return cmd;   
+        } else {   
+          const dirs = getMissileDirs();   
+          if (dirs.includes(MyTank.dir)) return "S";   
+          else if (dirs.length > 0) return dirs[0];   
+        }   
+      }    
+      return attackTank(target);     
+    }     
+  }     
+  return "";     
+}  
+     
+function getSpecialWeapon() {       
+  let bestType = MyTank.specialWeapon.type;       
+  let candidates = Weapons;   
+  const cmd = attackOpponent();   
+  if (cmd == "") {   
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);   
+  }   
+  for (let i = 0; i &lt; candidates.length; i += 1) {       
+    const weapon = candidates[i];       
+    if (weaponIsBetter(weapon.type, bestType)) {       
+      bestType = weapon.type;       
+    }       
+  }       
+  const bestWeapons = candidates.filter(weapon => weapon.type == bestType);       
+  const closeBestWeapon = getClosestItem(bestWeapons);       
+  if (closeBestWeapon == null) return [];       
+          
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);       
+}  
+      
+function weaponIsBetter(weaponType1, weaponType2) {       
+  const rankings = {};      
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;      
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;      
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;      
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;      
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;      
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;      
+  rankings[0] = 7; // no weapon      
+          
+  const values = Object.values(MyTank.specialPower);    
+  const allPowers = values.reduce((a, b) => a + b, 0);    
+          
+  if (allPowers &lt; 4 * MAX_POWER &amp;&amp; (MyTank.specialPower.damage >= 2)) {    
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0;     
+  }    
+        
+  return rankings[weaponType1] &lt; rankings[weaponType2];      
+}   
+       
+function freezeOpponent() {    
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {    
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");     
+    const target = getClosestItem(opponents);    
+    return attackTank(target);    
+  }    
+  return "";    
+}   
+   
+function escapeFromDanger() {     
+  const delta = {     
+    U: [0, -1],     
+    D: [0, 1],     
+    L: [-1, 0],     
+    R: [1, 0],     
+  };     
+  const dirs = Object.keys(delta);     
+  let bestDir = "";     
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];     
+          
+  for (let i = 0; i &lt; dirs.length; i += 1) {     
+    const dir = dirs[i];     
+    const newc = MyTank.c + delta[dir][0];     
+    const newr = MyTank.r + delta[dir][1];     
+          
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;     
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;     
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);     
+          
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {     
+      lowestDS = dangerScores[newr][newc];     
+      bestDir = dir;     
+    }     
+  }     
+  return bestDir;       
+}    
+      
+function isShellBlockedAtPos(col, row, color) {    
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row );    
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T');    
+}    
+         
+function getDangerScores() {     
+  const scores = createNewGraph();     
+            
+  for (let i = 0; i &lt; Tanks.length; i += 1) {     
+    const t = Tanks[i];     
+    if (t.color == MyTank.color) continue;     
+    const dscore = 1 + t.specialPower.damage;     
+              
+    // tank facing upward     
+    if (t.dir == 'U') {     
+      for (let j = t.r - 1; j >= 0; j -= 1) {     
+        scores[j][t.c] += dscore;     
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;     
+      }     
+    } else if (t.dir == 'D') { // facing downward     
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {     
+        scores[j][t.c] += dscore;     
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;     
+      }     
+    } else if (t.dir === 'L') { // facing to the left     
+      for (let j = t.c - 1; j >= 0; j -= 1) {     
+        scores[t.r][j] += dscore;     
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;     
+      }     
+    } else if (t.dir === 'R') { // facing to the right     
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {     
+        scores[t.r][j] += dscore;     
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;     
+      }     
+    }     
+  }     
+  return scores;     
+}     
+         
+function getRandomCommand() {        
+  // random command        
+  const r = Math.random() * 100;        
+  if (r > 10) return "S";        
+  if (r > 8) return "U";        
+  if (r > 6) return "D";        
+  if (r > 4) return "L";        
+  if (r > 2) return "R";        
+  return "";        
+}       
+         
+function createGraph() {       
+  const blockingTileTypes = ['R', 'M', 'T'];       
+  graph = createNewGraph();       
+              
+  for (let i = 0; i &lt; graph.length; i += 1) {       
+    for (let j = 0; j &lt; graph[i].length; j += 1) {       
+      const tile = Maze[i][j];       
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;       
+      else graph[i][j] = 1 + dangerScores[i][j];       
+    }       
+  }       
+  return graph;       
+}       
+         
+function getClosestItem(items) {       
+  let shortDis = 1000;       
+  let target = null;       
+              
+  for (let i = 0; i &lt; items.length; i += 1) {       
+    const pos = items[i];       
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;       
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);       
+    if (dis &lt; shortDis) {       
+      shortDis = dis;       
+      target = pos;       
+    }       
+  }       
+  return target;       
+}       
+         
+function getCrystal() {       
+  const target = getClosestItem(Crystals);       
+  if (!target) return [];       
+  return getShortestPathCmd(graph, MyTank, target);       
+}       
+         
+function upgradeSpecialPowers() {       
+  let cmd = "";       
+  // if no power point, return blank command cmd       
+  if (MyTank.powerPoint == 0 ) return cmd;       
+  const sp = MyTank.specialPower;       
+              
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";   
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3";     
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";       
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";       
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";       
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";       
+              
+  return cmd;       
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! Welcome back for the last tutorial on special weapons! In this tutorial, we'll discuss the features and special strategies for the 4-Way weapon. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The 4-Way weapon fires shells in all four directions. Unlike the 3-Splitter or the Nova, the 4-Way doesn't have to hit on a tank or obstacle first to show its special power. However, the 4-Way cannot hit a target without being on the same row or column as the target. Therefore, in this tutorial, we'll focus on the 4-Way's key advantage: hitting multiple tanks in one shot.
+  </p>
+  <p>
+    <img src='/images/4wayexample.gif' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    A helper function, <span class="variablenamebold">get4WayRange</span> has been provided for you to calculate the attack range of the 4-Way weapon. This function takes two parameters: the shooting tanks's starting position <span class="variablenamebold">pos</span> and the tank's color <span class="variablenamebold">color</span>. Since the tank's facing direction doesn't affect the 4-Way's attack range, so it is not included in the parameter list. The function returns the attack range as an array of position strings, while each string is formatted as "columnNumber_rowNumber".
+  </p>
+  <p>
+    <pre class="brush: js">
+function get4WayRange(pos, color) 
+    </pre>
+  </p>
+</element>
+
+<element elementid="130" elementType="Coding" condition="TestFinishedWithLog_7">
+  <p>
+    <b>Challenge: </b>First, let's update <span class="variablenamebold">weaponRangeFuncs</span> in the function <span class="variablenamebold">getNewCommand</span> to include the function <span class="variablenamebold">get4WayRange</span>, and print out the keys of <span class="variablename">weaponRangeFuncs</span>.
+  </p>
+  <code isHidden="true">
+//TODO
+function getNewCommand() {     
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange; 
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange; 
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange; 
+  console.log(Object.keys(weaponRangeFuncs)); 
+  ......
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getNewCommand() {     
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.SPLITTER3] = get3SplitterRange; 
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.NOVA] = getNovaRange; 
+  weaponRangeFuncs[SPECIAL_WEAPON_TYPES.WAY4] = get4WayRange; 
+  console.log(Object.keys(weaponRangeFuncs)); 
+  
+  dangerScores = getDangerScores();     
+  graph = createGraph();     
+          
+  let cmd = upgradeSpecialPowers();     
+  if (cmd.length > 0) return cmd;     
+          
+  // escape from danger     
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];     
+  if (MyTank.health &lt; 2 * totalDamage) {     
+    cmd = escapeFromDanger();     
+    if (cmd.length > 0) return cmd;     
+  }     
+        
+  // freeze opponents    
+  cmd = freezeOpponent();    
+  if (cmd.length > 0) return cmd;     
+        
+  // get a crystal       
+  let path = getCrystal();       
+  if (path.length > 0) return path[0];       
+              
+  // get a weapon       
+  path = getSpecialWeapon();       
+  if (path.length > 0) return path[0];       
+              
+  // attack opponent tank      
+  cmd = attackOpponent();      
+  if (cmd.length > 0) return cmd;       
+            
+  // attack white tank       
+  cmd = attackWhiteTank();       
+  if (cmd.length > 0) return cmd;       
+              
+  // random command       
+  return getRandomCommand();      
+}
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    If we follow the pattern of the previous two tutorials, we should modify the function <span class="variablenamebold">attackTank</span> to check whether the target tank is in the attack range of your 4-Way weapon. If so, fire right away. The question is, shall we do the same for the 4-Way weapon? 
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    If we change the code, how would your tank's behavor change? Your tank still needs to be on the same row or column as the target to fire, so the only difference is that your tank no longer needs to turn towards the target before firing. Since it only takes a tiny amount of time to turn your tank, this is not much of a benefit. 
+  </p>
+  <p>
+    <img src='/images/4wayexample.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<!-- <element elementid="160" elementType="Info">
+  <p>
+    Now let's see what it costs if we implement the new logic. To check whether the target tank is in the range, your code has to get the range of 4-Way, which means to check all the four directions and list each position within the range. 
+  </p>
+  <p>
+    If we use the current logic in <span class="variablename">attackTank</span>, your code will only need to check whether there is an obstacle between your tank and the target in one direction. 
+  </p>
+</element> -->
+
+<!-- <element elementid="170" elementType="Info">
+  <p>
+    It sounds like the benefits don't cover the costs. So in conclusion, we won't change <span class="variablename">attackTank</span>. In programming, we often analyze the time cost or time complication of our code, and the time cost is one important criterion of evaluating an algorithm. We'd like to choose the algorithm that costs least time. 
+  </p>
+</element> -->
+
+<element elementid="180" elementType="Info">
+  <p>
+    On the other hand, the 4-Way weapon may boost your tank's fire power by 4 times, so let's try to leverage its advantage to attack multiple tanks at once. To do that, we need to find an optimal <b>shooting position</b>, from where more than one tank can be attacked by your 4-Way weapon. 
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    As we discussed in the previous tutorials, all tanks are alive. So by the time your tank moves to the ideal shooting position, the target tanks might have already moved away. So when we search for the optimal shooting position, we shouldn't bother checking positions far away from your tank. 
+  </p>
+    <p>
+    For the Nova weapon, we only considered the 4 tiles next to your tank. For the 4-Way weapon, let's consider the positions on the same row or column as your tank's current position, and select the best position for shooting. 
+  </p>
+  <p>
+    <img src='/images/4waychecks.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    We'll implement this strategy in the function <span class="variablenamebold">attackWhiteTank</span>. But the function is very long already. Let's refactor it and move some code into a new function called <span class="variablenamebold">shootWith3SplOrNova</span>, which takes the array of white tanks and returns a command string. 
+  </p>
+</element>
+
+<element elementid="210" elementType="Coding" condition="TestFinishedCodeIncludes_functionshootWith3SplOrNova(;TestFinishedAnyResult">
+  <p>
+    Replace the function <span class="variablenamebold">attackWhiteTank</span> with the code below. Test it when you finish.
+  </p>
+  <pre class="brush: js">
+function shootWith3SplOrNova(whiteTanks) {
+  const funcName = weaponRangeFuncs[MyTank.specialWeapon.type]; 
+  let bestPos = null; 
+  let mostHit = 0; 
+  const obs = ['T', 'M', 'R']; 
+  const positions = [ 
+    [MyTank.c, MyTank.r],  
+    [MyTank.c - 1, MyTank.r],  
+    [MyTank.c + 1, MyTank.r],  
+    [MyTank.c, MyTank.r - 1],  
+    [MyTank.c, MyTank.r + 1] 
+  ]; 
+
+  // loop through the positions 
+  for (const pos of positions) { 
+    if (pos[0] &lt; 0  
+        || pos[0] >= Maze[MyTank.r].length  
+        || pos[1] &lt; 0  
+        || pos[1] >= Maze.length 
+        || obs.includes(Maze[pos[1]][pos[0]])) { 
+      continue; 
+    } 
+    for (const dir of ['L', 'R', 'U', 'D']) { 
+      const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color); 
+      const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length; 
+      if (count > mostHit) { 
+        mostHit = count; 
+        bestPos = { c: pos[0], r: pos[1], dir: dir }; 
+      } 
+    } 
+  } 
+    
+  if (mostHit > 1) { 
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) { 
+      if (MyTank.dir == bestPos.dir) return "S"; 
+      else return bestPos.dir; 
+    }  
+    if (bestPos.c &lt; MyTank.c) return "L"; 
+    if (bestPos.c > MyTank.c) return "R"; 
+    if (bestPos.r &lt; MyTank.r) return "U"; 
+    if (bestPos.r > MyTank.r) return "D"; 
+  } 
+  return "";
+}
+
+function attackWhiteTank() {   
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;    
+  (MyTank.r != tank.r || MyTank.c != tank.c));   
+    
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {  
+    const cmd = shootWith3SplOrNova(MyTank.specialWeapon.type, whiteTanks);
+    if (cmd.length > 0) return cmd; 
+  } 
+  
+  // if MyTank is equipped with a Freezer   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);   
+  }   
+      
+  const target = getClosestItem(whiteTanks);   
+  return attackTank(target);   
+}
+  </pre>
+  <cleancode>
+function shootWith3SplOrNova(whiteTanks) {
+  const funcName = weaponRangeFuncs[MyTank.specialWeapon.type]; 
+  let bestPos = null; 
+  let mostHit = 0; 
+  const obs = ['T', 'M', 'R']; 
+  const positions = [ 
+    [MyTank.c, MyTank.r],  
+    [MyTank.c - 1, MyTank.r],  
+    [MyTank.c + 1, MyTank.r],  
+    [MyTank.c, MyTank.r - 1],  
+    [MyTank.c, MyTank.r + 1] 
+  ]; 
+
+  // loop through the positions 
+  for (const pos of positions) { 
+    if (pos[0] &lt; 0  
+        || pos[0] >= Maze[MyTank.r].length  
+        || pos[1] &lt; 0  
+        || pos[1] >= Maze.length 
+        || obs.includes(Maze[pos[1]][pos[0]])) { 
+      continue; 
+    } 
+    for (const dir of ['L', 'R', 'U', 'D']) { 
+      const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color); 
+      const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length; 
+      if (count > mostHit) { 
+        mostHit = count; 
+        bestPos = { c: pos[0], r: pos[1], dir: dir }; 
+      } 
+    } 
+  } 
+    
+  if (mostHit > 1) { 
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) { 
+      if (MyTank.dir == bestPos.dir) return "S"; 
+      else return bestPos.dir; 
+    }  
+    if (bestPos.c &lt; MyTank.c) return "L"; 
+    if (bestPos.c > MyTank.c) return "R"; 
+    if (bestPos.r &lt; MyTank.r) return "U"; 
+    if (bestPos.r > MyTank.r) return "D"; 
+  } 
+  return "";
+}
+
+function attackWhiteTank() {   
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;    
+  (MyTank.r != tank.r || MyTank.c != tank.c));   
+    
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {  
+    const cmd = shootWith3SplOrNova(MyTank.specialWeapon.type, whiteTanks);
+    if (cmd.length > 0) return cmd; 
+  } 
+  
+  // if MyTank is equipped with a Freezer   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);   
+  }   
+      
+  const target = getClosestItem(whiteTanks);   
+  return attackTank(target);   
+}
+  </cleancode>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedCodeIncludes_functionshootWith4Way(;TestFinishedAnyResult">
+  <p>
+    <b>Challenge: </b>Now, create a new function <span class="variablenamebold">shootWith4Way</span> and call it in the function <span class="variablenamebold">attackWhiteTank</span>. You can simply return a blank string from the new function "shootWith4Way" for now.
+  </p>
+  <code isHidden="true">
+//TODO
+function shootWith4Way(whiteTanks) {
+  return "";
+}
+
+function attackWhiteTank() {   
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;    
+  (MyTank.r != tank.r || MyTank.c != tank.c));   
+    
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) {  
+    const cmd = shootWith4Way(whiteTanks);
+    if (cmd.length > 0) return cmd; 
+  } 
+
+  ......
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function shootWith3SplOrNova(whiteTanks) {
+  const funcName = weaponRangeFuncs[MyTank.specialWeapon.type]; 
+  let bestPos = null; 
+  let mostHit = 0; 
+  const obs = ['T', 'M', 'R']; 
+  const positions = [ 
+    [MyTank.c, MyTank.r],  
+    [MyTank.c - 1, MyTank.r],  
+    [MyTank.c + 1, MyTank.r],  
+    [MyTank.c, MyTank.r - 1],  
+    [MyTank.c, MyTank.r + 1] 
+  ]; 
+
+  // loop through the positions 
+  for (const pos of positions) { 
+    if (pos[0] &lt; 0  
+        || pos[0] >= Maze[MyTank.r].length  
+        || pos[1] &lt; 0  
+        || pos[1] >= Maze.length 
+        || obs.includes(Maze[pos[1]][pos[0]])) { 
+      continue; 
+    } 
+    for (const dir of ['L', 'R', 'U', 'D']) { 
+      const range = funcName({ c: pos[0], r: pos[1] }, dir, MyTank.color); 
+      const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length; 
+      if (count > mostHit) { 
+        mostHit = count; 
+        bestPos = { c: pos[0], r: pos[1], dir: dir }; 
+      } 
+    } 
+  } 
+    
+  if (mostHit > 1) { 
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) { 
+      if (MyTank.dir == bestPos.dir) return "S"; 
+      else return bestPos.dir; 
+    }  
+    if (bestPos.c &lt; MyTank.c) return "L"; 
+    if (bestPos.c > MyTank.c) return "R"; 
+    if (bestPos.r &lt; MyTank.r) return "U"; 
+    if (bestPos.r > MyTank.r) return "D"; 
+  } 
+  return "";
+}
+
+function shootWith4Way(whiteTanks) {
+  return "";
+}
+
+function attackWhiteTank() {   
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;    
+  (MyTank.r != tank.r || MyTank.c != tank.c));   
+  
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.WAY4) {  
+    const cmd = shootWith4Way(whiteTanks);
+    if (cmd.length > 0) return cmd; 
+  } 
+
+  if ([SPECIAL_WEAPON_TYPES.SPLITTER3, SPECIAL_WEAPON_TYPES.NOVA].includes(MyTank.specialWeapon.type)) {  
+    const cmd = shootWith3SplOrNova(whiteTanks);
+    if (cmd.length > 0) return cmd; 
+  } 
+  
+  // if MyTank is equipped with a Freezer   
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) {   
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen);   
+  }   
+      
+  const target = getClosestItem(whiteTanks);   
+  return attackTank(target);   
+}
+  </cleancode>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    Good! Now let's implement the new function <span class="variablenamebold">shootWith4Way</span> to optimize how we use the 4-Way weapon. Similar to <span class="variablenamebold">shootWith3SplOrNova</span>, we will follow these steps: 1) get all the candidate positions we can move to; 2) for each position, get the attack range if we shoot the 4-Way weapon from that position, and count the number of white tanks in this range; 3) keep track of the best shooting position with the highest number of white tanks covered; 4) calculate the command to go to that best position and then fire the weapon. 
+  </p>
+</element>
+
+<!-- <element elementid="240" elementType="Info">
+  <p>
+    But there are two places that need our attention. First, we need to check the four directions to get all the candidate positions. On each direction, we'll start from your tank's current position until an obstacle blocks the path. Second, unlike <span class="variablename">shootWith3SplOrNova</span>, when we get the range of 4-Way, we don't have to loop through the different directions. 
+  </p>
+</element> -->
+
+<element elementid="250" elementType="Coding" condition="TestFinishedWithLog_8">
+  <p>
+    <b>Challenge: </b>In function <span class="variablenamebold">shootWith4Way</span>, get all candidate positions we can move to in the current row or column and print them out.
+  </p>
+  <code isHidden="false">
+//TODO
+function shootWith4Way(whiteTanks) {
+  const positions = [[MyTank.c, MyTank.r]]; 
+  const obs = ['T', 'R', 'M'];
+  // get empty tiles to our tank's left in the current row
+  //h0::from the column on the left of MyTank's current column to the left border::let col = MyTank.c - 1; col >= 0; col -= 1
+  for ( ? ) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  // get empty tiles to our tank's right in the current row
+  //h1::from the column on the right of MyTank's current column to the right border::let col = MyTank.c + 1; col &lt; Maze[MyTank.r].length; col += 1
+  for ( ? ) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  // get empty tiles above our tank in the current column
+  //h2::from the row above MyTank's current row to the top border::let row = MyTank.r - 1; row >= 0; row -= 1
+  for ( ? ) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+  // get empty tiles below our tank in the current column
+  //h3::from the row below MyTank's current row to the bottom border::let row = MyTank.r + 1; row &lt; Maze.length; row += 1
+  for ( ? ) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+  console.log(positions);
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function shootWith4Way(whiteTanks) {
+  const positions = [[MyTank.c, MyTank.r]]; 
+  const obs = ['T', 'R', 'M'];
+  // get positions in current row
+  for (let col = MyTank.c - 1; col >= 0; col -= 1) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  for (let col = MyTank.c + 1; col &lt; Maze[MyTank.r].length; col += 1) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  // get positions in current column
+  for (let row = MyTank.r - 1; row >= 0; row -= 1) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+  for (let row = MyTank.r + 1; row &lt; Maze.length; row += 1) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+  console.log(positions);
+  return "";
+}
+  </cleancode> 
+</element> 
+
+<element elementid="260" elementType="Coding" condition="TestFinishedTanksKilled_2">
+  <p>
+    Excellent!
+  </p>
+  <p>
+    <b>Challenge: </b>in <span class="variablenamebold">shootWith4Way</span>, loop through every position in the <b>positions</b> array, find the one position from where we can hit the most white tanks, and return a command to move to that position (or fire if we are already at that position).
+  </p>
+  <code isHidden="false">
+//TODO
+function shootWith4Way(whiteTanks) {
+  const positions = [[MyTank.c, MyTank.r]]; 
+  const obs = ['T', 'R', 'M'];
+
+  ......
+
+  let bestPos = null; 
+  let mostHit = 0; 
+  // loop through the positions 
+  for (const pos of positions) { 
+    //h0::get 4-Way's attack range::call function get4WayRange with current position and color::get4WayRange({ c: pos[0], r: pos[1] }, MyTank.color) 
+    const range = ? ;
+    //h1::count the number of white tanks that are in range::use filter function to get an array of the white tanks in range and get the array's length
+    ::whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length
+    const count = ? ; 
+    if (count > mostHit) { 
+      mostHit = count; 
+      bestPos = { c: pos[0], r: pos[1]}; 
+    } 
+  } 
+    
+  if (mostHit > 1) { 
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) {
+      if (MyTank.speedX != 0 || MyTank.speedY != 0) return "P";
+      return "S"; 
+    }
+    if (bestPos.c &lt; MyTank.c) return "L"; 
+    if (bestPos.c > MyTank.c) return "R"; 
+    if (bestPos.r &lt; MyTank.r) return "U"; 
+    if (bestPos.r > MyTank.r) return "D"; 
+  } 
+  
+  return "";
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function shootWith4Way(whiteTanks) {
+  const positions = [[MyTank.c, MyTank.r]]; 
+  const obs = ['T', 'R', 'M'];
+  // get positions in current row
+  for (let col = MyTank.c - 1; col >= 0; col -= 1) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  for (let col = MyTank.c + 1; col &lt; Maze[MyTank.r].length; col += 1) {
+    if (obs.includes(Maze[MyTank.r][col])) break;
+    positions.push([col, MyTank.r]);
+  }
+  // get positions in current column
+  for (let row = MyTank.r - 1; row >= 0; row -= 1) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+  for (let row = MyTank.r + 1; row &lt; Maze.length; row += 1) {
+    if (obs.includes(Maze[row][MyTank.c])) break;
+    positions.push([MyTank.c, row]);
+  }
+
+  let bestPos = null; 
+  let mostHit = 0; 
+  // loop through the positions 
+  for (const pos of positions) { 
+    const range = get4WayRange({ c: pos[0], r: pos[1] }, MyTank.color); 
+    const count = whiteTanks.filter(t => range.includes(t.c + '_' + t.r)).length; 
+    if (count > mostHit) { 
+      mostHit = count; 
+      bestPos = { c: pos[0], r: pos[1]}; 
+    } 
+  } 
+    
+  if (mostHit > 1) { 
+    if (bestPos.c == MyTank.c &amp;&amp; bestPos.r == MyTank.r) {
+      // pause MyTank's movement if its speed is not zero by sending "P".
+      if (MyTank.speedX != 0 || MyTank.speedY != 0) return "P";
+      return "S"; 
+    }
+    if (bestPos.c &lt; MyTank.c) return "L"; 
+    if (bestPos.c > MyTank.c) return "R"; 
+    if (bestPos.r &lt; MyTank.r) return "U"; 
+    if (bestPos.r > MyTank.r) return "D"; 
+  } 
+  
+  return "";
+}
+  </cleancode>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    You might have noticed that in the code we send the command "P" to pause <span class="variablename">MyTank</span> when it is at the <span class="variablename">bestPos</span>. The command "P" is another command you can send to your tank. When your tank receives the command "P", it will pause its movement and stay at its current position. To see whether <span class="variablename">MyTank</span> is moving, we check whether <span class="variablenamebold">MyTank.speedX</span> (its speed along the X axis) and <span class="variablenamebold">MyTank.speedY</span> (its speed along the Y axis) are both zero. If either speed is not zero, that means the tank is moving. So the command "P" is issued to stop the tank first. 
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    Congratulations! You've finished all the tutorials for the special weapons!
+  </p>
+  <p>
+    <b>Summary: </b>Now we have discussed the features and strategies of many sepcial weapons. Based on the updated usage of these weapons, you can review and update the ranking of these special weapons in <span class="variablenamebold">weaponIsBetter</span>. 
+  </p>
+  <p>
+    <b>Exercise 1: </b>instead of searching through all tiles on the same row and column as your tank's current position, can you change the shootWith4Way function to search all tiles in the 3x3 region centered at your tank's current position? 
+  </p>
+  <p>
+    <b>Exercise 2: </b>Release a new version of your robot code and test it in games. 
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="https://forum.tgame.ai/t/lesson-22-the-4-way/449" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

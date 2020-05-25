@@ -1,0 +1,17 @@
+.tg-loading-page{
+    height: calc(100vh - 120px);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .tg-container{
+      flex-direction: column;
+      color: #333333;
+      img{
+        width: 50px;
+      }
+      span{
+        font-size: $tg-fs-large;
+      }
+    }
+  }

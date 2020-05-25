@@ -1,0 +1,133 @@
+/* The lint marker gutter */
+.CodeMirror-lint-markers {
+  width: 16px;
+}
+
+.CodeMirror-lint-tooltip {
+  margin-top: -10000px;
+  background-color: #ffd;
+  border: 1px solid black;
+  border-radius: 4px 4px 4px 4px;
+  color: black;
+  font-family: monospace;
+  font-size: 10pt;
+  overflow: hidden;
+  padding: 2px 5px;
+  position: fixed;
+  white-space: pre;
+  white-space: pre-wrap;
+  z-index: 100;
+  max-width: 600px;
+  opacity: 0;
+  transition: opacity .4s;
+  -moz-transition: opacity .4s;
+  -webkit-transition: opacity .4s;
+  -o-transition: opacity .4s;
+  -ms-transition: opacity .4s;
+}
+
+.CodeMirror-lint-mark-error, .CodeMirror-lint-mark-information, .CodeMirror-lint-mark-warning {
+  background-position: left bottom;
+  background-repeat: repeat-x;
+}
+
+.CodeMirror-lint-mark-error {
+  /* background-image:
+  url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==")
+  ; */
+  /* color: darkorange; */
+  /* background-color: red; */
+  background-image: url("images/redunderline2.png");
+}
+
+.CodeMirror-lint-mark-warning {
+  /* background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII="); */
+  background-image: url("images/orangeunderline.png");
+}
+
+.CodeMirror-lint-mark-information {
+  background-image: url("images/lint-blue-mark.png");
+}
+
+.CodeMirror-lint-marker-error, .CodeMirror-lint-marker-warning, .CodeMirror-lint-marker-information {
+  background-position: center center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.CodeMirror-lint-message-error, .CodeMirror-lint-message-warning, .CodeMirror-lint-message-information {
+  padding-left: 18px;
+  background-position: top left;
+  background-repeat: no-repeat;
+}
+
+.CodeMirror-lint-marker-error, .CodeMirror-lint-message-error {
+  background-image: url('images/tbotError.png');
+  background-size: 15px, 5px;
+}
+
+.CodeMirror-lint-marker-warning, .CodeMirror-lint-message-warning {
+  background-image: url('images/tbotWarning.png');
+  background-size: 15px, 5px;
+}
+
+.CodeMirror-lint-marker-information, .CodeMirror-lint-message-information {
+  background-image: url('images/tbotInformation2.png');
+  background-size: 15px, 5px;
+}
+
+.CodeMirror-lint-marker-multiple {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC");
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  width: 100%; height: 100%;
+}
+
+.cm-s-abcdef span.CodeMirror-matchingbracket {color: rgb(253, 253, 253) !important; background-color: rgb(70, 172, 92) !important; }
+.cm-s-abcdef span.CodeMirror-nonmatchingbracket {color: rgb(231, 217, 19) !important; background-color: rgb(189, 28, 28) !important; }
+
+.cm-s-blackboard span.CodeMirror-matchingbracket {
+  color: rgb(70, 172, 92) !important; 
+  outline: none !important;
+  /*background-color: rgb(70, 172, 92) !important; */
+}
+.cm-s-blackboard span.CodeMirror-nonmatchingbracket {color: rgb(231, 217, 19) !important; background-color: rgb(189, 28, 28) !important; }
+
+
+/* error warning box */
+
+.codingboxshadow 
+{
+  -moz-box-shadow: 3px 3px 5px #ffffff;
+  -webkit-box-shadow: 3px 3px 5px #ffffff;       
+  box-shadow: 3px 3px 5px #ffffff;
+}
+.codingroundbox
+{  
+  -moz-border-radius: 6px 6px 6px 6px;
+  -webkit-border-radius: 6px;  
+  border-radius: 6px 6px 6px 6px;
+}
+
+.codingroundbox-top
+{    
+    -moz-border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;    
+    border-radius: 4px 4px 0 0;
+}
+.codingroundbox-bottom
+{    
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+}
+
+.gridheaderleft
+{
+  text-align: left;
+}

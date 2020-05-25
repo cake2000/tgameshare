@@ -1,0 +1,255 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}     
+
+function getCallShot() {
+  return {
+    aimx: Balls[1].x,
+    aimy: Balls[1].y - BallDiameter,
+    strength: 50
+  };
+}
+
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>In our last tutorial, you managed to knock the black ball vertically downward into the pocket directly below it. However, the shot won't work when the black ball's x-coordinate is not fixed at 0.</p>
+  <p>
+    In this tutorial, we'll introduce a helper function for your robot to calculate the aiming point for any ball-pocket combination.
+  </p>
+  <p>
+    If you get stuck at any point during this lesson, check out <a href="https://forum.tgame.ai/t/aim-position-calculation-helper/23" target="_blank">this lesson's discussion</a> in our forum.
+  </p>
+</element>
+
+<element elementid="105" elementType="Info">
+  <p>Your first task is to <b>shoot the red ball 3 into pocket 0 (top left)</b>. To do that, you need to aim the cue ball in such a way that when it touches the ball 3, it is on the same straight line as ball 3 and pocket 0, as illustrated below.</p>
+  <p>
+    <img src="/images/examplegetaimposition03.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+  <p>
+    <img src="/images/aimpointoffsets.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    One way to calculate the aiming point is to use the position of ball 3 (<span class="variablename">Balls[3].x</span> and <span class="variablename">Balls[3].y</span>), along with some offsets as shown above.
+  </p>
+
+  <!-- <p>In the base code given in your robot code editor, we first define 2 constants of ballPos and pocketPos using the keyword <a href="#" onclick="ClickToSendChat(event, 'how to use const?')" class="inlinebutton"><b>const</b></a>, and read the ball and pocket positions out of the predefined arrays <b>Balls</b> and <b>Pockets</b>. Then we define a new object aimPosition using ball 3's position and an offset of 40 for x and 25 for y, and use that to specify the returned shot command. </p> -->
+  <p>
+      <img src="/images/changeoffsetsball3.gif" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+    </p>
+  <p>
+    <b>Challenge</b>: experiment with different offset values for aimx and aimy until you can shoot ball 3 into pocket 0, at strength of 30. Note that the offsets of 40 and 25 are just for illustration purpose, and they are not the correct answer.
+  </p>
+  <code isHidden="true">
+//TODO: shoot ball 3 into pocket 0
+function getCallShot() {
+  return { 
+    // set offset between aimx and Balls[3].x to 40
+    aimx: Balls[3].x + 40, 
+    //h0::the offset between aimy and Balls[3].y should be between 13 and 19
+    ::aimy: Balls[3].y + 14,
+    ::aimy: Balls[3].y + 16,
+    ::aimy: Balls[3].y + 18,
+    aimy: Balls[3].y + ?, 
+    strength: 30 
+  };
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCallShot() {
+  return {
+    aimx: Balls[3].x + 40,
+    aimy: Balls[3].y + 16,
+    strength: 30
+  };
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+<element elementid="113" elementType="Info">
+  <p>
+    Now instead of manually specifying the contact position at which to aim, we can calculate it by drawing a "target line" from the target pocket to the target ball, and then extending its length further by the ball diameter, as shown below. 
+  </p>
+  </p>
+    <img src="/images/getaimcalc.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  <p>
+  <p>
+    Since this calculation is so useful, we have created a helper function to do this: <b class="variablenamebold">getAimPosition</b>. This function <b>takes two input parameters (the positions of target ball and target pocket), and returns the aiming point as an object with x and y properties</b>. 
+    </p>
+    <p>
+      Note that you can get a pocket's position using another predefined array, <b class="variablenamebold">Pockets</b>, similar to <b class="variablenamebold">Balls</b>. So to calculate the aiming point for ball 3 and pocket 0, call the function like this:
+    <pre class="brush: js">
+getAimPosition(Balls[3], Pockets[0]);
+    </pre>
+  </p>
+</element>
+  
+<element elementid="114" elementType="Info">
+  <p>
+    Now, how do we store the aiming point object returned by the getAimPosition function? We need to define a <b>variable</b>. 
+    </p>
+</element>
+
+<element elementid="114.5" elementType="Language" languageSkills="JavaScript:Variable|Python:Variable">
+</element>
+
+<element elementid="114.8" elementType="Info">
+  <p>
+    Before continuing, I need to give a brief explaination of <b>scope</b>. For now, you can simply assume the entire program is one <b>global scope</b>, and each pair of brackets "{}" defines a new local scope inside it. Every time you define a new variable inside a scope, that variable can only be used within that scope. For example:
+  </p>
+  <p>
+      <pre class="brush: js">
+// define A in the global scope so it can be used anywhere 
+let A = 10;         
+
+function f1() { // start of function f1's scope
+  // define a variable B that is only usable in function f1's scope
+  let B = 20;
+
+  if (B > 10) { // start a new scope for if-statement
+    // define a variable C within the if scope
+    let C = 15;
+    // B can be used since the if scope is f1's child scope
+    B = C + 5;
+    // A can be used since A is defined the global scope
+    A = B + 5;
+  } // end of the if scope
+
+  // C can't be used here outside the if-statement's scope
+  C = 20; // &lt;-- will cause an error
+} // end of function f1's scope
+
+// B can't be used outside the function f1's scope
+B = 30; // &lt;-- will cause an error
+    </pre>
+  </p>
+  <p>
+    For more information on variables and scope, you can read <a href="https://www.digitalocean.com/community/tutorials/understanding-variables-scope-hoisting-in-javascript" target="_blank">this well-written tutorial online</a>.
+  </p>
+</element>
+<element elementid="114.9" elementType="Info">
+  <p>
+    <img src="/images/scope.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    Scope is one of the reasons why <b>indentation</b> is so important. It helps us to identify the scope of code blocks. So, please remember to click the <b>BEAUTIFY</b> button now and then to keep your code well-indented. 
+  </p>
+</element>
+  
+<element elementid="115" elementType="Coding" condition="TestPPPocketBall_3_In_0">
+  <p>
+    For the <span class="variablename">aimPoint</span>, <b>since we do not plan to reassign it to some other value, it's more proper to define it with "<span class="variablenamebold">const</span>"</b>, though using "<span class="variablename">let</span>" would also work. 
+  </p>
+
+  <p>
+    <b>Challenge:</b> please modify your code to calculate <span class="variablename">aimPoint</span> using getAimPosition, then return the calculated point as output of your getCallShot function.
+  </p>
+  <p>
+    <img src="/images/addgetaimposition.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <code isHidden="false">
+//TODO: shoot ball 3 into pocket 0
+function getCallShot() {
+  // calculate aiming point by calling the helper function
+  const aimPoint = getAimPosition(Balls[3], Pockets[0]);
+  //h0::use aimPoint.x and aimPoint.y for aimx and aimy::write "aimy:aimPoint.y"
+  return { 
+    aimx: aimPoint.x, 
+    aimy: ?, 
+    strength: 30 
+  };
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCallShot() {
+  const aimPoint = getAimPosition(Balls[3], Pockets[0]);
+  return {
+    aimx: aimPoint.x,
+    aimy: aimPoint.y,
+    strength: 30
+  };
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}    
+  </cleancode>
+</element>
+
+<element elementid="116" elementType="Coding" condition="TestPPPocketBall_3_In_1">
+  <p>
+    For our last challenge, can you <b>modify the <span class="variablenamebold">getCallShot</span> function to shoot ball 3 into pocket 1 at top center</b>? This should be as simple as <b>changing 1 number</b> in your getCallShot function.
+  </p>
+  <code isHidden="true">
+//TODO: shoot ball 3 into pocket 1
+function getCallShot() {
+  //h0::you need to use Pockets[1] instead of Pockets[0]::replace "?" with "getAimPosition(Balls[3], Pockets[1])"
+  const aimPoint = ? ;
+  return { 
+    aimx: aimPoint.x, 
+    aimy: aimPoint.y, 
+    strength: 30 
+  };
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCallShot() {
+  const aimPoint = getAimPosition(Balls[3], Pockets[1]);
+  return {
+    aimx: aimPoint.x,
+    aimy: aimPoint.y,
+    strength: 30
+  };
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}   
+  </cleancode>
+</element>
+    
+<element elementid="180" elementType="Conclusion">
+  <p>Tutorial completed!</p>
+
+  <p>
+    <b>Summary:</b> You have learned how to call a new function, <b class="variablenamebold">getAimPosition</b>, to calculate the aiming point given a target ball position and a target pocket position, and also how to choose between <b class="variablenamebold">const</b> and <b class="variablenamebold">let</b> when defining a new object. We'll be using them a lot going forward.
+  </p>
+  
+  <p>
+    <b>Exercise 1:</b> Can you change your call shot to shoot ball 2 (on left) into pocket 5 (left bottom)? 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Can you change your call shot to shoot ball 2 into pocket 1?
+  </p>
+</element>
+

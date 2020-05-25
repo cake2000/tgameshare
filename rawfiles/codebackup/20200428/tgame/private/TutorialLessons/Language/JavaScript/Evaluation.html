@@ -1,0 +1,613 @@
+<element elementid="100" elementType="Quiz" answerKey="B" answerReason="" skill="Function">
+  <p>
+    Out of the 4 choices below, which one is NOT correct about JavaScript functions?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> A function is a block of statements for performing a task or calculating a value.
+      </li>
+      <li>
+        <b>B.</b> A function definition consists of three components: the keyword "function", the name of the function, and code statements enclosed in a pair of "{}".
+      </li>
+      <li>
+        <b>C.</b> A function can take input parameters optionally, and it may return an object as its output.
+      </li>
+      <li>
+        <b>D.</b> A function executes when you append a parameter list (can be an empty list) to its name.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="101" elementType="Quiz" answerKey="C" answerReason="" skill="Function">
+  <pre class="brush: js">
+function double(a) {
+  return 2 * a;
+}
+  </pre>
+  <p>
+    Given the function definition above, which choice below is a correct function call?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+const c = function double(a);
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+const c = double(a);
+        </pre>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+const c = double(3);
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+const c = double(a=3);
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="102" elementType="Quiz" answerKey="D" answerReason="" skill="Function">
+  <p>
+    Out of the 4 statements, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+function plus(a, b)
+  return a + b;
+}
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> This function is correctly defined
+      </li>
+      <li>
+        <b>B.</b> The function name should be capitalized
+      </li>
+      <li>
+        <b>C.</b> A "{" is missing at the end of first line
+      </li>
+      <li>
+        <b>D.</b> The ";" after "return a + b" is redundant
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="103" elementType="Quiz" answerKey="C" answerReason="" skill="Variable">
+  <p>
+    Out of the 4 statements below, which one is NOT correct about variable names?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> All JavaScript variables must be identified with unique names.
+      </li>
+      <li>
+        <b>B.</b> Variable names can contain letters, digits, underscores, and dollar signs.
+      </li>
+      <li>
+        <b>C.</b> Variable names must begin with a letter or a digit
+      </li>
+      <li>
+        <b>D.</b> JavaScript keywords cannot be used as names
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="104" elementType="Quiz" answerKey="A" answerReason="" skill="Variable">
+  <p>
+    Out of the 4 choices below, which one is NOT a correct varable definition?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+int a = 5;
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+const a = 5;
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+let a = 5;
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+var a = 5;
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="104" elementType="Quiz" answerKey="B" answerReason="" skill="Variable">
+  <p>
+    Out of the 4 choices below, which one has no errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+const aVariable = 3;
+aVariable = 6;
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+const anObject = { x: 1, y: 0 };
+anObject.z = -1;
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+let aVariable = 3;
+const anotherVariable = 6;
+anotherVariable = aVariable;
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+const anObject = { x = 1, y = 0 };
+anObject.x = 0;
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="106" elementType="Quiz" answerKey="A" answerReason="" skill="Object">
+  <p>
+    Out of the 4 statements below, which one is NOT correct about JavaScript objects?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> A JavaScript object is a collection of properties (or attributes), separated by ";".
+      </li>
+      <li>
+        <b>B.</b> Each property of an object has a corresponding value, and a ":" is expected between the property name and the value.
+      </li>
+      <li>
+        <b>C.</b> An object literal starts with "{" and ends with "}".
+      </li>
+      <li>
+        <b>D.</b> A JavaScript object can also have methods as its properties.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="107" elementType="Quiz" answerKey="D" answerReason="" skill="Object">
+  <p>
+    An object <b>car</b> is defined as below.
+  </p>
+  <pre class="brush: js">
+let car = {
+  color: "red",
+  speed: 50,
+  posX: 0,
+  posY: 0
+};
+  </pre>
+  <p>
+    Out of the 4 choices below, which one has syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+car.wheel = {
+  diameter: 17, color: "silver",
+};
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+const pos = { x: car["posX"], y: car["posY"] }
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+const pos = { x: car.posX, y: car.poxY }
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+const pos = { x: car[posX], y: car[poxY] }
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="108" elementType="Quiz" answerKey="B" answerReason="" skill="Object">
+  <p>
+    Out of the four choices below, which one correctly adds a method to the object <b>car</b>?
+  </p>
+  <pre class="brush: js">
+let car = {
+  color: "red",
+  speed: 50,
+  posX: 0,
+  posY: 0
+};
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+car.run = function {
+  posX = posX + 5;
+}
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+car.run = function() {
+  this.posX = this.posX + 5;
+};
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+car.run = function() {
+  this.posX: this.posX + 5,
+};
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+car.run = function() {
+  posX = posX + 5;
+}
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="110" elementType="Quiz" answerKey="C" answerReason="" skill="Array">
+  <p>
+    Out of the 4 statements below, which one is NOT correct about arrays?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> An array is a list of things bound together.
+      </li>
+      <li>
+        <b>B.</b> You can refer to an array's elements with index numbers, such as AnArray[2].
+      </li>
+      <li>
+        <b>C.</b> The array index starts at 0 in JavaScript, and it must be an integer less than or equal to the array's length.
+      </li>
+      <li>
+        <b>D.</b> In JavaScript, you can have values of different types in the same array.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="112" elementType="Quiz" answerKey="C" answerReason="" skill="Array">
+  <p>
+    Out of the 4 choices below, which one is the value of <b>[2, 4, 1, 6, 8, 0].length</b>?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> 2
+      </li>
+      <li>
+        <b>B.</b> 8
+      </li>
+      <li>
+        <b>C.</b> 6
+      </li>
+      <li>
+        <b>D.</b> 1
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="115" elementType="Quiz" answerKey="B" answerReason="" skill="Array">
+  <p>
+    Out of the 4 choices below, which one assigns a value of <b>6</b> to the variable <b>aNum</b>?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+const aNewArray = [0, 1, 2];
+const aNum = aNewArray[3] * 3;
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+const aNewArray = [0, 1, 2];
+const aNum = aNewArray.length * 2;
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+const aNewArray = [0, 1, 2];
+const aNum = aNewArray[2] * 2;
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+const aNewArray = [0, 1, 2];
+const aNum = aNewArray[0] + aNewArray[1] * 1 + aNewArray[2] * 2;
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="118" elementType="Quiz" answerKey="D" answerReason="" skill="ForLoop">
+  <p>
+    Out of the 4 choices, which one is a correct definition of a for-loop?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+for (i = 0; i &lt; 5; i += 1) {
+  console.log(i);
+}
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+for (let i = 0; i &lt; 5; i = i++ ) {
+  console.log(i);
+}
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+for (const i = 0; i &lt; 5; i = i + 1) {
+  console.log(i);
+}
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+for (let i = 0; i &lt; 5; i = i + 1) {
+  console.log(i);
+}
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="120" elementType="Quiz" answerKey="D" answerReason="" skill="ForLoop">
+  <p>
+    To print out all multiples of 3, from 12 down to 3, which of the following for-loop is correct?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+for (let k = 12; k = k - 3; k >= 3) {
+  console.log(k);
+}
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+for (let k = 12; k > 3; k = k - 3) {
+  console.log(k);
+}
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+for (let k = 12; k >= 3; k = k + 3) {
+  console.log(k);
+}
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+for (let k = 12; k >= 3; k = k - 3) {
+  console.log(k);
+}
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="121" elementType="Quiz" answerKey="B" answerReason="" skill="ForLoop">
+  <p>
+    Out of the 4 choices, which one is correct about the code below?
+  </p>
+  <pre class="brush: js">
+let count = 0;
+for (let i = 0; i &lt; 3; i + 1) {
+  count = count + 1;
+}
+console.log("count is " + count);
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> This code will print 'count is 4'
+      </li>
+      <li>
+        <b>B.</b> The line inside the for-loop will run forever
+      </li>
+      <li>
+        <b>C.</b> This code will print 'count is 0'
+      </li>
+      <li>
+        <b>D.</b> This code has some syntax errors and will not run at all
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="123" elementType="Quiz" answerKey="D" answerReason="" skill="IfCondition">
+  <pre class="brush: js">
+const b1 = false;
+const b2 = (1 &lt;= 2);
+const b3 = (1 == 2);
+  </pre>
+  <p>
+    Given the variable definition above, which statement below will evaluate to 'true'?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> b1 &amp;&amp; b2
+      </li>
+      <li>
+        <b>B.</b> b1 || b3
+      </li>
+      <li>
+        <b>C.</b> !b1 &amp;&amp; !b2
+      </li>
+      <li>
+        <b>D.</b> !(b3 || b1 &amp;&amp; b2)
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="125" elementType="Quiz" answerKey="A" answerReason="" skill="IfCondition">
+  <pre class="brush: js">
+const a = 5;
+const b = 1;
+let count = 0;
+if (b > a) 
+  count += b;
+else if (b == a) 
+  count += 1;
+else if (b &lt; a &amp;&amp; count > 0) 
+  count += a;
+else 
+  count *= 2;
+console.log(count);
+  </pre>
+  <p>
+    What is the output of code above?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b> 0
+      </li>
+      <li>
+        <b>B.</b> 1
+      </li>
+      <li>
+        <b>C.</b> 5
+      </li>
+      <li>
+        <b>D.</b> 2
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="Quiz" answerKey="C" answerReason="" skill="IfCondition">
+  <p>
+    Out of the 4 function definitions below, which one has NO syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <b>A.</b>
+        <pre class="brush: js">
+function max(a, b) {
+  if a &lt;= b:
+    return b;
+  else:
+    return a;
+}
+        </pre>
+      </li>
+      <li>
+        <b>B.</b>
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt; b):
+    return b;
+  else:
+    return a;
+}
+        </pre>
+      </li>
+      <li>
+        <b>C.</b>
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt;= b) {
+    return b;
+  } else {
+    return a;
+  }
+}
+        </pre>
+      </li>
+      <li>
+        <b>D.</b>
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt;= b) {
+    return b;
+  } else {
+    return a;
+}
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>

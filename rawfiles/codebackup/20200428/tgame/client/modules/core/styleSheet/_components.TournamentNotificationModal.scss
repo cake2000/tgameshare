@@ -1,0 +1,102 @@
+.tournamentModal {
+  &--container {
+    color: black;
+    display: flex;
+    justify-content: center;
+
+    &--wrapper {
+      width: 400px;
+      border: 1px solid white;
+      background-color: white;
+      padding: 30px;
+
+      &__header {
+        font-size: 25px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      &--content {
+        margin-top: 15px;
+
+        &--wrapper {
+          display: block;
+          padding: 15px 0px;
+          font-size: 15px;
+          text-align: center;
+
+          &__message {
+            font-weight: 600;
+            margin-bottom: 10px;
+          }
+
+          &__winner {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0a73bc;
+            margin-bottom: 10px;
+          }
+
+          &__time {
+            font-size: 20px;
+            margin-bottom: 10px;
+          }
+          &--data {
+            &--component {
+              display: flex;
+              flex-wrap: wrap;
+              margin: 20px;
+              &__name {
+                flex-basis: 50%;
+                text-align: left;
+              }
+              &__value {
+                flex-basis: 50%;
+                color: #0a73bc;
+              }
+            }
+          }
+        }
+
+        &--button {
+          text-align: center;
+          padding: 15px;
+          &__join {
+            padding: 10px 15px;
+            border: none;
+            background-color: #0a73bc;
+            color: white;
+            max-width: 100%;
+            width: 80px;
+            border-radius: 3px;
+          }
+
+          &__cancel {
+            padding: 10px 15px;
+            margin-left: 30px;
+            border: none;
+            max-width: 100%;
+            width: 80px;
+            border-radius: 3px;
+
+            &:hover {
+              background-color: rgb(192, 192, 192);
+            }
+          }
+
+          &__close {
+            padding: 10px 15px;
+            border: none;
+            max-width: 100%;
+            width: 80px;
+            border-radius: 3px;
+
+            &:hover {
+              background-color: rgb(192, 192, 192);
+            }
+          }
+        }
+      }
+    }
+  }
+}

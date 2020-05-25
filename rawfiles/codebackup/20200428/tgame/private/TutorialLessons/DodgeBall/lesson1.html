@@ -1,0 +1,124 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Hi there, I am <b>TBot</b>, a robot to help you building your Dodge Ball robot through a series of tutorials. You can chat with me by typing your questions or commands in the box below, such as: </p>
+    <p>
+        <ul>
+            <li>
+                <b>Please tell me about objects</b> or <b>How to use an array?</b>
+            </li>
+            <li>
+                <b>continue</b> or <b>next</b>
+            </li>
+            <li>
+                <b>help</b> or <b>hint</b>
+            </li>
+        </ul>
+    </p>
+    <p>Are you ready to get started?</p>
+</element>
+
+<element elementid="101" elementType="Info">
+    <h5 class="elementheader">The <i>update</i> function</h5> 
+    <p>
+        <img src="/images/1_1_updatefunction.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+        
+    <p><b>this.update</b> is the most important function of your robot. Here <b>this</b> refers to the robot itself, so others can use it by calling <b>robot.update()</b>, similar to <b>car.run()</b>, or <b>bird.fly()</b>. </p>
+
+    <p>As shown in the picture, the game engine collects information from the game world and then calls your robot's update function, sort of like asking "hey, here is updated information on what's going on. What do you want to do now?".</p> 
+    
+    <p> In response, your robot can send some commands back in its update function, and the game engine will execute those commands for you. This loop from step 1 to step 4 occurs very frequently (about 60 times per second) so your robot can make <b>real-time</b> decisions based on latest information.</p>
+
+    <p>
+         Now let's start by adding an empty update function to your robot code. Please copy or type the code below into the robot code editor on the right. When you are done, say "next" or "ok" to continue.</p>
+    <code isHidden='false'>
+this.update = function(info) {
+};                                 
+    </code>
+</element>
+    
+    
+
+<element elementid="110" elementType="Coding" condition="TestDBPickUpBall" conditionind="300">
+    <h5 class="elementheader">Challenge: driving the car forward</h5> 
+    <p>Your first challenge is to simply drive the car forward.</p>
+    <p>To do so, the robot needs to call the function <b>sendCommand</b> with parameter "F" in its <b>update</b> function. 
+    <p>When you are done, click the <b>TEST</b> button on the top right, and I expect your car to run forward and pick up the ball.</p>
+    <p>You will see a message box for test result. If you want to dismiss the game window before the test result, you can click the "Exit" button or press the <b>ESC</b> key at any time.</p>
+    <code isHidden='false'>
+this.update = function(info) {
+    //TODO: drive car forward
+    //h0::call sendCommand() with parameter "F"
+    ::sendcommand("F");    
+    ::sendCommand(F);    
+    ::sendCommand("F");    
+    sendCommand("F");
+};                          
+    </code>
+</element>
+
+
+<element elementid="125"  elementType="Coding" condition="TestDBScorePoint"  conditionind="400">
+    <h5 class="elementheader">Challenge: shooting at the blue car</h5> 
+    <p>Now your car can pick up the red ball, the next challenge is to shoot it out, as the blue car is standing far in the front.</p>
+    <p>
+        To shoot the ball, your robot can call the function <b>sendCommand</b> with parameter "S". Once you have added the command, click the <b>TEST</b> button to check if your robot is acting as expected.</p>
+    <p>Again, you can press the <b>ESC</b> key to dismiss the game window at any time. </p>
+    <code isHidden="false">
+this.update = function(info) {
+    sendCommand("F");
+    //TODO: shoot ball 
+    //h0::call sendCommand with parameter "S"
+    ::sendCommand["S"];
+    ::sendCommand("S");    
+    ::sendCommand{"S"};    
+    sendCommand("S");
+};                                 
+    </code>
+</element>
+
+
+
+<element elementid="130"  elementType="Coding" condition="TestDBScorePointAndTurnRight"  conditionind="500">
+    <h5 class="elementheader">Challenge: turn after shooting ball</h5> 
+    <p>For the last challenge of this tutorial, let's turn your car to the right after it shoots the ball out.</p>
+    <p>
+        To shoot the ball, your robot can call <b>sendCommand</b> with parameter <b>R</b>, but how does it know whether it has captured the ball or not? You can use a given variable <b>MyInfo.hasCapturedBall</b>. If it is true, then your car has captured the ball.
+    </p>
+    <p>When you click the "TEST" button, your robot should pick up the ball, shoot it out, then turns right.</p>
+    <code isHidden="false">
+this.update = function(info) {
+    sendCommand("F");
+    sendCommand("S");
+    //TODO: turn right if ball has been captured
+    //h0::check if car has captured ball::use if on MyInfo.hasCapturedBall
+    :: if (MyInfo.hasCapturedBall = true) {
+    :: if (MyInfo.hasCapturedBall) {
+    if (MyInfo.hasCapturedBall) {
+        //h1::call sendCommand with parameter "R"
+        sendCommand("R");
+    //h2::close h0 block::use }
+    }
+};                                 
+    </code>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing your first tutorial! </p>
+    <p>
+        If you are looking for more fun, here is an extra challenge for you. You might notice that your car keeps spinning right after it shoots out the ball. This is because the command "R" is the same as pressing down the right arrow key to turn the car, but only when your robot sends the command "NR" (same as releasing the right arrow key) would the car stops turning. Can you try to change your robot so that it doesn't always turning right after shooting out the ball?
+    </p>
+    <p>By the way, for a quick tip, you can ask me a question like <b>help on sendCommand</b> to get all commands supported.</p>
+</element>
+<!-- 
+this.update = function (data) {
+    sendCommand("F");
+    sendCommand("S");
+    if (MyInfo.hasCapturedBall) {
+      sendCommand("R");
+    } else {
+      sendCommand("NR");
+    }
+}; 
+-->

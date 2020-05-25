@@ -1,0 +1,186 @@
+<element elementid="100" elementType="Info">
+  <p>In this and next lessons, we'll talk about how to build a <b class="reallyhighlight">Linear Regression</b> model for predicting the <b>success probability of a shot</b>. </p>    
+</element>
+
+<element elementid="104" elementType="Info">
+    <p>
+      So far we have only focused on <b>improving the odds of success for pocketing the current target ball</b>. However, as any professional pool player would tell you, to significantly step up your game, you need to <b>plan for cue ball positioning after taking the current shot</b>. 
+    </p>
+    <p>
+      <img src="/images/comparisonof2shots.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>  
+    <p>
+      For example, the image above shows 2 ways of handling the given table setup. Although both shot commands will pocket ball 2 successfully, the bottom shot command also draws the cue ball much closer to ball 3 using a back spin, <b class="reallyhighlight">significantly increasing the chance of pocketing ball 3 in the next shot</b>. If your robot optimizes cue ball movement like this, it'll have a much higher chance of pocketing several balls in a row.
+    </p>
+</element>
+<!-- setup for comparison picture
+ResetTable(true);
+PlaceBallOnTable(0, -137, 239);
+PlaceBallOnTable(3, -620, -430); 
+PlaceBallOnTable(2, -65, 349);
+ChooseRedColor(); 
+TakeCallShot();
+await WaitForAllBallStop();
+ReportEndOfTest(); 
+
+robot code:
+
+function getCallShot() {
+  var ballPos = Balls[2];
+  var pocketPos = Pockets[0];
+  var aimPosition = {x: ballPos.x -5, y: ballPos.y -25};
+  aimPosition.x = 120;
+  aimPosition.y = 600;
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 30 }; 
+}
+
+
+
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0, strength: 30
+  }; 
+}
+
+
+code change for different sim lines
+aaaa drawing for lesson 22
+
+-->
+
+
+<element elementid="105" elementType="Info">
+    <p>
+      So how can your robot know whether using a back spin would be better for the next shot? We need to <b>build a model (an esitmating tool)</b> so that your robot can <b>estimate success probability given a cue ball position, a target ball position, and a target pocket position</b>. 
+    </p>
+      
+    <p>
+      With such a model, your robot can simply compare the success probability of the next shot (for ball 3), given the estimated cue ball position after the current shot. Note that we can not simply use <b>world.calculateProbability</b> here, since that function always uses the cue ball's current position, but we want to know the probability for the next shot from the cue ball's end position after the current shot. 
+    </p>
+    <p>
+      We can <b>build a model for success probability</b> in 2 steps:
+      <ul>
+        <li>
+          <b>Generate a lot of training samples</b>: each sample describes "when the cue ball and target ball are positioned like this, the success probability is that".
+        </li>
+        <li>
+          <b>Feed the training data samples into a model trainer</b>, which adjust the model parameters until it can output a reasonable success probability estimate given any combination of cue ball and target ball positions. We'll cover the model training process in the next tutorial.
+        </li>
+      </ul>
+    </p>
+</element>
+
+
+<element elementid="110" elementType="Coding" condition="GoodSaveDataLinearRegression">
+    <p>
+      In the test script given to you, we are repeating a test scenario for 300 times. In each iteration, we randomly place the cue ball and ball 2 on the table, then record the <b>ball distance</b> (distance between cue ball and aim position), <b>pocket distance</b> (distance between ball 2 and pocket 0), <b>cut angle</b> (angle between cue ball's trajectory line and ball 2's trajectory line), and <b>success probability</b> for pocket 0. All data is stored in a table 'testresult1'.
+    </p>
+    <p>
+      Note that the function <b>dist2(p1, p2)</b> calculates distance between 2 points on the table, and the function <b>getCutAngle(pocketPos, aimPos, cueBallPos)</b> has been introduced before for cut angle calculation.
+    </p> 
+    <p>
+      <b>Challenge:</b> please complete the test script for pocket distance related lines.
+    </p>
+    <code ishidden="true">
+ResetTable(true);
+const probabilityList = [];
+const ballDistanceList = [];
+//TODO: complete pocket distance related code
+//h0::initialize pocketDistanceList as an empty array::use []
+const pocketDistanceList = ?;
+const cutAngleList = [];
+
+// run through 300 random scenarios
+for (let i=0; i&lt;300; i++) {
+  PlaceBallOnTable(0, 1600 * Math.random() - 800, 800 * Math.random() - 400);
+  PlaceBallOnTable(2, 1600 * Math.random() - 800, 800 * Math.random() - 400);
+  await UpdateWorld();
+  const cmd = calculateShotCommand(2, 0);
+  const aimPos = new Victor(cmd.aimx, cmd.aimy);
+  const prob = await calculateProbability(cmd);
+  if (prob > 0) {
+    probabilityList.push(prob);
+    ballDistanceList.push(dist2(Balls[2], Balls[0]));
+    //h1::add distance from ball 2 to pocket 0::use function dist2 on Balls[2] and Pockets[0]
+    pocketDistanceList.push(?);
+    cutAngleList.push(Math.abs(getCutAngle(Pockets[0], aimPos, Balls[0])));
+  }
+}
+//ENDTODO
+const result = {
+  BallDistance: ballDistanceList,
+  PocketDistance: pocketDistanceList,
+  CutAngle: cutAngleList,
+  Probability: probabilityList
+};
+await SubmitData('testresult1', result);
+ReportEndOfTest();      
+    </code>
+</element>
+
+
+<element elementid="115" elementType="Coding" condition="TestFinishedPlottedBasicScatterChart_CutAngle_Probability">
+    <p>
+      Now we have the training data, it's very important to <b>plot the data</b> before building any models. This allows us to spot any potential data issues, and also to look for obvious patterns in the data. Any insights we gain from the plots will be useful later in building and verifying the regression model.
+    </p>
+    <p>
+      To examine the data visually for potential relationship between 2 variables, usually we use a <b>scatter plot</b>. For example, the following test script would draw a scatter plot between <b>success probability</b> and <b>ball distance</b>. Please <b class="reallyhighlight">copy the code below to the beginning of your test script</b> and test run it.
+    </p>
+    <p>
+      <pre class="brush: js">
+// plot probability against ball distance          
+await PlotData('testresult1', 'Scatter', 'BallDistance', 'Probability');
+ReportEndOfTest(); 
+      </pre>
+    </p>    
+    <p>
+      You should see a plot similar to the one below:
+    </p>
+    <p>
+        <img src="/images/probabilityvsdistanceplot.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+      </p>  
+    <p>
+      <b>Challenge:</b> can you modify the above script to <b>plot the success probability against the cut angle instead of ball distance</b>?
+    </p>
+    <code ishidden="true">
+//TODO: plot success probability against cut angle
+//h0::replace 'BallDistance' with 'CutAngle'
+await PlotData('testresult1', 'Scatter', ?, 'Probability');
+ReportEndOfTest();      
+//ENDTODO
+    </code>    
+</element>
+
+<element elementid="120" elementType="Quiz" answerKey="D" answerReason="At shorter ball distances we see more high probability data points. Choice B is somewhat true but the trend is not so strong.">
+  <p>
+    <b>Quiz:</b> observing the 2 scatter plotting success probability against cut angle or ball distance, which of the following observations is most obvious?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> The probability tends to increase for wider cut angles.
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> The probability tends to decreases for wider cut angles.
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> The probability tends to increases for farther ball distances.
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> The probability tends to decreases for farther ball distances.
+      </li>
+    </ul>
+  </p>
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p><b>Summary:</b> you have learned <b>how to generate training data for regression models</b> and <b>how to use scatter plots to observe potential patterns in the training data</b>.</p>
+  <p>
+    <b>Exercise:</b> try to produce more training data samples, such as 3000 runs. In general, the more training data you have, the more accurate the resulting model for our next tutorial. 
+  </p>
+  <p>
+    <b>Exercise 2: </b> try to plot the success probability against 'PocketDistance'. You might see some high probability data points at very small and very large distances. Can you explain why? Share your thoughts in our forum.
+  </p>
+</element>
+

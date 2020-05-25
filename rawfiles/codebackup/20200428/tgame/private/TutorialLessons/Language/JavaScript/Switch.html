@@ -1,0 +1,174 @@
+<element elementid="100" elementType="Info">
+  <p>
+    The JavaScript <span class="keyword">switch</span> statement is used to execute different set of statements based on the values of the expression it evaluates. The syntax of <span class="keyword">switch</span> statement is as below.
+  </p>
+  <p>
+    <pre class="brush:js">
+switch(expression) {
+  case x:
+    code block 1
+    break;
+  case y:
+    code block 2
+    break;
+  default:
+    code block 3
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The <span class="keyword">switch</span> statement evaluates the given expression wrapped in "<span class="variablenamebold">()</span>", matching the value to a <span class="keyword">case</span> clause, and executes the code block associated with that case. If there is no matched value in any <span class="keyword">case</span> clause, the <span class="keyword">default</span> clause will be executed if provided; if not, no code will be executed. The code block inside the <span class="keyword">case</span> clause is executed until either the end of the <span class="keyword">switch</span> statement or a <span class="keyword">break</span>.
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    The above <span class="keyword">switch</span> statement can be translated into a nested <span class="keyword">if-else</span> statement as below. 
+  </p>
+  <p>
+    <pre class="brush:js">
+if (expression === x) {
+  code block 1
+} else if (expression === y) {
+  code block 2
+} else {
+  code block 3
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    If there are multiple case clauses matched the value of the given expression, the first case clause will be executed. Use <span class="keyword">break</span> to stop the execution, otherwise it goes to the end of <span class="keyword">switch</span> statement. Sometimes you will want multipe case clauses to use the same code block, then you can put these case statements together. Such as the code below, if <span class="variablename">a</span> is 0 or 1, code block 1 will get executed. 
+  </p>
+  <p>
+    <pre class="brush:js">
+switch(a) {
+  case 0:
+  case 1:
+    code block 1
+    break;
+  case 2:
+  case 3:
+    code block 2
+    break;
+  defualt:
+    code block 3
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Here is another example of <span class="keyword">switch</span> statement. The <span class="keyword">default</span> clause is optional. In the example below, no default price is set. Since <span class="varaiblename">"peach"</span> and <span class="varaiblename">"pear"</span> clauses have the same price value, we can put them together without a <span class="keyword">break</span> in between. 
+  </p>
+  <p>
+    <pre class="brush:js">
+let price = -1;
+switch(fruitType) {
+  case "apple":
+    price = 3.5;
+    break;
+  case "peach":
+  case "pear":
+    price = 5;
+    break;
+  case "orange":
+    price = 2.8;
+    break;
+  case "banana":
+    price = 0.5;
+}
+    </pre>
+  </p>
+</element>
+
+<element elementid="150" elementType="Quiz" answerKey="D" answerReason="The given num is 2, so case 2 clause is executed until the end of switch statement."> 
+  <p>
+    <b>Quiz:</b> Out of the four statements, which one is correct output of the code below?
+  </p>
+  <pre class="brush: js">
+function sayHello(num) {
+  let result = "";
+  switch(num) {
+    case 0: 
+      result += "Hello! ";
+    case 1:
+      result += "How ";
+    case 2: 
+      result += "are ";
+    case 3:
+      result += "you?";
+  }
+  return result;
+}
+console.log(sayHello(2));
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> How are you?
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> Hello! How are you?
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> are
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> are you?
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="120" elementType="Quiz" optional="True" showCondition="PreNonZeroFailures" answerKey="B" answerReason="multiple(2) returns nothing; multiple(3) returns 9; multiple(1) returns 1."> 
+  <p>Great! Here is another question.</p>
+  <p>
+    <b>Quiz:</b> Out of the four choices, which one is correct output of the code below?
+  </p>
+  <pre class="brush: js">
+function multiple(num) {
+  switch(num) {
+    case 0: 
+      return 0;
+    case 1:
+      return num;
+    case 2:
+      num *= 2;
+      break;
+    case 3:
+      num *= 3;
+      return num;
+  }
+}
+console.log("Output: " + multipe(2) + " " + multipe(3) + " " + multipe(1));
+  </pre>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> </a> Output: 4 9 1
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> </a> Output: 9 1
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> </a> Output: 4 9 2
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> </a> Output: 9
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="SkillLearned" skill="Switch">
+    <p>
+      That's all you need to know about <span class="keyword">switch</span> statement for now. Let's go back to the game bot code.
+    </p>
+  </element>

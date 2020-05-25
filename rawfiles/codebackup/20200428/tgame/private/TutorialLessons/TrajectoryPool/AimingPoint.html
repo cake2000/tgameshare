@@ -1,0 +1,213 @@
+<element elementid="100" elementType="Info">
+  <p>
+      <img src="/images/animatedhi.gif" style="width: 10%; height: auto; margin-left: 0%; vertical-align: top;"/>
+  </p>
+  <p>My name is <b class="reallyhighlight">TBot</b> (TuringGame Bot), and I'm here to show you how to build your own game bot for the Trajectory Pool game. </p>    
+  <!-- <p>You can chat with me by typing your question or command in the box below, such as "<b>what's the pool table's size</b>" or simply "<b>next</b>".</p> -->
+  <p>Shall we start? You can type "<b>next</b>" in the box below and then press <b>Enter</b>. 
+  <!-- or click <img src='/images/icon-send.png' style='width: auto; height: 25px; vertical-align: bottom;'/> -->
+  
+      You can also click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/>.
+  </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>If you have not played the Trajectory Pool game yet, please <a href="/gamesBoard">go play a few practice games</a> first. You need to understand the basic rules of the game, and how the game engine adds <b>random errors</b> to your shot direction according to the strength and spin of your shot.</p>    
+  <p>When you are ready, type <b>"n"</b> for "next" or click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> to continue.</p> 
+  </p>
+</element>
+
+<element elementid="104" elementType="Info">
+  <p>
+    When a pool game begins, the game engine will ask your robot "<b>hey, how do you want to take the break shot?</b>", and your robot replies with "<b>let's aim at this point (...) on the table</b>".
+  </p>
+  <p>
+    To make that happen, your robot code needs to contain a <b>function</b> called "getBreakShot". This is like telling the world "<b>hey guys, I know how to take a break shot, just ask me!</b>". A <b>function</b> is a chunk of code for performing a task, and in this case the getBreakShot function specifies a shot command.
+  </p>
+  <p> 
+    Then when it's time for your robot to take a break shot, the game engine will retrieve your robot's shot command by <b>calling its getBreakShot function like this: "command = robot.getBreakShot()"</b>.
+  </p>
+</element>
+
+<!-- 
+<element elementid="105" elementType="Quiz" answerKey="D" answerReason="A is missing parameter list; B is missing statements; C is missing the 'function' keyword.">
+  <p>
+    When a pool game begins, the game engine will ask your robot "<b>hey, how do you want to take the break shot?</b>", and your robot replies with "<b>let's aim at this point (...) on the table</b>".
+  </p>
+  <p>
+    To make that interaction happen in your robot's digital world, your robot needs to implement a <b>function</b> called "getBreakShot"
+  </p>
+  <p>
+    To make that happen in computer code, we need to use a <b>function</b>, which is a chunk of code that performs a task or calculates a value. A function definition contains 4 parts:
+  </p>
+  <p>
+      <img src="/images/function4parts.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <br />
+  <p>
+    <b class="reallyhighlight">Quiz:</b> out of the 4 choices below, which one is a complete function definition?
+  </p>
+  <p>
+      <ul>
+        <li>
+          <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> function A {} 
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> function B()
+          </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> func C() {}
+        </li>
+        <li>
+            <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> function D() {}
+        </li>
+      </ul>
+    </p>
+  </element> -->
+
+  
+<element elementid="106" elementType="Info">
+  <p>
+    Do you want to <a href="#" onclick="ClickToSendChat(event, 'what is a function?')" class="inlinebutton"><b>learn more about functions</b></a> or <a href="#" onclick="ClickToSendChat(event, 'next')" class="inlinebutton"><b>continue with the main tutorial for now</b></a>?
+  </p>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedAnyResultAimXY">
+  <p>
+    As shown in your robot code editor on right, I have added a getBreakShot function for you that <b>returns an object with 2 properties: aimx and aimy</b>. Currently both aimx and aimy are set to 0, which essentially tells the game engine to aim at the center point of the table. I'll talk about how to set aimx/aimy values very soon.
+  </p>
+  <p>
+    <img src="/images/greatbreakshotspecifycenter.jpg" style="width: 60%; height: auto; margin-left: 30%; vertical-align: top;"/>
+</p>
+  
+  <!-- <p>
+    An <b>object</b> is a collection of "property: value" pairs wrapped by "{}". For more information on Javascript objects, type a question like "<b>what is an object in Javascript?</b>". You may be surprised by how much I know or how much I don't know:) But I am learning really fast!
+    </p> -->
+    <br />
+  <p>
+    Now please click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button on top right to see this function in action! 
+  </p>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 0 // table center
+  }; 
+}            
+    </cleancode>  
+</element>
+
+<element elementid="111" elementType="Info">
+  <p>
+    If you are new to JavaScript, an <b>object</b> is a collection of "property: value" pairs wrapped by "{}". Do you want to <a href="#" onclick="ClickToSendChat(event, 'what is an object in JavaScript?')" class="inlinebutton"><b>learn more about objects</b></a> or <a href="#" onclick="ClickToSendChat(event, 'next')" class="inlinebutton"><b>continue with the main tutorial for now</b></a>?
+  </p>
+</element>
+
+<element elementid="112" elementType="Info">
+  <p>
+    So what values to assign to <b>aimx</b> and <b>aimy</b>? They are <b class="reallyhighlight">coordinates used to specify the aiming point</b>. The game engine will shoot the white cue ball towards this aiming point when executing your shot command. 
+  </p> 
+  <p>
+    Each coordinate has 2 parts: the <b>x coordinate</b> tells us the horizontal (left to right) position of a point, and the <b>y coordinate</b> tells the vertical (top to bottom) position of a point. Note that <b>the y coordinate increases as you move down the table</b>.
+  </p>
+  <p>
+    The pink dot <img src='/images/pinkdot.png' style='width: 18px; height: auto; vertical-align: bottom; margin-bottom: 2px'/> shows the aiming point on the table. <b class="reallyhighlight">Try clicking on different points on the table</b>. You can see the coordinates change as you move the aiming point, and also the trajectory of ball movements.
+  </p>
+  <p>
+    <img src="/images/aimingpoint.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="113" elementType="Quiz" answerKey="C" answerReason="x > 0 means the point is on the right half of the table, and y &lt; 0 means the point is on the top half of the table. ">
+  <p>As shown below, the table is 2000 units wide and 1000 units high, so the x coordinate of any point on table is between -1000 and 1000, and y coordinate between -500 and 500. For example, the table center's coordinate is <b>(0, 0)</b>, and the initial position of the cue ball is <b>(-500, 0)</b> (center of table's left half).</p>
+  <!-- <p>
+    Try to think of a new coordinate, such as (-800, 200), and see if you can quickly find it on the table within a few clicks.
+  </p> -->
+  <p>
+      <img src="/images/PathPoolTableDimension4.jpg" style="width: 96%; height: auto; margin-left: 2%; vertical-align: top;"/>
+  </p>
+  <p>
+  </p>
+  <br />
+  <p><b class="reallyhighlight">Quiz:</b> out of the 4 points (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A</b></a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B</b></a>, <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C</b></a> and <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D</b></a>) in the picture above, which one is most likely to have a coordinate of <b>(630, -300)</b>? That is, its x coordinate is 630, and y coordinate is -300. Please type or click the letter of your answer.</p>
+</element>
+
+<element elementid="115" elementType="Coding" condition="TestFinishedAimY35">
+    <p>
+      Now let's play with the coordinates a bit. Can you <b>change aimy from 0 to 35 like illustrated below?
+    </p> 
+    <p>
+      <img src="/images/breakcodechangeexample.jpg" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+    <br />
+    <p>
+      Guess which ball would the cue ball hit first? Click <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> to find out when you are done with coding. 
+    </p>
+    <!-- <p>Below is a baseline code for your reference.</p> -->
+    <code isHidden="true">
+function getBreakShot() {
+  //TODO: change aimy to 35
+  return { 
+    aimx: 0, aimy: 35
+  }; 
+  //ENDTODO
+}      
+    </code>
+    <cleancode>
+function getBreakShot() {
+  return { 
+    aimx: 0, aimy: 35
+  }; 
+}            
+    </cleancode>
+</element>
+
+<element elementid="120" elementType="Coding" condition="TestFinishedFirstTouchBall_11">
+  <p>You are doing well! Now can you <b class="reallyhighlight">try different values for aimx and aimy until the white cue ball hits ball 11 (yellow ball on the right most) before any other ball</b>?</p>
+  <!-- <p>
+      <img src="/images/ballidsfor11.jpg" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>   -->
+  <p>
+    Click the <img src='/images/testbutton.png' style='width: 40px; height: auto; vertical-align: bottom;'/> button when you are done. Again, type "<b>hint</b>" or click <img src='/images/icon-hint.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/> if you need some help.
+  </p>
+  <code isHidden="true">
+function getBreakShot() {
+  //TODO: change aimx and aimy to hit yellow ball on right
+  return { 
+    //h0::rebound cue ball off bottom cushion then right cushion::if aimx is 0, aimy is somewhere between 310 and 390.
+    ::aimx:0, aimy: 310
+    ::aimx:0, aimy: 350
+    ::aimx:0, aimy: 390
+    aimx: ?, aimy: ?
+  }; 
+  //ENDTODO
+}      
+  </code>
+  <cleancode>
+function getBreakShot() {
+  return { 
+    // bound off bottom cushion then right cushion
+    aimx: 0, aimy: 350 
+  }; 
+}            
+  </cleancode>  
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Congratulations on completing your first tutorial! </p>
+  <p>
+    <b>Summary:</b> you have learned <b>how to specify the x and y coordinates of any point on the table</b>, and also how to use the 2 parameters <b>aimx</b> and <b>aimy</b> to specify your break shot's aiming point.
+  </p>
+  <p>
+    You can go back to the <a href="/courses">tutorial list</a> for the next tutorial, which has been unlocked for you. But if you are looking for some more fun, below is an extra challenge:
+  </p>
+  <!-- <p>
+    <b>Extra Fun:</b> try to pick another ball, and see if you can have the cue ball hit that ball before any other ball.
+  </p> -->
+  <p>
+    <b>Extra Fun:</b> try to change the aiming point so that the cue ball would fall into pocket 3 (bottom right) after hitting at least one ball. Since the game engine adds some random error to your shot direction to simulate real pool games, even if you are aiming perfectly, you may still need to run the test a few times. Once you get it working, I encourage you to share your solution in our forum, under <a href="https://forum.tgame.ai/t/aiming-point/20" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+
+<!-- even more fun answer: aimx: 515, aimy: 32.5 -->
+

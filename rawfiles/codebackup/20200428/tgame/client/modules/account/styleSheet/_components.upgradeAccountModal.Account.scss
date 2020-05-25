@@ -1,0 +1,172 @@
+.parent-email-modal {
+  width: 100%;
+  padding: 20px;
+  @include flexbox();
+  flex-direction: column;
+  overflow: hidden;
+  .modal__header{
+    padding: 0 0 20px 0;
+  }
+  .modal__header__title{
+  }
+  .button--submit{
+    border-radius: 0px;
+  }
+  .modal__body--content{
+    padding: 0px;
+  }
+  .wrapper-content {
+    & > div {
+      width: 500px;
+    }
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+.choose-question-modal {
+  width: 100%;
+  @include flexbox();
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.plan-item{
+  font-family: $tg-ff-body;
+  display: flex;
+  flex-direction: column;
+  &__title{
+    font-size: $tg-fs-heading3;
+    text-align: center;
+    margin: 35px 0px 20px 0px;
+    font-weight: 500;
+    &.premium-title {
+      color: $tg-col-basic-dark-green;
+    }
+  }
+  &__price{
+    font-size: $tg-fs-heading1;
+    text-align: center;
+    font-weight: 500;
+    .fa-usd {
+      font-size: 1.04em;
+    }
+    .current-price {
+      &.has-coupon {
+        text-decoration: line-through;
+        text-decoration-color: $tg-col-basic-light-blue;
+        margin: 0 10px;
+        .fa-usd {
+          text-decoration: line-through;
+          text-decoration-color: $tg-col-basic-light-blue;
+        }
+      }
+      &.paid-by-school {
+        color: #ff6482;
+      }
+    }
+    .new-price {
+      color: $tg-col-basic-light-blue;
+      text-decoration: none;
+    }
+    &--duration {
+      color: #777272;
+      font-size: 20px;
+      text-decoration: none;
+      &.has-coupon {
+        color: $tg-col-basic-light-blue;
+      }
+    }
+    &--desc{
+      font-size: 12px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 15px;
+      margin-top: 10px;
+    }
+  }
+  &__desc{
+    text-align: center;
+    margin: 25px 0px;
+    line-height: 24px;
+    color: $tg-col-basic-light-blue;
+    padding: 0 20px;
+  }
+  &__features{
+    font-size: 16px;
+    font-weight: 500;
+    flex: 1;
+    &__item{
+      @include flexbox();
+      align-items: center;
+      margin-bottom: 20px;
+      span{
+        flex: 1;
+        line-height: 20px;
+      }
+      &.different-item {
+        color: $tg-col-basic-dark-green;
+      }
+      .fa{
+        line-height: 20px;
+        color: #e0e0e0;
+        font-size: 22px;
+        font-weight: bold;
+      }
+    }
+  }
+  &__button {
+    .btn{
+      margin: 20px 0px 10px 0px;
+      width: 100%;
+      border-radius: 10px;
+      font-size: 18px;
+      padding: 10px 20px;
+      height: 60px;
+      font-weight: 500;
+
+      &.current-plan-btn {
+        border: 2px solid #ff6482;
+        color: #ff6482;
+        background: #fff;
+        svg {
+          path {
+            stroke: #ff6482;
+          }
+        }
+
+        .sub-name {
+          font-size: 17px;
+          margin-top: 5px;
+        }
+      }
+      &.updatepay-btn {
+        color: #fff;
+        background: #141a6d;
+
+        &:hover {
+          background: #1a1c9b;
+        }
+      }
+      &.upgrade-btn {
+        color: #fff;
+        background: #257a14;
+
+        &:hover {
+          background: #419628;
+        }
+      }
+      &.downgrade-btn {
+        color: #fff;
+        background: #92120e;
+
+        &:hover {
+          background: #aa200e;
+        }
+      }
+    }
+  }
+}
+

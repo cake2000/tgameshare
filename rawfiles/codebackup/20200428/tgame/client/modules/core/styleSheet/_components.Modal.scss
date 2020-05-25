@@ -1,0 +1,389 @@
+// vienpn Style
+.ReactModal{
+  &__Body{
+    &--open{
+      .tg-page{
+        &--general{
+          background: transparent;
+          background-image: none;
+        }
+      }
+    }
+  }
+}
+
+.modal{
+  &_block{
+    &_general{
+      position: relative;
+      padding: 20px;
+      &__loadingOverlay{
+        display: flex;
+        min-height: 160px;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: calc(50% - 45px);
+        left: calc(50% - 25px);
+        svg{
+          width: 40px;
+          height: 50px;
+          path{
+            stroke: #000;
+          }
+        }
+      }
+    }
+  }
+  &__header{
+    @include flexbox();
+    &__title {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      font-size: 21px;
+      font-weight: 600;
+      color: #0a2635;
+      border-radius: 20px 20px 0px 0px;
+      background-color: #fff;
+      & > span{
+        margin-right: 15px;
+      }
+    }
+    &--close {
+      width: 30px;
+      color: #0a2635;
+      height: 30px;
+      text-align: center;
+      cursor: pointer;
+      opacity: 0.8;
+      top: 0px;
+      align-items: center;
+      display: flex;
+      border-radius: 100%;
+      justify-content: center;
+      &:hover {
+        background: #ff5259;
+        opacity: 1;
+        color:#fff;
+      }
+    }
+  }
+  &_body{
+    &--changeTools{
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 960px;
+      margin-top: 15px;
+    }
+
+    &__content{
+
+
+    }
+  }
+  &__footer{}
+  &--AgeConfirm{
+    .modal__body{
+      margin-top: 25px;
+      display: flex;
+      margin-bottom: 10px;
+    }
+    .modal__body__left{
+      margin-right: 20px;
+    }
+    .modal__body__right{
+      flex: 1;
+    }
+
+    .text{
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .btn{
+      &--group{
+        text-align: center;
+      }
+      margin-right: 15px;
+    }
+  }
+}
+
+
+
+
+
+.modal{
+  &_block{
+    &_general{
+
+    }
+  }
+  &__header{
+    @include flexbox();
+    font-size: $tg-fs-heading4;
+    font-family: $tg-ff-form;
+    color: $tg-col-basic-ivory;
+    &__title{
+    }
+    &__title-center{
+      text-align: center;
+    }
+    &__action{
+      &--addStudent {
+        border: 1px solid #2793ff !important;
+        background: #2793ff !important;
+        color: #fff;
+        padding: 5px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-right: 10px;
+        i {
+          margin-right: 5px;
+        }
+        &:hover {
+          background: #1972f9 !important;
+        }
+      }
+      button{
+        background: none;
+        border: none;
+        &:focus{
+          outline: none;
+          color: #21abda;
+        }
+      }
+    }
+  }
+  &__content{
+    &.payment-form {
+      padding: 15px;
+      overflow: auto;
+
+      .payment-currentPlan {
+        margin-top: 20px;
+        text-align: center;
+        color: $tg-col-basic-light-blue;
+        font-weight: 500;
+        font-size: 17px;
+      }
+
+      .form__group {
+        padding: 3px 5px;
+        .form__label {
+          padding: 5px 0;
+          font-weight: 500;
+        }
+        .form__group__text {
+          width: 100%;
+          background: #fff;
+          height: 36px;
+          max-width: 100%;
+          border-color: #b4b4b4;
+          border-radius: 3px;
+        }
+      }
+      .form__group--action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 10px 0;
+
+        .charged-btn {
+          background: #404aff;
+          color: #fff;
+          width: calc(100% - 260px);
+          margin: 5px 0;
+          border-radius: 3px;
+          height: 100%;
+          &:hover {
+            background: #1823f9;
+          }
+        }
+        .cancelled-btn {
+          background: none;
+          color: #ee371f;
+          &:hover {
+            color: #2e0c0b;
+          }
+        }
+      }
+    }
+    &__billing{
+      @include flexbox();
+      margin-bottom: 15px;
+      margin-top: 30px;
+      height: 80px;
+      &__desc{
+        flex: 1;
+        font-size: 19px;
+        font-weight: 500;
+      }
+      &__switch{
+        @include flexbox();
+        align-items: baseline;
+        justify-content: flex-end;
+        &__wrapper {
+          text-align: right;
+        }
+        &__title {
+          color: #c5c4cc;
+          font-weight: 500;
+          font-size: 13px;
+        }
+        &__action{
+          .billing-btn{
+            padding: 8px 12px;
+            border-radius: 3px;
+            margin-left: 10px;
+            font-size: 12px;
+            border: 1px solid $tg-col-xxx-grey;
+            background-color: $tg-col-xxx-grey;
+            color: $tg-col-light-grey;
+            cursor: pointer;
+            &:focus{
+              outline: none;
+            }
+            &:hover {
+              background-color: $tg-col-x-grey;
+            }
+          }
+          .disabled{
+            cursor: none;
+            pointer-events: none;
+            background-color: $tg-col-light-grey;
+            color: $tg-col-light;
+          }
+        }
+        &__coupon {
+          color: $tg-col-basic-light-blue;
+          text-decoration: underline;
+          font-size: 17px;
+          margin-top: 10px;
+          font-weight: 500;
+          cursor: pointer;
+          text-align: right;
+          &.has-coupon {
+            text-decoration: none;
+            i {
+              color: $tg-col-basic-alert;
+            }
+          }
+          &.coupon-expiration {
+            text-decoration: none;
+            color: $tg-col-basic-alert;
+          }
+        }
+      }
+    }
+    &__plans{
+      @include flexbox();
+      &__container {
+        margin: 0 70px 55px 0;
+        flex: 1;
+        &:last-child{
+          margin-right: 0;
+        }
+        &:first-child{
+          margin-left: 0;
+        }
+      }
+      &__students {
+        text-align: center;
+        color: #257a14;
+        font-size: 20px;
+        cursor: pointer;
+        &:hover {
+          color: #419628;
+        }
+      }
+      &__item{
+        border: 2px solid #b1b1b1;
+        margin-bottom: 10px;
+        padding: 15px 25px;
+        height: 100%;
+
+        &.current-plan {
+          border: 2px solid #ff6482;
+        }
+      }
+    }
+  }
+}
+
+// .ReactModal {
+//   &__Overlay {
+//     &--after-open {
+
+//     }
+//   }
+//   &__Content {
+//     background-color: $tg-col-basic-white !important;
+//     padding: 0px !important;
+//     border-radius: 0px !important;
+//     .modal__header {
+
+//     }
+//     .modal__body {
+//       background-color: $tg-col-basic-white;
+//       color: $tg-col-basic-dark-blue;
+//       font-family: $tg-ff-body;
+//       font-size: $tg-fs-body;
+//       overflow: auto;
+//       @media only screen and (max-width: 768px) {
+//         flex-direction: column;
+//       }
+//       @include flexbox();
+//       &--img {
+//         padding: 20px 0 20px 30px;
+//       }
+//       &--content {
+//         @include flexbox();
+//         flex-direction: column;
+//         padding: 20px 30px;
+//         flex: 1;
+//         .text {
+//           margin-bottom: 20px;
+//         }
+//         .btn--group {
+//           @include flexbox();
+//           justify-content: center;
+//           .btn {
+//             font-size: $tg-fs-body;
+//             padding: 10px;
+//             min-width: 80px;
+//             text-align: center;
+//             margin-right: 10px;
+//             cursor: pointer;
+//             text-transform: none;
+//             border-radius: 3px;
+//             transition-duration: 0.3s;
+//             &.btn-big {
+//               font-size: $tg-fs-heading3;
+//             }
+//             &.btn-info {
+//               color: $tg-col-basic-white;
+//               border: 1px solid $tg-col-basic-dark-blue;
+//               background-color: $tg-col-basic-dark-blue;
+//               &:hover {
+//                 border: 1px solid $tg-col-hover;
+//                 background-color: $tg-col-hover;
+//               }
+//             }
+//             &.btn-default {
+//               border: 1px solid $tg-col-basic-aqua;
+//               color: $tg-col-basic-dark-blue;
+//               background-color: $tg-col-basic-white;
+//               &:hover {
+//                 border: 1px solid $tg-col-blue;
+//                 background-color: $tg-col-blue;
+//                 color: $tg-col-basic-white;
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// }

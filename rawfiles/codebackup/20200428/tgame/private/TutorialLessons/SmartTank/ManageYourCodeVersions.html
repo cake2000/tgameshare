@@ -1,0 +1,106 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+}      
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hey! Before we dive into more complicated code, in this tutorial, we will discuss how to manage different versions of our code. If you've learned this part in the pool game tutorials, you can have a quick review. It cannot be over-emphasized on version control. 
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Managing program release is always an important part of the work of programming. <b>A release is a specific copy of your code</b>. Normally you want to create a new release each time you have completed some improvements to your bot code, and you need to select a valid release when you play games using your bot.
+  </p>
+  <p>
+    <img src="/images/coderelease.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+    As shown above, three control buttons ("Save", "Load" and "Delete") are provided at the upper-right of the code editor for managing bot code releases.
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>Here are more details on how to use these control buttons.
+    <ul>
+      <li>
+        <p> 
+          To <b>save your code into a new release</b>
+        </p>
+        <p id="save">
+          Type the name of the release (such as "v1"), and then click <img src='/images/saveButton.jpg' style='width: auto; height: 20px; vertical-align: bottom;'/>. If another release already exists by that name, you'll be prompted to confirm or cancel your request to save. <b>If you confirm, the earlier release will be overwritten.</b> If you cancel, the saving does not occur, and the earlier release is preserved; you will have to choose a new name for your new release. 
+        </p> 
+        <p>
+          <img src="/images/savearelease.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+        </p>
+        <p>
+          Whenever you have completed a major update to your bot code, it is a good idea to copy the entire code and email it to yourself as a safe copy. This will ensure that you have an extra ("safe") copy in case you should accidentally overwrite the release in the future.
+        </p>
+      </li>
+      <li>
+        <p>
+          To <b>load an existing release</b> of your bot code into the editor
+        </p>
+        <p id="load">
+          Type in the release name, select the release you want to load from the dropdown, and then click <img src='/images/loadButton.jpg' style='width: auto; height: 20px; vertical-align: bottom;'/>. (To list all existing release versions, you can click the input box and type the <b>space</b> key.) Next, you'll be prompted to confirm or cancel your command to load. 
+        </p>
+        <p>
+            <img src="/images/loadarelease.gif" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+          </p>
+        <p>
+          Note that loading a release will <b>completely replace</b> the current code in your editor, so do it with care. Also, as a protection for previous releases, changes you make in the editor are not automatically saved back into the last-loaded release unless you explicitly save them to that release. Instead, <b>your edits are auto-saved into a draft in the editor</b>.
+        </p>
+      </li>
+      <li>
+        <p>
+          To <b>delete an existing release</b> of your bot code
+        </p>
+        <p id="delete">
+          Type in the release name, or select the release you want to delete, and then click <img src='/images/deleteButton.jpg' style='width: auto; height: 25px; vertical-align: bottom;'/>. <b>Since this is unrecoverable, please do it with extreme caution.</b> 
+        </p>
+      </li>
+    </ul>
+  </p>
+  <p>
+    <b>Action:</b> Following the above instructions, create a release of your bot code now.
+  </p>
+</element>
+
+<element elementid="200" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> Now you have released a simple and silly robot that shoots white tanks. Now you can select the first version of your own robot for practice or online games. Go ahead and try a practice game with your newly "born" game bot!
+  </p>
+  <p>
+    <b>Exercise 1:</b> Try to release your code into a new version called "test", then delete that version. 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Try to delete some lines from your code, then load the released code into the editor to restore your code.
+  </p>
+</element>
+

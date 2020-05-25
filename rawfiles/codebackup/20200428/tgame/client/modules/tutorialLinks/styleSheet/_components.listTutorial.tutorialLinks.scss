@@ -1,0 +1,264 @@
+
+.tg-tutorial {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 35px;
+  &__container {
+    margin: 0px auto 20px;
+    max-width: 1170px;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+  }
+  &__header {
+    display: flex;
+    justify-items: center;
+    justify-content: space-between;
+    background: #1bdabb;
+    padding: 20px;
+    color: #fff;
+    &__left {
+      display: flex;
+      align-items: center;
+      flex: auto;
+      margin-right: 10px;
+
+      font-size: 1.2em;
+      font-weight: 600;
+      > span {
+        margin-right: 10px;
+      }
+      > div {
+        flex: auto;
+        max-width: 600px;
+      }
+    }
+    &__right {
+      display: flex;
+      align-items: center;
+      > i {
+        font-size: 22px;
+      }
+      > a {
+        margin: 0 0 0 7px;
+        font-size: 1.1em;
+        color: #fff;
+      }
+    }
+  }
+  &__title {
+    &__group {
+      font-size: $tg-fs-heading4 !important;
+      margin-top: 25px;
+    }
+    h3 {
+      margin-top: 25px;
+      font-family: $tg-ff-form;
+      color: $tg-col-basic-navy;
+      font-size: $tg-fs-heading3;
+      padding-bottom: 10px;
+      line-height: 30px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid $tg-col-basic-grey;
+    }
+  }
+  &__group {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &--avatar {
+      width: 100px;
+      text-align: center;
+      position: absolute;
+      top: 20px;
+
+      &--robot {
+        width: 80px !important;
+        height: auto;
+        top: 30px;
+      }
+
+      img {
+        width: 100%;
+      }
+    }
+
+    &--content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-left: 125px;
+    }
+
+    &--block {
+      display: flex;
+      flex-direction: column;
+      margin: 15px 0px 0px 15px;
+
+      &__line {
+        display: flex;
+        align-items: center;
+
+        &__name {
+          color: $tg-col-basic-orange;
+          margin-bottom: 5px;
+          line-height: 24px;
+          font-weight: bold;
+          font-size: calc(#{$tg-fs-heading4} - 1px);
+          flex: 1;
+          cursor: pointer;
+
+          &:hover {
+            color: $tg-col-basic-light-blue;
+          }
+        }
+
+        &__name__locked {
+          color: $tg-col-basic-lighter-blue;
+          margin-bottom: 5px;
+          line-height: 24px;
+          font-weight: bold;
+          font-size: calc(#{$tg-fs-heading4} - 1px);
+          flex: 1;
+          // cursor: pointer;
+          // &:hover{
+          // color: $tg-col-hover-a;
+          // }
+        }
+
+        &__progress {
+          display: flex;
+          align-items: center;
+
+          img {
+            width: 15px;
+            margin-right: 12px;
+          }
+
+          span {
+            color: $tg-col-basic-navy;
+            font-size: $tg-fs-body;
+            font-weight: 300;
+          }
+        }
+
+        &__level {
+          display: flex;
+          align-items: center;
+          margin: 5px 0px 10px 0px;
+
+          .tg-icon-star {
+            font-size: $tg-fs-body;;
+            margin-left: 3px;
+          }
+
+          span {
+            color: $tg-col-basic-black;
+            font-size: $tg-fs-body;
+            margin-right: 10px;
+            font-weight: 300;
+          }
+        }
+
+        &__coin {
+          margin-bottom: 5px;
+          margin-left: 10px;
+
+          img {
+            width: 25px;
+            height: 25px;
+            margin-right: 5px;
+          }
+
+          display: flex;
+          align-items: center;
+          font-size: $tg-fs-heading4;
+          color: $tg-col-yellow;
+        }
+      }
+    }
+  }
+}
+.form-status{
+  margin: 0px 0px;
+  width: 100%;
+  &__info{
+    padding: 20px;
+    text-align: center;
+    &--sucess{
+      background-color: $tg-col-bg-sucess;
+    }
+    &--fail{
+      padding: 10px 20px;
+      background-color: $tg-col-bg-fail;
+    }
+  }
+}
+
+@media(max-width: 480px){
+  .tg-tutorial {
+    &__block{
+      &__line{
+        &__name{
+          font-size: $tg-fs-body;
+        }
+        &__progress{
+           span{
+             font-size: $tg-fs-comment;
+           }
+        }
+        &__level{
+          .tg-icon-star{
+            font-size: $tg-fs-body;
+          }
+           span{
+             font-size: $tg-fs-comment;
+           }
+        }
+      }
+    }
+    &__title{
+      h3{
+        font-size: $tg-fs-heading4;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+    }
+    &__group {
+      display: flex;
+      flex-direction: column;
+      &--avatar {
+        width: 100px;
+        text-align: center;
+        position: relative;
+        top: 20px;
+
+        &--robot {
+          width: 80px !important;
+          height: auto;
+          top: 30px;
+        }
+
+        img {
+          width: 100%;
+        }
+      }
+      &--content {
+        width: 100%;
+        margin-left: 0px;
+      }
+      &--block {
+        margin: 0px;
+        &__line {
+          display: flex;
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

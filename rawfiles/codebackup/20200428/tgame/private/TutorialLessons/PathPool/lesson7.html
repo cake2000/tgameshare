@@ -1,0 +1,107 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Very often your robot needs to estimate how likely it can pocket a ball at position A when the cue ball is at position B. Though the game engine provides the utility function <b>calculateProbability</b>, it is slow, and it doesn't allow you to specify the cue ball position at will.</p>
+    <p>
+      Human player can get a sense of such success probability through experience. For robot players, we need to do the same thing: generate a lot of training data for shot success probability and then build a model for it. Are you ready to get started? 
+    </p>
+</element>
+
+<element elementid="110" elementType="Quiz" answerKey="C" answerReason="Choice C is preferred over choice B since the x and y values can be negative, and the minus sign can be confused to be the seperator. ">
+    <h5 class="elementheader">Storing key and values</h5>
+    <p>
+      Since we need to generate a lot of training data, we need to store the value somewhere, so you don't need to restart from scratch if you need to make multiple runs to complete the dataset. In Javascript, this can be easily done with <b>localStorage</b> like this:
+    </p>
+    <p>
+        <pre class="brush: js">
+          localStorage.setItem(keyString， valueString);
+        </pre>
+    </p>
+    <p>
+        Each <b>setItem</b> call stores one string value using a unique key string. Suppose we have retrieved the probability of shooting a ball at position (targetx, targety) using the cue ball at (cueballx, cuebally), the value to be stored is obviously the probability, but what should be a good format of the key to use?
+    </p>
+    <p>Please answer with one letter: <b>A</b>, <b>B</b>, <b>C</b>, or <b>D</b>.</p>
+    <p>
+      <ul>
+        <li>
+          <b>A</b>. key = targetx + "_" + targety;
+        </li>
+        <li>
+          <b>B</b>. key = targetx + "-" + targety + "-" + cueballx + "-" + cuebally;
+        </li>
+        <li>
+            <b>C</b>. key = targetx + "_" + targety + "_" + cueballx + "_" + cuebally;
+        </li>
+      </ul>
+    </p>
+</element>
+    
+
+<element elementid="120" elementType="Coding" condition="TestFinishedGotOneProbabilityStored">
+  <h5 class="elementheader">Storing one training sample</h5>
+  <p>
+      Now we are ready to actually generate one training sample and store it. Specifically, as shown in the example test setup code below, you need to call a new function <b>GetCallShotProbability</b> to retrieve the probability of best call shot command, and then store that value to <b>localStorage</b> as discussed above. When you click Test, I expect to see the correct probability value added to the localStorage.
+  </p>
+  <code isHidden="false">
+ResetTable(true);
+SetCandidateBalls([2]);
+
+let cueballx = 100;
+let cuebally = 200;
+let targetx = 0;
+let targety = 0;
+PlaceBallOnTable(0, cueballx, cuebally);
+PlaceBallOnTable(2, targetx, targety);
+
+// ask for probability of best shot
+let prob = await GetCallShotProbability();
+
+//TODO: store probability to localStorage
+//h0::compose a unique key::please refer to the answer from the quiz above
+const key = ? ;
+
+//h1::store probability using localStorage.setItem
+::localStorage.setItem(key, prob);
+::localStorage.setItem(prob, key);
+::localStorage.setItem(key, value);
+//ENDTODO
+  </code>
+</element>
+
+    
+
+<element elementid="150" elementType="Coding" condition="TestFinishedBlackBallPocketed">
+    <h5 class="elementheader">Building a simple model</h5>     
+    <p>Now that you are familiar with vector operations, let's try to use it in your robot program to make your shot work for any ball/pocket. </p>
+    <p>In this test, the black ball is no longer vertically aligned with the bottom middle pocket, but the idea is the same: pick an aiming position for the cue ball such that it is touching the black ball, and it is on the same line as the black ball and the pockets.</p>
+    <code isHidden="false">
+ResetTable(true);
+SetCandidateBalls([2]);
+
+let cueballx = 100;
+let cuebally = 200;
+let targetx = 0;
+let targety = 0;
+PlaceBallOnTable(0, cueballx, cuebally);
+PlaceBallOnTable(2, targetx, targety);
+
+let prob = GetCallShotProbability();
+//TODO: store probability to localStorage
+const key = targetx + "_" + targety + "_" + cueballx + "_" + cuebally;
+//h1::call localStorage.setItem
+::localStorage.setItem(key, prob);
+::localStorage.setItem(prob, key);
+::localStorage.setItem(key, value);
+//ENDTODO
+  </code>
+</element>
+
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing your third tutorial! </p>
+    <p>
+        <b>Extra Credit:</b> try to change pocket from the world.Pockets[4] (bottom center pocket) to world.Pockets[3] (bottom right pocket), and see if your robot can hit the blackball into that pocket without any other code change. How about world.Pockets[2] (top right pocket)?
+    </p>
+    <p><b>Todo:</b>Go to <a href="#" onclick="GoToNextTutorial(event)" class="inlinebutton">Next Tutorial</a>. </p>
+</element>

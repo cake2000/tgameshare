@@ -1,0 +1,258 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Now your robot can hit a blackball straight down, let's enhance it to hit the ball into any pocket from anywhere. To do that, we need to give your robot a new tool to use: <b>2-dimension (2D) Vectors</b></p>
+    <p>
+        A 2D vector is an object with 2 key attributes: x and y. It can be used to represent a point on the table (like ball position), or a directed arrow from one point to another point:
+    </p>
+    <p>
+        <pre class="brush: js">
+// vector as a position 
+var pos1 = { x: 200, y: 50 };
+var pos2 = { x: 100, y: 130 };
+
+// vector as the direction from pos2 to pos1
+var Dir2to1 = {
+  x: pos1.x - pos2.x, // 100
+  y: pos1.y - pos2.y, // -80
+};
+        </pre>
+    </p>
+    <p>
+        <img src="/images/VectorDirectionIllustration.jpg" style="width: 40%; height: auto; margin-left: 30%; vertical-align: top;"/>
+    </p>
+</element>
+
+
+<element elementid="110" elementType="Quiz" answerKey="C">
+    <h5 class="elementheader">[Quiz] Vector Operations</h5>
+    <p>
+        Since we will be using vectors for a lot of calculations in your robot, we need to define a few math operation functions, such as adding and subtracting vectors:
+    </p>
+    <p>
+        <pre class="brush: js">
+function addVectors(v1, v2) {
+  // add x and y attributes separately
+  return { x: v1.x + v2.x, y: v1.y + v2.y };
+}
+function subtractVectors(v1, v2) {
+  // subtract x and y (order matters)
+  return { x: v1.x - v2.x, y: v1.y - v2.y };
+}
+const v1 = {x: 5, y:10}, v2 = {x:12, y:4};
+const v3 = addVector(v1, v2);       // -> {17, 14}
+const v4 = subtractVectors(v2, v1); // -> {7,  -6}
+        </pre>
+    </p>
+    <p>
+        The calculations above are illurstrated in the drawing below.
+    </p>
+    <p>
+        <img src="/images/VectorAddAndSubtract.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+    <p><b>Quiz:</b> what is the value of v3 in the calculation below? Please answer in the chat with one letter: <b>A</b>, <b>B</b>, <b>C</b>, or <b>D</b>.</p>
+    <p></p>
+    <p>
+        <pre class="brush: js"> 
+var v1 = {x: 10, y:20}, v2 = {x:30, y:-20};
+var v3 = addVectors(v1, subtractVectors(v1, v2));
+v3 = ?
+[A]: {x:10,  y:20};
+[B]: {x:30,  y:-20};
+[C]: {x:-10, y:60};
+[D]: {x:10,  y:-60};
+        </pre>
+    </p>
+</element>
+    
+
+<element elementid="120" elementType="Quiz" answerKey="B">
+    <h5 class="elementheader">More Vector Operations</h5>
+    <p>
+        Besides adding and subtracting, here are some more interesting operations on vectors.
+    </p>
+    <p>
+        <img src="/images/vectornormalizescale.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+    <ul>
+        <li>
+            <p>
+                <b>Length of Vector: the distance between the point (x,y) and (0,0).</b>
+            </p>
+            <p>
+                <pre class="brush: js">
+function VectorLength(v) {
+    return Math.sqrt(v.x*v.x + v.y*v.y);
+}
+VectorLength({x:4, y:3}) -> 5
+                </pre>
+            </p>
+        </li>
+        <li>
+            <p>
+                <b>Scaling a Vector: shrink or extend a vector along its direction by a multiplier.</b>
+            </p>
+            <p>
+                <pre class="brush: js">
+function ScaleVector(v, multiplier) {
+    return {
+        x: v.x * multiplier,
+        y: v.y * multiplier 
+    }
+} 
+ScaleVector({x:4, y:3}, 2) -> {x:8, y:6}
+                </pre>
+            </p>
+        </li>
+        <li>
+            <p>
+                <b>Normalization of Vector: scale a vector so its length becomes 1.</b>
+            </p>
+            <p>
+                <pre class="brush: js">
+function NormalizeVector(v) {
+    var length = VectorLength(v);
+    return ScaleVector(v, 1/length);
+}
+NormalizeVector({x:8, y:6}) -> {x:0.8, y:0.6}
+                </pre>
+            </p>
+        </li>
+    </ul>
+
+    <p><b>Quiz:</b> what is the value of v3 in the calculation below? Answer with one letter: <b>A</b>, <b>B</b>, <b>C</b>, or <b>D</b>.</p>
+    <p>
+        <pre class="brush: js"> 
+var v1 = {x: 40, y:20}, v2 = {x:10, y:-20};
+var v3 = NormalizeVector(subtractVectors(v1, v2);
+v3 = ScaleVector(v3, 5);
+v3 = ?
+[A]: {x:4,  y:6};
+[B]: {x:3,  y:4};
+[C]: {x:4, y:5};
+[D]: {x:12,  y:15};
+        </pre>
+    </p>
+</element>
+
+<element elementid="130" elementType="Info" >
+    <h5 class="elementheader">[Info] The Victor Library</h5>     
+    <p>
+        Given that the vector operations are so useful, we should write a library so that programmers all over the world can use it!        
+    </p>
+    <p>
+        ... But on a second thought, we are probably not the first to think about building a vector library. A google search on "javascript vector librarry" shows many awesome libraries for us to use for free, and we will be using a simplified version of <a href="http://victorjs.org/" target="_blank">Victor.js</a> in our Trajectory Pool games. 
+    </p>
+    <p>
+        Here is a reference card for a few key operations we use most often, and I can bring it out for you whenever you ask me "what is victor.js?" in our chat.
+    </p>
+    <p>
+        <table class="ReferenceTable">
+            <thead>
+                <th> Usage </th> <th>Description</th>
+            </thead>
+            <tbody>
+                    <tr>
+                        <td>v1=new Victor(2,3)</td>
+                        <td>create a new vector</td>
+                    </tr>
+                    <tr>
+                        <td>v1.add(v2)</td>
+                        <td>set v1 to v1 + v2</td>
+                    </tr>
+                    <tr>
+                        <td>v1.subtract(v2)</td>
+                        <td>set v1 to v1 - v2</td>
+                    </tr>
+                    <tr>
+                        <td>v1.normalize()</td>
+                        <td>scale v1 to length=1</td>
+                    </tr>
+                    <tr>
+                        <td>v1.scale(2)</td>
+                        <td>double v1's length</td>
+                    </tr>
+                    <tr>
+                        <td>v2=v1.clone()</td>
+                        <td>make a copy of v1</td>
+                    </tr>
+                    <tr>
+                        <td>L1=v1.length()</td>
+                        <td>get v1's length</td>
+                    </tr>
+                </tbody>
+        </table>
+    </p>
+</element>
+    
+<element elementid="142" elementType="Coding" condition="TestFinishedBlackBallPocketed">
+    <h5 class="elementheader">[Challenge] Hitting The Black Ball</h5>     
+    <p>Now that you are familiar with vector operations, let's try to use it in your robot program. </p>
+    <p>In this challenge, the black ball's x and y coordinates are both random. So to hit it into the bottom pocket, we need to aim the cue ball this way: when the cue ball touches the black ball, it kicks the blackball from behind towards the bottom pocket, as illustrated below.</p>
+    <p>
+        <img src="/images/calculateaimingblackball.png" style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+    </p>
+    <p>
+        As you can see below, I've added some setup code to get 4 vector objects for you to use: the black ball position <b>blackBallPos</b>, the ball diameter <b>ballD</b>, and the bottom center pocket position <b>pocketPos</b>.
+    </p>
+    <p><b>Challenge:</b> please add the calculation needed to calculate aimPos so that your robot hits the black ball into the bottom center pocket.
+    </p>
+    <code isHidden="false">
+function getCallShot() {
+  const blackBallPos = world.Balls[1].clone();
+  const ballD = world.BallDiameter; 
+  const pocketPos = world.Pockets[4].clone();
+
+  //TODO: calculate aim ball position (aimPosition)
+  //h0::define dirBallToPocket as arrow from target ball to pocket::use subtract operation between pocketPos and blackBallPos
+  ::const dirBallToPocket = pocketPos.subtract(blackBallPos); 
+  ::const dirBallToPocket = blackBallPos.subtract(pocketPos); 
+  const dirBallToPocket = ?; 
+  //h1::calculate dirAimToBall by scaling dirBallToPocket to length ballD::use normalize and scale on dirBallToPocket
+  ::const dirAimToBall = dirBallToPocket.scale(ballD);
+  ::const dirAimToBall = dirBallToPocket.scale(ballD).normalize();
+  ::const dirAimToBall = dirBallToPocket.normalize().scale(ballD);
+  const dirAimToBall = ?; 
+  //h2::define aim position using target ball position::subtract dirAimToBall from targetBallPos
+  ::const aimPosition = dirAimToBall.subtract(blackBallPos);
+  ::const aimPosition = blackBallPos.subtract(dirAimToBall);
+  ::const aimPosition = pocketPos.subtract(dirAimToBall);
+  const aimPosition = ?; 
+  //ENDTODO
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 1000 };                          
+}
+
+function getBreakShot() {
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+
+</element>
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing your third tutorial! </p>
+    <p>
+        <b>Extra Credit:</b> try to change target pocket from world.Pockets[4] (bottom center pocket) to world.Pockets[3] (bottom right pocket), and see if your robot can hit the blackball into that pocket without any other code change. For a more difficult challenge, what changes are needed to hit the blackball into the top right pocket (world.Pockets[2]) via rebound?
+    </p>
+</element>
+
+
+
+
+<!-- 
+function getCallShot() {
+  const blackBallPos = world.Balls[1].clone();
+  const ballD = world.BallDiameter; 
+  const pocketPos = world.Pockets[4].clone();
+  const dirBallToPocket = pocketPos.subtract(blackBallPos); 
+  const dirAimToBall = dirBallToPocket.normalize().scale(ballD); 
+  const aimPosition = blackBallPos.subtract(dirAimToBall); 
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 1000 };                          
+}            
+
+function getBreakShot() {
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+
+-->

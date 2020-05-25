@@ -1,0 +1,19 @@
+.verification-email{
+  position: fixed;
+  cursor: pointer;
+  width: 100%;
+  background: #e47727;
+  z-index: 1;
+  top: 70px;
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
+  &__text{
+    max-width: 1170px;
+    color: #fff;
+  }
+  &__loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

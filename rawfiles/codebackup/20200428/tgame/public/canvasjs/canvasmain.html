@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" value="notranslate">
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />    <!-- <link rel="shortcut icon" href="static/favicon.ico"> -->
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+
+      let nextCanvasID = 0;
+      window.onmessage = function(e){
+        if (!e.data) return;
+        if (!e.data.indexOf) return;
+
+        // if (e.data.includes("reveal") && e.data.includes("resize") && e.data.includes("eventName") ) {
+        //   that.setState({isLoadingScratch: true});
+        //   $("#messagecontent").html("Loading project ...");
+        //   $("#scratchoverlay").show();
+        // }
+
+
+        if (e.data.indexOf('PRINT_TEXT') == 0) {
+          const msg = e.data.substring(11);
+          $("#console").append("<p>" + msg + "</p>");
+        }
+
+        if (e.data.indexOf('CLEAR_OUTPUT') == 0) {
+          $("#console").empty();
+        }
+        
+
+        if (e.data.indexOf('DRAW_CIRCLE') == 0) {
+          const params = e.data.substring(12).split(":");
+          $("#console").append("<p><canvas id='canvasid" + (nextCanvasID) + "'></canvas></p>");
+          let canvas = document.getElementById('canvasid'+nextCanvasID);
+          nextCanvasID ++;
+          var context = canvas.getContext('2d');
+          context.beginPath();
+          context.arc(params[0], params[1], params[2], 0, 2 * Math.PI, false);
+          context.fillStyle = params[5];
+          context.fill();
+          context.lineWidth = params[4];
+          context.strokeStyle = params[3];
+          context.stroke();
+        }
+      }
+    </script>
+
+    <style>
+      p {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        margin-left: 5px;
+      }
+
+      canvas { 
+        border: 1px solid blue;
+      }
+    </style>
+
+  </head>
+  <body style="height: 20000px; width: 99%; background: #263547;">
+    <div >
+      <center>
+        <h1 style="margin: 0px; color: white">output</h1>
+        <br />
+      </center>
+      
+
+      <div id="console" style="width: 96%; height: 19900px; margin-left: 2%; background: white;" >
+
+      </div>
+
+      
+    </div>
+
+</body>
+</html>

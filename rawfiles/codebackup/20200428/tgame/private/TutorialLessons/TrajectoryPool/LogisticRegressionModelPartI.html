@@ -1,0 +1,119 @@
+<element elementid="100" elementType="Info">
+  <p>Now that you know how to generate data, I need to show you how to store the data somewhere for use later.</p>    
+  <p>
+    And the data we are going to generate will be used for building a model on a shot's success probability.
+  </p> 
+</element>
+
+<element elementid="104" elementType="Info">
+    <p>
+      As we have made quite some improvements to our robot, so far we have only been focused on <b>improving the odds of success for the current shot</b>. However, as any professional pool player can tell you, to really step up your game, you need to <b>manage the cue ball position after taking the current shot</b>. 
+    </p>
+    <p>
+      <img src="/images/comparison of 2 shots.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>  
+    <p>
+      As shown above, although both shots will sure pocket the targeted ball 2, the second shot has a much higher chance of pocketing ball 3 after that. If we can plan <b>which ball we are targetting next and where to park our cue ball after the current shot</b>, we'll have a much higher chance of taking great shots in a row.
+    </p>
+</element>
+
+
+<element elementid="105" elementType="Info">
+    <p>
+      To get better shot planning, the first step is to estimate success probability given a cue ball position, a target ball position, and a target pocket position. Although we can ask the game engine for this information using <b>world.calculateProbability</b>, that is too slow, and it only works for the current position of the cue ball. 
+    </p>
+    <p>
+      Therefore, our solution is to <b>make a lot of inquiries for different ball position combinations, store the data, and then build a model to estimate the success probability</b>.
+    </p>
+</element>
+
+
+
+<element elementid="110" elementType="Coding" condition="GoodSaveData">
+    <p>
+      Enough talking. Let's generate some data now for a typical call shot. In the starting test script, we are testing how distance affect success probability. In 10 repeated shots, ball 2 is always placed on the left top corner, the cue ball in line with ball 2 and pocket 0, but with increasing distance from ball 2 on each shot. We save the cue ball distance and success probability of each shot into an array, and submit the array at the end.
+    </p>
+    <p>
+      <img src="/images/comparison of 2 shots.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>      
+    <p>
+      Some quick notes on the test script:
+      <ul>
+        <li>
+          <b>dist2(p1, p2):</b> this is how you calculate distance between any 2 points on the table (<b>p1</b> and <b>p2</b>), with each point represented by attribtes x and y.
+        </li>
+        <li>
+          <b>ReportEndOfTest(result):</b> the result you pass back from the test script can be a JSON object describing a table using 2 attributes:
+          <ul>
+            <li></li> this can be a TABLE or 
+          </ul>
+        </li>
+        <li>
+          <b>appending to array:</b> you can append new items into an array using <b>push</b>.
+        </li>
+      </ul>
+    </p> 
+    <p>
+      <b>Challenge:</b> 
+    </p>
+
+    <p>
+      <ul>
+        <li>
+          <b>ResetTable(clearTable):</b> if the parameter <b>clearTable</b> is true, move all balls into pockets; if <b>clearTable</b> is false, move all balls to the starting position of a game.
+        </li>
+        <li>
+          <b>PlaceBallOnTable(ballID, x, y):</b> place a ball with the specified id at the point (x,y) on table. For example, PlaceBallOnTable(1, 0, 0) would put the black ball at table center.
+        </li>
+        <li>
+          <b>ChooseRedColor or ChooseYellowColor:</b> set red or yellow color as your robot's chosen color suite, so that the balls your robot can legally shoot (<i>world.CandidateBallList[MyID]</i>) will be limited to balls of this color on table.
+        </li>
+        <li>
+          <b>TakeCallShot:</b> prompt your robot to take a call shot.
+        </li>
+        <li>
+          <b>TakeBreakShot:</b> prompt your robot to take a break shot.
+        </li>
+        <li>
+          <b>PlaceCueBallFromHand:</b> prompt your robot to place the cue ball on table as if the opponent has just made a foul.
+        </li>
+        <li>
+          <b>WaitForAllBallStop:</b> pause execution of script until all balls have stopped. This is critical if you need to ask your robot to take more than one shots.
+        </li>
+      </ul>
+    </p>
+    <p>
+      <b>Challenge:</b> can you modify the placement of balls so that your robot would choose to shoot ball 2 into pocket 4 (bottom center)?
+    </p>
+</element>
+
+
+
+<element elementid="120" elementType="Coding" condition="TestPPPocketBall_3_In_2">
+    <p>
+      For the last challenge of this lesson, let's do 2 shots in a row. Please add the following 2 lines to the end of your test script:
+    </p>
+    <p>
+        <pre class="brush: js">
+WaitForAllBallStop();
+TakeCallShot();
+      </pre>
+    </p>    
+    <p>
+      As you may have guessed, these 2 new lines asks your robot to wait until all the balls have stopped moving after the first shot, and then take another call shot.
+    </p>
+    <p>
+      <b>Challenge:</b> can you modify the placement of balls so that your robot would choose to shoot ball 2 into pocket 4 (bottom center), <b>and then shoot ball 3 into pocket 2 (top right)</b>?
+    </p>
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! </p>
+  <p><b>Summary:</b> you have learned <b>the basics of setting up a test script</b> using a set of special commands.</p>
+  <p>
+      <b>Exercise:</b> try to place another red ball (say ball 6) on table, and try to change your test script so that your robot would shoot ball 6 into pocket 0 after the first 2 shots.
+      <b>Open Challenge:</b> try to go back to lesson 1 to 10 and check out the test scripts used in those lessons. Feel free to play with them to test your robot differently.
+  </p>
+</element>
+

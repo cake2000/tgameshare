@@ -1,0 +1,19 @@
+@mixin flexbox(){
+  display: -ms-flexbox;
+  display: -moz-flex;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+
+
+@mixin fontMontserrattRegular(){
+  font-family: 'Montserrat', sans-serif ;
+}
+@mixin fontDroidSansRegular(){
+  font-family: "Droid Sans", sans-serif ;
+}
+@mixin fontBold(){
+  font-weight: 600 ;
+}

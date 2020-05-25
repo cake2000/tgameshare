@@ -1,0 +1,127 @@
+
+<element elementid="100" elementType="Info">
+    <!-- <h5 class="elementheader">Hitting the black ball</h5>  -->
+    <h5 class="elementheader">Introduction</h5> 
+    <p>In every pool game, after a valid breakshot, the 2 players start to make <b>Call Shots</b> in turns, where you need to pocket a <b>target ball</b> into a <b>target pocket</b> to keep making call shots. For a simple start, let's teach your robot to hit one ball into a pocket. </p>
+    <p>sounds good?</p>
+</element>
+
+<!-- <element elementid="110"  elementType="Coding" condition="TestFinishedAnyResultAimXYStrength">
+    <h5 class="elementheader">[Challenge] Making a call shot</h5> 
+    <p>First let's add a new function <b>getCallShot</b>, which specifies the aiming point and how much strength to use in a call shot, similar to your <b>getBreakShot</b> function.</p>
+    <p>When you are done, hit the <b>TEST</b> button to have your robot take its first call shot, and it doesn't need to hit any ball yet.</p>
+    <code isHidden="false">
+function getCallShot() {
+  //TODO: return any shot command
+  //h0::return an object similar to getBreakShot with aimx/aimy/strength
+  ::return { aimx: 0, aimy: 0, strength: 1000 };
+  ::{ aimx: 0, aimy: 0, strength: 1000 };
+  ::return { aimx, aimy, strength };
+  return { aimx: 0, aimy: 0, strength: 1000 };
+}                       
+function getBreakShot() {
+  return { strength: 2000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element> -->
+
+<element elementid="115"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch">
+    <h5 class="elementheader">[Challenge] Hitting the Black Ball</h5> 
+    <p>First let's add a new function <b>getCallShot</b> in your robot code, which specifies the aiming point (aimx/aimy) and how much strength to use in a call shot.</p>
+    <p>To make it interesting, I'm placing the black ball on a <b>random point</b> between the table center and the bottom center pocket each time you hit TEST. In other words, the x of the black ball is always 0, but the y coordinate may be any value between 100 and 250. </p>
+    <p>
+      <img src="/images/aimdirectatblackball.png" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+    </p>
+    <p><b>Challenge:</b> please return a shot command object in the getCallShot function based on the draft below so that your robot can hit the black ball. You might need to test a few times.</p>
+    <code isHidden="false">
+function getCallShot() {
+  //TODO: return a shot command to hit the black ball
+  //h0::try to assign some numbers to aimx and aimy::aimx can be 0, how about aimy?
+  ::return { aimx:0, aimy: 0, strength:1000};
+  ::return { aimx:0, aimy: 100, strength:1000};
+  ::return { aimx:0, aimy: 200, strength:1000};
+  return { aimx:?, aimy:?, strength:1000};
+  //ENDTODO
+}           
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element>
+
+
+<element elementid="116"  elementType="Coding" condition="TestFinishedBlackBallFirstTouch">
+    <h5 class="elementheader">[Challenge] Always Hitting the Black Ball</h5> 
+    <p>Instead of hoping for good luck, how do you <b>always</b> hit the black ball? Your robot needs to aim at the black ball using its coordinate like this: <b>blackballPos = world.Balls[1]</b>.</p> 
+    <p>Here <b>world</b> is a helper object for your robot to get information about the game world, and <b>world.Balls[1]</b> represent the position of the ball with ID of 1, which is the black ball. You can ask me about the <b>world</b> to get more information.</p>
+    <p class="jshelp">
+      <b>Javascript Help:</b> note that world.Balls is an array, which contains a list of ball position objects. You can access each object with the syntax "array[index]", so <b>world.Balls[0]</b> is the first object in the list (the cue ball position), <b>world.Balls[1]</b>> is the second object (the black ball position), and so on.
+    </p>
+    <p><b>Challenge:</b> please return a shot command object in the getCallShot function based on the draft below so that your robot can <b>ALWAYS</b> hit the black ball.</p>
+    <code isHidden="false">
+function getCallShot() {
+  // read black ball's position
+  const blackBallPos = world.Balls[1];
+  //TODO: return a shot command to hit the black ball directly
+  //h0::set aimy to be same as black ball's y coordinate
+  ::return { aimx: 0, aimy: blackBallPos.y, strength: 1000 };
+  ::return { aimx: 0, aimy: blackBallPos, strength: 1000 };
+  ::return { aimx: 0, aimy: blackBallPos.ycoordinate, strength: 1000 };
+  return { aimx:0, aimy:?, strength:1000};
+  //ENDTODO
+}           
+
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element>
+
+
+
+
+
+<element elementid="130"  elementType="Coding" condition="TestFinishedBlackBallPocketed">
+    <h5 class="elementheader">[Challenge] Pocketing the Black Ball</h5> 
+    <p>Now let's try to kick the black ball down into the bottom center pocket, as shown below.</p>
+    <p>
+      <img src="/images/callshotaimingexample.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+    <p>When the cue ball is touching the black ball, the cue ball has to be exactly above the blackball, and the distance between the 2 balls' centers is exactly 2 times the ball radius, i.e. the ball diameter  <b>world.BallDiameter</b>. So instead of aiming at the black ball, we just need to aim at this new position right on top of the black ball.</p>
+    <p><b>Challenge:</b> change aimy so that the cue ball always hits the black ball into the bottom center pocket.</p>
+    <code isHidden="false">
+function getCallShot() {
+  const blackBallPos = world.Balls[1];
+  //TODO: return shot command to hit black ball into bottom pocket
+  //h0::aimy should be exactly world.BallDiameter less than blackBallPos.y
+  ::return { aimx: 0, aimy: blackBallPos.y - world.BallDiameter, strength: 1000 };
+  ::return { aimx: 0, aimy: blackBallPos.y + world.BallDiameter, strength: 1000 };
+  ::return { aimx: 0, aimy: world.BallDiameter, strength: 1000 };
+  return { aimx: 0, aimy: ?, strength: 1000 };
+  //ENDTODO
+}          
+                    
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 0, cueballx: 0, cuebally: 0 };
+}      
+    </code>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations on completing your second tutorial! Try to test run it a few more times, and note that your robot can hit the black ball even though it changes its y position every time.</p>
+    <p>
+        For more exercise, can you change your call shot so that it always shoot the black ball to the right horizontally? Think about the aim ball position (that is, where the cue ball should be when it touches the black ball).
+    </p>
+</element>
+
+<!-- 
+function getBreakShot() {
+  return { strength: 3000, aimx: 0, aimy: 2, cueballx: 0, cuebally: 0 };
+}
+
+function getCallShot() { 
+  const blackBallPos = world.Balls[1];
+  return { strength: 1000, aimx: 0, aimy: blackBallPos.y - world.BallDiameter, cueballx: 0, cuebally: 0 };
+}
+-->

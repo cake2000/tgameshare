@@ -1,0 +1,101 @@
+$tg-col-bg-main: #cfd5dc;
+$tg-col-primary: #3e3e3e;
+$tg-col-back: #000;
+$tg-col-blue: #21abda;
+$tg-col-blue-dark: #0a73bc;
+$tg-col-hover: #08609c;
+$tg-col-hover-nav: #0082f3;
+$tg-col-light: #ffffff;
+$tg-col-extra-light: #fafbfc;
+$tg-col-yellow: #ffd800;
+$tg-col-pinkish: #F26060;
+$tg-col-transparent: transparent;
+$tg-col-grey: #383737;
+$tg-col-light-grey: #1e1e1f;
+$tg-col-xx-grey: #504e4e;
+$tg-col-x-grey: #999;
+$tg-col-xxx-grey:  #e7e4e4;
+$tg-col-33:  #333333;
+$tg-col-6c:  #cccccc;
+$tg-col-label: #504e4e;
+$tg-col-extra-light-grey: #f7f9fa;
+$tg-col-border-top-menu: #383737;
+$tg-col-bg-sucess: #dddddd;
+$tg-col-bg-fail: #ffdede;
+$tg-col-btn: #3898EC;
+$tg-col-hover-a: #319ae4;
+$tg-col-hover-span: #3572f1;
+$tg-col-nav-slider: #b1a9a9;
+$tg-col-nav-background: #002736;
+
+// basic colors
+$tg-col-basic-black: #060606;
+$tg-col-basic-white: #fefefe;
+$tg-col-basic-navy: #16385f;
+$tg-col-basic-blue: #2793ff;
+$tg-col-basic-dark-blue: #236bc2;
+$tg-col-basic-light-blue: #51a9d6;
+$tg-col-basic-lighter-blue: #0079ca;
+$tg-col-basic-bg-blue: #051c30; // #052b4b;
+$tg-col-basic-aqua: #97d8dd;
+$tg-col-basic-ivory: #fefaf1;
+$tg-col-basic-orange: #f78f1f;
+$tg-col-basic-grey: #b6c1c5;
+$tg-col-basic-dark-grey: #6c6c6c;
+$tg-col-basic-alert: #c33030;
+$tg-col-basic-green: #00b050;
+$tg-col-basic-dark-green: #618e43;
+
+/****** Pretty printing styles. Used with prettify.js. *******/
+
+/* SPAN elements with the classes below are added by prettyprint. */
+.pln { color: #000 }  /* plain text */
+
+@media screen {
+  .str { color: #080 }  /* string content */
+  .kwd { color: #008 }  /* a keyword */
+  .com { color: #800 }  /* a comment */
+  .typ { color: #606 }  /* a type name */
+  .lit { color: #066 }  /* a literal value */
+  /* punctuation, lisp open bracket, lisp close bracket */
+  .pun, .opn, .clo { color: #660 }
+  .tag { color: #008 }  /* a markup tag name */
+  .atn { color: #606 }  /* a markup attribute name */
+  .atv { color: #080 }  /* a markup attribute value */
+  .dec, .var { color: #606 }  /* a declaration; a variable name */
+  .fun { color: red }  /* a function name */
+}
+
+/* Use higher contrast and text-weight for printable form. */
+@media print, projection {
+  .str { color: #060 }
+  .kwd { color: #006; font-weight: bold }
+  .com { color: #600; font-style: italic }
+  .typ { color: #404; font-weight: bold }
+  .lit { color: #044 }
+  .pun, .opn, .clo { color: #440 }
+  .tag { color: #006; font-weight: bold }
+  .atn { color: #404 }
+  .atv { color: #060 }
+}
+
+/* Put a border around prettyprinted code snippets. */
+pre.prettyprint { padding: 2px; border: 1px solid #888 }
+
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums { margin-top: 0; margin-bottom: 0 } /* IE indents via margin-left */
+li.L0,
+li.L1,
+li.L2,
+li.L3,
+li.L5,
+li.L6,
+li.L7,
+li.L8 { list-style-type: none }
+/* Alternate shading for lines */
+li.L1,
+li.L3,
+li.L5,
+li.L7,
+li.L9 { background: #eee }
+

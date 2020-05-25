@@ -1,0 +1,65 @@
+.admin-table {
+	&__header {
+		padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #eceff1;
+    border-bottom: 1px solid #cfd8dc;
+    font-size: 1.5em;
+	}
+	&__content {
+		background-color: white;
+    flex: 1 1 auto;
+		padding: 1.25rem 3rem;
+    margin-bottom: 1rem;
+		&__row {
+
+		}
+		&__title {
+			border-top: 1px solid #cfd8dc;
+			border-bottom: 2px solid #cfd8dc;
+			&__item {
+				display: inline-block;
+				padding: 0.75rem;
+				font-weight: bold;
+				span {
+					word-wrap: break-word;
+				}
+			}
+		}
+		&__col {
+			&--2{
+				width: 16%
+			}
+			&--3{
+				width: 26%
+			}
+			&--4{
+				width: 36%
+			}
+			&--5{
+				width: 46%
+			}
+			&--6{
+				flex-basis: 56%
+			}
+		}
+		&__data {
+			&__item {
+				border-bottom: 1px solid #cfd8dc;
+				display: inline-block;
+				width: 100%;
+				&__col {
+					display: inline-block;
+					padding: 0.75rem;
+					float: left;
+					span {
+						word-wrap: break-word;
+					}
+				}
+			}
+		}
+	}
+	&__footer {
+
+	}
+}

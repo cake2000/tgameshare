@@ -1,0 +1,190 @@
+
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Whenever your opponent pockets the cue ball by accident, you get a chance to place the cue ball anywhere on the table so long as it doesn't touch any other balls on the table.</p>
+    <p>Many strategies can be adopted to determine how you want to place the cue ball, and in this tutorial we'll implement one of them as an example: try to pocket the one ball that's closest to the rails.</p>
+    <p>Are you ready to get started?</p>
+</element>
+
+
+<element elementid="120" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <!-- <h5 class="elementheader">Adding the getCueBallPlacement function</h5>  -->
+    <p><b>Challenge:</b> for the first step, please add a new function to your robot code <b>this.getCueBallPlacement</b>, which returns the position to place the cueall as a JSON with 2 attributes <b>x</b> and <b>y</b>, both set to 0 (so the cue ball is placed at center of table). <b>Hint:</b> you can ask me about "table dimension" to refresh up on that if you like.</p>
+    <code isHidden="true">
+this.getCueBallPlacement = function() {
+    return {
+        x: 0, 
+        y: 0
+    };
+};
+    </code>
+</element>
+    
+
+<element elementid="130" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <!-- <h5 class="elementheader">Adding the getCueBallPlacement function</h5>  -->
+    <p>So far so good. To make our task simpler, let's assume for the moment we have already selected ball 3 to be our next target, and pocket 5 as the target pocket.</p>
+    <p>
+        Then we only need to place the cue ball right behind ball 3, facing pocket 5. Luckily this is exactly the aim position calculated in our <b>getCallShotCommand</b> function.
+    </p>
+    <p>
+        <b>Challenge:</b> change your <b>this.getCueBallPlacement</b> function to return the x/y position of the aim position if we target ball 3 and pocket 5.
+    </p>
+    <code isHidden="true">
+this.getCueBallPlacement = function() {
+    // use a variable shotCmd to store shot command for pocket 5/ball 3
+    var shotCmd = getCallShotCommand(5, 3);
+    // return the aim position shotCmd.aimx and shotCmd.aimy
+    return {
+        x: shotCmd.aimx,
+        y: shotCmd.aimy
+    };
+};
+    </code>
+</element>
+
+
+
+<element elementid="140" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <!-- <h5 class="elementheader">Adding the getCueBallPlacement function</h5>  -->
+    <p>We are making good progress. The next step towards our goal is to select a target ball from all the balls we can legally shoot.</p>
+    <p>
+        There may be hundreds of ways to define which candidate ball is best, and here as an example we simply pick the ball that is closest to one of the 4 rails, since such balls are usually harder to pocket.
+    </p>
+    <p>
+        It is fairly straightforward to calculate the distance between a ball and the 4 rails, as the rails are at exactly half of table width/height from the center of the table (ignoring the width of the rail bars for now). I have laid out the a basic framework for a new function <b>getBallClosestToRail</b> below.
+    </p>
+    <p>
+        <pre class="brush: js">
+var getBallClosestToRail = function() {
+    var minDistAll = 100000;
+  	var minDistBallID = 0;
+    var legalBallIDs = world.CandidateBallList[myID];
+  
+    for (var j=0; j &lt; legalBallIDs.length; j++){
+      var ballPos = world.Balls[legalBallIDs[j]].clone();
+      var distRight = world.TableWidth/2 - ballPos.x;
+      var distLeft = ballPos.x + world.TableWidth/2;
+      var distBottom = world.TableHeight/2 - ballPos.y;
+      var distTop = ballPos.y + world.TableHeight/2;
+      // TODO: update minDistAll and minDistBallID
+    }  
+    return minDistBallID;
+};          
+        </pre>
+    </p>    
+    <p>
+        <b>Challenge:</b> please complete the <b>getBallClosestToRail</b> function, and also call it in the <b>this.getCueBallPlacement</b> to get the target ball ID (instead of hardcoding ball 3) like shown below.
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getCueBallPlacement = function() {
+    // use a variable shotCmd to store shot command for pocket 5/ball 3
+    var shotCmd = getCallShotCommand(5, getBallClosestToRail());
+    // return the aim position shotCmd.aimx and shotCmd.aimy
+    return {
+        x: shotCmd.aimx,
+        y: shotCmd.aimy
+    };
+};
+        </pre>
+    </p>
+
+
+    <code isHidden="true">
+var getBallClosestToRail = function() {
+    var minDistAll = 100000;
+    var minDistBallID = 0;
+    var legalBallIDs = world.CandidateBallList[myID];
+    
+    for (var j=0; j &lt; legalBallIDs.length; j++){
+        var ballPos = world.Balls[legalBallIDs[j]].clone();
+        var distRight = world.TableWidth/2 - ballPos.x;
+        var distLeft = ballPos.x + world.TableWidth/2;
+        var distBottom = world.TableHeight/2 - ballPos.y;
+        var distTop = ballPos.y + world.TableHeight/2;
+        // find minimum distance to all 4 rails using Math.min
+        var minDist = Math.min(distRight, distLeft, distBottom, distTop);
+        // check if distance is less than overall minimum minDistAll so far 
+        if (minDist &lt; minDistAll) {
+        // update minDistAll to the new minimum distance
+        minDistAll = minDist; 
+        // update minDistBallID to the new candidate ball ID
+        minDistBallID = legalBallIDs[j];
+        }
+    }  
+    return minDistBallID;
+};          
+    </code>
+</element>
+        
+    
+
+<element elementid="150" elementType="Coding" condition="TestFinishedRedBallFirstTouch">
+    <p>
+        For the last step, instead of always targetting pocket 5, we need to select the best pocket based on the pocketing probability.
+    </p>
+    <p>
+        You have already used the function <b>calculateProbability</b>, which returns the pocketing probability given a command. We will be reusing this function, except that we need to add 2 additional fields to the shot command: <b>cueballX</b> and <b>cueballY</b>. They specify where the cue ball would be placed when the shot is taken, since we are planning to place the cue ball at the aim position.
+    </p>
+    <p>
+        I have laid out the starting code for you below:
+    </p>
+    <p>
+        <pre class="brush: js">
+this.getCueBallPlacement = function() {        
+    var maxProb = -1;
+    var bestShotCmd = {};    
+    var minDistBallID = getBallClosestToRail();
+    for (var pocketID=0; pocketID &lt; 6; pocketID++) {
+        var cmd = getCallShotCommand(pocketID, minDistBallID);
+        cmd.cueballX = cmd.aimx; 
+        cmd.cueballY = cmd.aimy;
+        var probability = calculateProbability(cmd);
+        // TODO: update maxProb and bestShotCmd if better shot found
+    }
+    return {
+        x: bestShotCmd.cueballX, y: bestShotCmd.cueballY
+    };
+};        
+        </pre>
+    </p>
+    <p><b>Challenge:</b> please complete the searching code in <b>this.getCueBallPlacement</b> to select a target pocket with highest success probability.</p>
+    <code>
+this.getCueBallPlacement = function() {        
+    var maxProb = -1;
+    var bestShotCmd = {};    
+    var minDistBallID = getBallClosestToRail();
+    for (var pocketID=0; pocketID &lt; 6; pocketID++) {
+        var cmd = getCallShotCommand(pocketID, minDistBallID);
+        cmd.cueballX = cmd.aimx; 
+        cmd.cueballY = cmd.aimy;
+        var probability = calculateProbability(cmd);
+        // check if probability is higher than overall maxProb so far 
+        if (probability > maxProb) {
+            // update maxProb to current probability
+            maxProb = probability;
+            // update bestShotCmd to current cmd 
+            bestShotCmd = cmd;
+        }
+    }
+    return {
+        x: bestShotCmd.cueballX, y: bestShotCmd.cueballY
+    };
+};        
+    </code>
+                
+</element>
+    
+
+
+
+    
+<element elementid="180" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Now your robot has completed all 3 key functions: getBreakShot, getCallShot and getCueBallPlacement.</p>
+    <p>
+        <b>Extra Credit:</b> can you try some other ways to place the cue ball? For example, place the cue ball so that after this shot, the next shot has highest probability of pocketing? Or instead of placing the cue ball on the same line as the target ball and target pocket, placing it with some angle so that the cue ball rolls towards another candidate ball of yours? 
+    </p>
+</element>
+    

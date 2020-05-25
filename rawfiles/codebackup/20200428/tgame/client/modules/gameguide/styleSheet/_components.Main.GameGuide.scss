@@ -1,0 +1,221 @@
+.tg{
+  &-page{
+    &--gameGuide{
+      color: $tg-col-basic-ivory;
+      background-color: $tg-col-basic-bg-blue;
+      background-image: url('/images/3px-tile.png');
+      background-size: 150px;
+      min-height: inherit;
+    }
+    &__content{
+      &--gameGuide{
+        padding: 38px 0px;
+        flex-direction: column;
+      }
+      &__header{
+        width: 100%;
+        display: inline-block;
+        h4{
+          margin-top: 20px;
+          margin-bottom: 20px;
+          width: 100%;
+          padding-bottom: 15px;
+          display: inline-block;
+          border-bottom:  1px solid  $tg-col-grey;
+          font-family: 'Droid Sans', sans-serif;
+          color: $tg-col-light;
+          letter-spacing: 0.5px;
+          text-transform: none;
+        }
+      }
+    }
+  }
+}
+.accordion{
+  &--guide{
+    display: inline-block;
+    width: 100%;
+  }
+  &__items{
+    padding: 20px;
+    border: 1px solid  rgba(49, 154, 228, .35);
+    margin-bottom: 20px;
+    background-color: rgba(10, 115, 188, .1);
+    box-shadow: 0 3px 21px 2px #000, inset 0 0 20px 0 rgba(0, 0, 0, .65);
+    cursor: pointer;
+    &:hover{
+      border-color: $tg-col-hover-a;
+    }
+    &:focus{
+      outline: none;
+    }
+    &__header{
+      @include flexbox();
+      align-items: center;
+        p{
+          flex: 1;
+          color: $tg-col-xxx-grey;
+          font-size: calc(#{$tg-fs-large} - 3px);
+          line-height: 24px;
+          font-weight: 500;
+        }
+        span{
+          font-size: $tg-fs-small;
+          color: $tg-col-light;
+        }
+    }
+    &__content{
+      display: none;
+      padding-top: 15px;
+      line-height: 23px;
+      font-weight: 300;
+      padding-left: 30px;
+      img{
+        max-width: 100%;
+      }
+      p{
+        margin-top: 10px;
+      }
+      .section-guide {
+        display: none;
+      }
+    }
+  }
+
+  &__list{
+    padding: 20px 39px 0px 61px;
+    &--level{
+    }
+    &--icon{
+      .accordion{
+        &__list{
+          &__items{
+            .content{
+                padding-left: 46px;
+                padding-right: 46px;
+                width: calc(100% - 92px);
+                @include flexbox();
+                i{
+                  padding-left: 45px;
+                  padding-right: 45px;
+                }
+            }
+          }
+        }
+      }
+    }
+    &__items{
+      margin-bottom: 10px;
+      &--special{
+        padding-left: 46px;
+      }
+      .content{
+        margin-bottom: 20px;
+        display: inline-block;
+        width: 100%;
+      }
+      .heading{
+        padding-left: 0px;
+        color: #21abda;
+        font-size: 16px;
+        font-weight: 400;
+        margin-bottom: 10px;
+        display: inline-block;
+        width: 100%;
+      }
+
+    }
+  }
+}
+.tg-table{
+  border: 1px solid $tg-col-grey;
+  &__heading{
+    @include flexbox();
+    background-color: $tg-col-hover-a;
+    &__content{
+      flex: 1;
+      text-align: center;
+      padding: 8px 15px;
+      &:nth-child(2){
+        border-left: 1px solid $tg-col-grey;;
+        border-right: 1px solid $tg-col-grey;
+      }
+    }
+  }
+  &__content{
+    &__items{
+      @include flexbox();
+      border-bottom: 1px solid $tg-col-grey;
+      &:last-child{
+        border-bottom: none;
+      }
+      &__content{
+        color: #b6b1b1;
+        flex: 1;
+        padding: 8px 15px;
+        &:nth-child(2){
+          border-left: 1px solid $tg-col-grey;;
+          border-right: 1px solid $tg-col-grey;
+        }
+      }
+    }
+  }
+}
+
+.guide-game-wrapper {
+  width: 100%;
+}
+
+@media(max-width:480px){
+  .tg-page{
+    &__content{
+      &--gameGuide{
+        padding-top: 15px;
+        padding-bottom: 15px
+      }
+      &__header{
+         h4{
+           font-size: clac(#{$tg-fs-regular} + 2px);
+         }
+      }
+    }
+  }
+
+  .accordion{
+    &__items{
+      &__header{
+        p{
+          font-size: clac(#{$tg-fs-regular} + 1px);
+        }
+      }
+      &__content{
+        padding-top: 5px;
+        padding-left: 20px;
+        p{
+          font-size: clac(#{$tg-fs-x-tiny});
+        }
+      }
+    }
+    &__list{
+      padding: 15px 0px 0px 15px;
+      &--icon{
+        .accordion{
+          &__list{
+            &__items{
+              .content{
+                  padding-left: 15px;
+                  padding-right: 15px;
+                  width: calc(100% - 32px);
+                  font-size: calc(#{$tg-fs-x-tiny});
+                  i{
+                    padding-left: 15px;
+                    padding-right: 15px;
+                  }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,335 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+ClearMaze();  
+
+const tiles = {
+  R: [[3, 3], [3, 4], [4, 3], [4, 4], [10, 3], [10, 4], [11, 3], [11, 4]],
+  M: [[7, 5], [7, 6], [6, 7], [7, 7], [8, 7]],
+  T: [[4, 10], [5, 10], [6, 11], [7, 11], [8, 11], [9, 10], [10, 10],
+     [4, 11], [5, 11], [6, 12], [7, 12], [8, 12], [9, 11], [10, 11]],
+};
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j += 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i += 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest(); 
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    In the previous tutorial, we created a battlefield with hardcoded tile positions (i.e. we manually typed in the coordinates). In this tutorial, you will learn to generate tile positions in your test script.   
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The picture below is the battlefield we are going to build. Yes, we will write a letter '<b>Z</b>' using all three types of tiles: rocks, mud puddles, and trees.
+  </p>
+  <p>
+    <img src="/images/battlefield3.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    For the purpose of this exercise, I have removed all hardcoded positions from the test script. Instead, all three tile types are initialized as empty arrays (<span class="variablename">[]</span>). 
+  </p>
+  <p>
+    <pre class="brush: js">
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+    </pre>
+  </p>
+</element>
+
+<!-- <element elementid="130" elementType="Coding" condition="TestFinishedAnyResult">
+  <p>
+    <b>Challenge:</b> In your <b>test script</b>, remove hardcoded positions in <span class="variablename">tiles</span>, and initialize property <span class="variablename">R</span>, <span class="variablename">M</span>, and <span class="variablename">T</span> with a blank array. Click TEST when you finish. 
+  </p>
+  <p>
+    <pre class="brush: js">
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+    </pre>
+  </p>
+  <cleancode>
+RemoveAllTanks();
+
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+
+const keys = Object.keys(tiles);
+for (let k = 0; k &lt; keys.length; k += 1) {
+  const key = keys[k];
+  const positions = tiles[key];
+  for (let i = 0; i &lt; positions.length; i = i + 1) {
+    const pos = positions[i];
+    PlaceTile(key, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest();   
+  </cleancode>
+</element> -->
+
+
+<element elementid="140" elementType="Info">
+  <p>
+    Now, let's write code to generate positions for the rock tiles that will make up the top row of our letter 'Z'. As illustrated, the rocks are all located on row 3, between column 4 and column 10, inclusive. We can write a <b>for-loop</b> to generate these positions. Can you think about how?
+  </p>
+  <p>
+    <img src="/images/rockrow.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="150" elementType="Coding" condition="TestFinishedBattleField_3">
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, populate the rock tile positions as part of the "tiles" object. Note that you can use the function <b>array.push()</b> to add a new item to an array. For example, if an array <b>A</b> is defined as "A = [2, 3]", then "A.push(4)" will append 4 to the end of <b>A</b>.
+  </p>
+  <code isHidden="false">
+ClearMaze(); 
+
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+
+//TODO: generate positions for rock row
+
+//h0::loop through column 4 to column 10::
+::for (let col = 4; col &lt; 10; col = col + 1) {
+::for (let col = 4; col &lt;= 10; col = col + 1) {
+for (? ; ? ; ? ) {
+  //h1::the first number is the column number, second number is the row number
+  tiles.R.push([ ? , ? ]);
+}
+
+//ENDTODO
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j = j + 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i = i + 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze(); 
+
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+
+for (let col = 4; col &lt;= 10; col = col + 1) {
+  tiles.R.push([col, 3]);
+}
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j = j + 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i = i + 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Great! Let's finish the rest of letter 'Z'. Do you think we need another two for-loops for mud puddles and trees? 
+  </p>
+  <p>
+    If you count rocks, puddles and trees in the picture below, you will find that there are the same number of puddles and trees as rocks. Therefore, in the same loop used for placing rocks, we can place puddles and trees as well.
+  </p>
+  <p>
+    <img src="/images/battlefield3.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    Let's take a close look at the current loop. When <span class="variablename">col = 4</span>, the row numbers for rock, puddle, and tree tiles are 3, 10, and 11 correspondingly. 
+  </p>
+  <p>
+    <img src="/images/bf3rowcol.png" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+    As <span class="variablename">col</span> increases, the row numbers for rocks and trees are fixed at 3 and 11 respectively, while the row number for mud puddles decreases. Can you think of a formula that can calculate the row number of mud puddles based on the variable <span class="variablename">col</span>?
+  </p>
+</element>
+
+<!-- <element elementid="180" elementType="Info">
+  <p>
+    You might have noticed that, the row numbers for rocks and trees are fixed to 3 and 11. The only thing changed with <span class="variablename">i</span> is the row number of puddles. In addition, when <span class="variablename">i</span> is increased, the puddle row numbers are decreased. So we can write a formula as below:
+  </p>
+  <p>
+    <pre class="brush:js">
+puddle row number = row - i + 7;
+    </pre>
+  </p>
+</element> -->
+
+<element elementid="190" elementType="Coding" condition="TestFinishedBattleField_4">
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, initialize the positions of <b>mud puddle</b> and <b>tree</b> tiles. 
+  </p>
+  <code isHidden="false">
+ClearMaze(); 
+
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+
+//TODO: generate positions for trees and puddles
+
+for (let col = 4; col &lt;= 10; col = col + 1) {
+  tiles.R.push([col, 3]);
+  //h0::row number of tree tiles::11
+  tiles.T.push([col, ? ]);
+  //h1::row number of puddle tiles::14 - col
+  tiles.M.push([col, ? ]);
+}
+
+//ENDTODO
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j = j + 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i = i + 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze(); 
+
+const tiles = {
+  R: [],
+  M: [],
+  T: []
+};
+
+for (let col = 4; col &lt;= 10; col = col + 1) {
+  tiles.R.push([col, 3]);
+  tiles.T.push([col, 11]);
+  tiles.M.push([col, 14 - col]);
+}
+
+const tileTypes = Object.keys(tiles);
+for (let j = 0; j &lt; tileTypes.length; j = j + 1) {
+  const tileType = tileTypes[j];
+  const positions = tiles[tileType];
+  for (let i = 0; i &lt; positions.length; i = i + 1) {
+    const pos = positions[i];
+    PlaceTile(tileType, pos[0], pos[1]);
+  }
+}
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Good job! You've drawn a big 'Z' in the battlefield. 
+  </p>
+  <p>
+    Let's take a look at the whole test script again. We first declare an object <span class="variablename">tiles</span> to hold the coordinates of each tile, and then run a for-loop to populate the object with tile coordinates, and finally run another for-loop to place these tiles on the battlefield. Anyway we can simplify this script?
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    To simplify the script, we can calculate a new tile coordinate and place that tile on the maze right away. This saves us the trouble of storing that coordinate information. I hope you have come to this insight yourself.
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedBattleField_4">
+  <p>
+    <b>Challenge:</b> Using the code below as a guide, remove the <span class="variablename">tiles</span> object by placing the tiles as the target positions are calculated. 
+  </p>
+  <code isHidden="false">
+ClearMaze(); 
+
+//TODO: refactor for loop
+
+for (let col = 4; col &lt; 11; col += 1) {
+  PlaceTile('R', col, 3);
+  //h0::place tree tiles::column number is col, row number is 11
+  ?
+  //h1::place puddle tiles::column number is col, row number is 14 - col
+  ?
+}
+
+//ENDTODO
+
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze(); 
+
+for (let col = 4; col &lt; 11; col += 1) {
+  PlaceTile('R', col, 3);
+  PlaceTile('T', col, 11);
+  PlaceTile('M', col, 14 - col);
+}
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    Excellent! Now the code is very simple and neat. You might be wondering why we wrote the more complicated code in the first place? It is because using the object <span class="variablename">tiles</span> to store positions gives us the flexibility to specify the tile positions either by hand or through code. There are many ways to implement an idea, simple or complicated. We need to choose the proper solution based on the requirement of the task at hand. 
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial, we practiced another way to create a battlefield. Starting from the next tutorial, we will go back to the robot code and start implementing some basic tank actions.  
+  </p>
+  <p>
+    <b>Exercise 1:</b> Draw an "X" in the battlefield. You should be able to reuse some of the code that added the mud puddles in the letter "Z". 
+  </p>
+  <p>
+    <b>Exercise 2:</b> Draw a square in the battlefield. You can start with four <span class="variablename">for-loops</span>, one for each edge, and refactor your code to use just one <span class="variablename">for-loops</span>. 
+  </p>
+  <p>
+    Don't forget to share ideas and questions in the forum under <a href="https://forum.tgame.ai/t/lesson-6-designing-a-nice-battlefield-ii/403" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

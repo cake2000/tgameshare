@@ -1,0 +1,6 @@
+.top-nav-bar{
+  height: 70px;
+  @media(max-width: 1024px){
+    height: 50px;
+  }
+}

@@ -1,0 +1,593 @@
+<element elementid="100" elementType="Info">
+  <p>Bonjour! Ready for another adventure? Let's get started! </p>    
+  <p>In last tutorial, you might have noticed that the value of shot <b>strength</b> has a huge effect on the shot success probabilities. Today, we'll dig deeper into the relationship between strength and probability, and learn a cool algorithm to find the optimal strength for your next shot. </p> 
+</element>
+
+<element elementid="101" elementType="Info">
+  <p>
+    First, let's think about how strength and probability are related. For example, in the setup below, we'd like to shoot ball 2 into pocket 0. Intuitively, if our strength is too small, the cue ball may not even hit the target ball, but if we hit too hard, the shot direction become more unpredictable due to the random error added by the game engine. So there is some strength value that's just right, and we'll try to find it. 
+  </p>
+  <p>
+    <img src="/images/alongshot.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>  
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    First, let's collect some data. I ran the shot for 100 times, with the shot strength ranging from 1 to 100, and the result is plotted below:
+  </p>
+  <p>
+    <img src="/images/strengthvsprobability.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+  <p>
+    The <b>x</b> axis is the <b>shot strength</b> from 1 to 100, and the <b>y</b> axis is the corresponding <b>success probability</b>. For example, when strength is 50, the probability is about 30%. If the strength is less than 23, the corresponding success probability is 0. As we increase the strength from 23 to 25, the probability grows from 63% to a peak at 73%. Then the probability starts to drop as stronger strength is applied. So the data confirms with our intuition, which is always a good sign!
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    Now the question becomes: how do we find the optimal strength (25 in this case) that gives highest probability?
+  </p>
+  <p>
+    An <b>naive</b> or <b>brute-force</b> approach would be to walk through strength values of 1 to 100, and compare their probabilities, but this will require us to run 100 simulations for each (ballID, pocketID) pair, which is too long.
+  </p>
+  <p>
+    Before continuing, can you think of a more clever way to find the optimal strength? Is there any pattern in the plot?
+  </p>
+</element>
+
+<element elementid="122" elementType="Info">
+  <p>
+    OK, I hope you have found the pattern: the whole curve only one peak, and the probability value decreases from the peak strength in both directions. So if we start at a random point on the curve and always move in the direction of higher probability, like climbing a hill, then eventually we will reach the peak. And guess what this algorithm is called - <b>Hill Climbing</b>!
+  </p>
+  <p>
+      Let me walk you through an example of how hill climbing works. First, we start in the middle of the curve where <b>strength = 50</b>, and we ask ourselves should we increase or decrease strength to improve our success probability? To answer this question, we try 1 point on each direction, at a distance of 16 (called step size) from our current position of strength = 50.       
+  </p>
+  <p>
+    <img src="/images/hillclimbing0.jpg" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+  <p>
+    As shown in the graph, in this case decreasing strength to 34 leads to higher probability, so we "move" left by setting our position to strength = 34.
+  </p>
+</element>
+
+<element elementid="125" elementType="Info">
+  <p>
+    In the next step, we repeat the same exercise, and compare the new left point of strength=18 and the new right point of strength=50. However, the probabilities on both points are lower than that of the current position of strength=34. That means the optimal value with highest probability must fall between the left point and right point, and we need to search within the range. So we cut our step size from 16 to 8, and check the new left point at 26 and new right point at 42.
+  </p>
+  <p>
+    <img src="/images/hillclimbing1.jpg" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    This algorithm is repeated (move position or reduce step size) until the step size is reduced to 1, and that's when we arrive at the optimal strength and decalre victory!
+  </p>
+  <p>
+    <img src="/images/hillclimbing2.jpg" style="width: 98%; height: auto; margin-left: 1%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="150" elementType="Quiz" answerKey="A" answerReason="Here is our journey: check (34, 50, 66), 34 is the best -> go to 34, check (18, 50) -> cut step to 8, check (26, 42), 26 is better -> go to 26, check (18, 34) -> cut step to 4, check (22, 30) -> cut step to 2, check (24, 28), 24 is better -> go to 24, check (22, 26) -> cut step to 1, check (23, 25), 25 is better -> go to 25, check (24, 26) -> cut step to 0.5, less than 1, stop the loop. ">
+  <p>
+    <b>Quiz:</b> looking at the chart above, can you tell how the center position has moved across the chart as we search for optimal?
+    <ul>
+      <li><a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b> 50, 66, 34, 18, 42, 26, 22, 30, 24, 28, 23, 25;</a></li>
+      <li><a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b> 50, 66, 34, 18, 26, 22, 25, 19;</a></li>
+      <li><a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b> 50, 66, 34, 82, 18, 42, 26, 22, 30, 25, 24, 19, 21;</a></li>
+      <li><a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b> 50, 66, 34, 18, 22, 25;</a></li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>In total, <b>only twelve points instead of 100</b> were checked. Not bad right?</p> 
+  <p>
+    Now it is time to implement this hill climbing algorithm in your robot code. Since we don't know how many iterations we need, we'll use a <b>while-loop</b> instead of <b>for-loop</b>. The <b>while-loop</b> is fairly simple: while <b>conditions</b> remain true, the <b>statements</b> will be executed again and again. Of course we can use a <b>break</b> caluse to exit the loop right away. </p>
+  <p>
+    <img src="/images/while.jpg" style="width: 30%; height: auto; margin-left: 35%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="161" elementType="Info">
+  <p>
+    An example of while-loop is as below. The <b>condition</b> is <b>num &lt; 3</b>. Inside the while loop, <b>num</b> is increased by 1 each time, so after 3 iterations the condition becomes false. 
+  </p>
+  <pre class="brush: js">
+let num = 0;
+while (num &lt; 3) {
+  console.log(num);
+  num += 1;
+}
+// output is
+// 0
+// 1
+// 2
+  </pre>
+</element>
+
+<element elementid="162" elementType="Coding" condition="TestPPPocketBall_2_In_0">
+  <p>
+    <b>Challenge:</b> use the template below to implement the <b>Hill Climbing</b> algorithm and find the best strength for each (ballID, pocketID) pair. To make the code clear, I have defined a new function <b>refineCommand</b> to refine the shot command with an optimal strength.
+  </p>
+  <code isHidden="false">
+async function refineCommand(cmd) {
+  // Initialization
+  let center = 50, step = 16;
+  let leftBoundary = 0, rightBoundary = 100;
+  
+  //TODO
+
+  // keep searching until we hit the boundaries or step size is reduced to 1
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) {
+    // center strength and probability
+    cmd.strength = center;
+    const centerProb = await calculateProbability(cmd);
+
+    // get probability at one step to the left
+    const leftStrength = Math.max(leftBoundary, center - step);
+    cmd.strength = leftStrength;
+    const leftProb = await calculateProbability(cmd);
+    
+    // get probability at one step to the right
+    //h0::the right strength value should be one step from center, but less than or equal to the right boundary::the smaller one between center + step and right boundary
+    ::const rightStrength = min(rightBoundary, center - step);
+    ::const rightStrength = Math.min(rightBoundary, center - step);
+    ::const rightStrength = Math.min(rightBoundary, center + step);
+    const rightStrength = ? ;
+    cmd.strength = rightStrength;
+    const rightProb = await calculateProbability(cmd);
+    
+    // cut step size or move center?
+    //h1::if the probability on both sides are lower, cut the step size
+    ::if (leftProb >= centerProb &amp;&amp; rightProb &lt;= centerProb) {
+    ::if (leftProb &lt;= centerProb &amp;&amp; rightProb >= centerProb) {
+    ::if (leftProb &lt;= centerProb &amp;&amp; rightProb &lt;= centerProb) {
+    if ( ? ) {
+      // cut step size to search within current range
+      step = step / 2;
+      leftBoundary = leftStrength;
+      rightBoundary = rightStrength;
+    } else {
+      // move center to the side with higher probability
+      //h2::compare leftProb and rightProb
+      if ( ? ) {
+        center = leftStrength;
+      } else {
+        center = rightStrength;
+      }
+    }
+  }
+  //ENDTODO
+  cmd.strength = center;
+  const prob = await calculateProbability(cmd);
+  return {cmd: cmd, prob: prob};
+}
+
+async function getCallShot() {
+  ...
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k ++ ) {
+    ...
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      ...
+      console.log("pocketID " + pocketID + " ballID " + ballID);
+      
+      // call the new function to optimize strength
+      const probWithCmd = await refineCommand(cmd);
+      if ( probWithCmd.prob > highestProb ) {
+        bestCommand = probWithCmd.cmd ; 
+        highestProb = probWithCmd.prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function refineCommand(cmd) { 
+  // Initialization 
+  let center = 50, step = 16; 
+  let leftBoundary = 0, rightBoundary = 100; 
+    
+  // keep searching until we hit the boundaries or step size is reduced to 1
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) {
+    // center strength and probability
+    cmd.strength = center;
+    const centerProb = await calculateProbability(cmd);
+
+    // get probability at one step to the left
+    const leftStrength = Math.max(leftBoundary, center - step);
+    cmd.strength = leftStrength;
+    const leftProb = await calculateProbability(cmd);
+    
+    // get probability at one step to the right
+    const rightStrength = Math.min(rightBoundary, center + step);
+    cmd.strength = rightStrength;
+    const rightProb = await calculateProbability(cmd);
+    
+    // cut step size or move center?
+    if (leftProb &lt;= centerProb &amp;&amp; rightProb &lt;= centerProb)
+      // cut step size to search within current range
+      step = step / 2;
+      leftBoundary = leftStrength;
+      rightBoundary = rightStrength;
+    } else {
+      // move center to the side with higher probability
+      if ( leftProb >= rightProb ) {
+        center = leftStrength;
+      } else {
+        center = rightStrength;
+      }
+    }
+  }
+  cmd.strength = center; 
+  const prob = await calculateProbability(cmd); 
+  return {cmd: cmd, prob: prob}; 
+} 
+  
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+        const endStates = await calculateEndState(cmd, true);
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+        (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          isInPocket = true;
+          break;
+        }
+      }
+      if (isInPocket) {
+        cmd.spin = -0.5;
+        const endStates = await calculateEndState(cmd); 
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+          (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          continue;
+        }
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      // call the new function to optimize strength
+      const probWithCmd = await refineCommand(cmd);
+      if ( probWithCmd.prob > highestProb ) {
+        bestCommand = probWithCmd.cmd ; 
+        highestProb = probWithCmd.prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}      
+  </cleancode>
+</element>
+
+<!-- 
+<element elementid="172" elementType="Info">
+  <p>
+    If you checked out the hints <b>h2</b>, you might have noticed a new operator (? and :), which is called <b>Conditional (Ternary) Operator</b>. The syntax is like below.
+  </p>
+  <pre class="brush: js">
+variableName = (condition) ? value1 : value2;     
+  </pre>
+  <p>It is a short notation equivalent to:</p>
+  <pre class="brush: js">
+if (condition) 
+  variableName = value1;
+else 
+  variableName = value2;
+  </pre>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Great! Now you robot is able to find the best strength. But don't you think it is still kind of slow? As you might be aware, the new function <b>refineCommand</b> did some duplicate calculations by checking a strength value more than once. 
+  </p>
+  <p>
+    In our example, in the second round of iteration, the point to the right is 50, which is the center point in last round. If we could save the results somewhere, then we don't need to do the calculations repeatedly. That is to say, we could <b>cache</b> the results to reduce duplicate calculations.
+  </p>
+  <p>
+    A <b>cache</b> is a place where data are stored for future inquiries. When we receive an inquiry, we first check if the result is already saved in the cache. If yes, we directly return the value in cache. Otherwise, we will calculate the result, save it to cache, and return it to users. 
+  </p>
+</element>
+
+<element elementid="185" elementType="Info">
+  <p>
+    In cache, in order to quickly locate the saved value, each value is labeled by a unique identifier. In our cache, the saved probabilities are labeled by the JSON string of corresponding shot commands and current cue ball position, so that next time when the function receives the same command, it will quickly find and return the probability in cache. (To get more information about JSON, please type or click <a href="#" onclick="ClickToSendChat(event, 'define JSON')" class="inlinebutton"><b>"define JSON"</b></a>.)
+  </p>
+  <p>
+    <img src="/images/cache.jpg" style="width: 30%; height: auto; margin-left: 35%; vertical-align: top;"/>
+  </p>  
+</element>
+
+<element elementid="188" elementType="Info">
+  <p>
+    Below is an example of how to use a cache.
+  </p>
+  <pre class="brush: js">
+// a cache of (infoType, info) pairs
+let myCache = {};
+myCache["name"] = "TBot";
+if (!("age" in myCache)) {
+  const age = 1;
+  myCache["age"] = 1;
+}
+console.log("Robot " + myCache["name"] + " is " + myCache["age"] + "year(s) old.");    
+  </pre>
+</element>
+
+<element elementid="190" elementType="Coding" condition="TestPPPocketBall_2_In_0">
+  <p>
+    <b>Challenge: </b>Define a new function getProbForCmd, which takes a shot command as the parameter, calculates and returns the corresponding probability. Implement a <b>cache</b> to reduce duplicate calculations. Don't forget to update <b>refineCommand</b> to use the new defined function. 
+  </p>
+  <code isHidden="false">
+async function getProbForCmd(cmd) {
+  // initialize the cache if it is not defined
+  if( typeof getProbForCmd.probCache == 'undefined' ) {
+    getProbForCmd.probCache = {};
+  }
+  // convert shot command to a string
+  const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y;
+  //TODO
+  // if cmdStr is in the cache, return the corresponding probability
+  //h0::check if cmdStr is in cache
+  ::if (typeof getProbForCmd.probCache[cmdStr] != 'undefined')
+  ::if (cmdStr in getProbForCmd.probCache)
+  ::if (getProbForCmd.probCache[cmdStr] != null)
+  if ( ? )
+    return getProbForCmd.probCache[cmdStr];
+  // otherwise, calculate and store into cache
+  const prob = await calculateProbability(cmd);
+  //h1::save probability in cache
+  ::getProbForCmd.probCache.cmdStr = prob;
+  ::getProbForCmd.probCache['cmdStr'] = prob;
+  ::getProbForCmd.probCache[cmdStr] = prob;
+  ? ;
+  //ENDTODO
+  return prob;
+}
+
+async function refineCommand(cmd) {
+  // Initialization
+  let center = 50, step = 16;
+  let leftBoundary = 0, rightBoundary = 100;
+  
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) {
+    // center
+    cmd.strength = center;
+    const centerProb = await getProbForCmd(cmd);
+    // left
+    const leftStrength = Math.max(leftBoundary, center - step);
+    cmd.strength = leftStrength;
+    const leftProb = await getProbForCmd(cmd);
+    // right
+    const rightStrength = min(rightBoundary, center - step);
+    cmd.strength = rightStrength;
+    const rightProb = await getProbForCmd(cmd);
+    ...  
+  }
+  cmd.strength = center;
+  const prob = await getProbForCmd(cmd);
+  return {cmd: cmd, prob: prob};
+}
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k ++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID=0; pocketID &lt;= 5; pocketID ++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if ( !isBlocked ) {
+        return getAimPosition(ballPos, pocketPos, 2 * BallDiameter);  
+      }
+    }
+  }
+}
+
+function calculateShotCommand(ballID, pocketID) {
+  const ballPos = Balls[ballID];
+  const pocketPos = Pockets[pocketID];
+  const aimPosition = getAimPosition(ballPos, pocketPos);
+  return { aimx: aimPosition.x, aimy: aimPosition.y, strength: 50, targetBallID: ballID, targetPocketID: pocketID };
+}
+
+function shouldBeSkipped(pocketID, ballID) { 
+  const isBlocked2 = isPathBlocked(Balls[ballID], Pockets[pocketID]);  
+  if (isBlocked2) {  
+    return true;  
+  } 
+  const aimPos = getAimPosition(Balls[ballID], Pockets[pocketID]);  
+  const cutAngle = getCutAngle(Pockets[pocketID], aimPos, Balls[0]); 
+  if (Math.abs(cutAngle) > 90) { 
+    return true; 
+  } 
+  if (pocketID == 1 || pocketID == 4) { 
+    const angle = getAngleToSidePocket(Balls[ballID], pocketID); 
+    if (Math.abs(angle) > 45) { 
+      return true; 
+    } 
+  } 
+  return false; 
+} 
+
+async function getProbForCmd(cmd) { 
+  // initialize the cache if it is not defined 
+  if( typeof getProbForCmd.probCache == 'undefined' ) { 
+    getProbForCmd.probCache = {}; 
+  } 
+  // convert shot command to a string 
+  const cmdStr = JSON.stringify(cmd) + Balls[0].x + Balls[0].y; 
+  // if cmdStr is in the cache, return the corresponding probability 
+  if ( cmdStr in getProbForCmd.probCache ) 
+    return getProbForCmd.probCache[cmdStr]; 
+  // otherwise, calculate and store into cache 
+  const prob = await calculateProbability(cmd); 
+  getProbForCmd.probCache[cmdStr] = prob ; 
+  return prob; 
+} 
+
+async function refineCommand(cmd) { 
+  // Initialization 
+  let center = 50, step = 16; 
+  let leftBoundary = 0, rightBoundary = 100; 
+    
+  while (step >= 1 &amp;&amp; center > leftBoundary &amp;&amp; center &lt; rightBoundary) { 
+    // center 
+    cmd.strength = center; 
+    const centerProb = await getProbForCmd(cmd); 
+    // left 
+    const leftStrength = Math.max(leftBoundary, center - step); 
+    cmd.strength = leftStrength; 
+    const leftProb = await getProbForCmd(cmd); 
+    // right 
+    const rightStrength = Math.min(rightBoundary, center + step); 
+    cmd.strength = rightStrength; 
+    const rightProb = await getProbForCmd(cmd); 
+    if ( centerProb >= leftProb &amp;&amp; centerProb >= rightProb ) { 
+      // optimal point is within current range 
+      // reduce steps to search more carefully 
+      step /= 2; 
+      leftBoundary = leftStrength; 
+      rightBoundary = rightStrength; 
+    } else { 
+      center = leftProb > rightProb ? leftStrength : rightStrength; 
+    } 
+  } 
+  cmd.strength = center; 
+  const prob = await getProbForCmd(cmd); 
+  return {cmd: cmd, prob: prob}; 
+} 
+  
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = null;
+  let highestProb = -1;
+
+  // array of ball IDs that can be legally targeted
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt; legalBallIDs.length ; k += 1 ) {
+    const ballID = legalBallIDs[k];
+    const isBlocked = isPathBlocked(Balls[ballID], Balls[0]);
+    if (isBlocked) {
+      continue;
+    }
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID ++) {
+      if (shouldBeSkipped(pocketID, ballID)) {
+        continue;
+      }
+      
+      const cmd = calculateShotCommand(ballID, pocketID);
+      let isInPocket = false;
+      for (let i = 0; i &lt; 10; i ++) {
+        const endStates = await calculateEndState(cmd, true);
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp; 
+        (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          isInPocket = true;
+          break;
+        }
+      }
+      if (isInPocket) {
+        cmd.spin = -0.5;
+        const endStates = await calculateEndState(cmd); 
+        if (endState &amp;&amp; endState.length >= 2 &amp;&amp;
+          (endStates[0].inPocketID != null || legalBallIDs.length > 1 &amp;&amp; endStates[1].inPocketID != null)) {
+          continue;
+        }
+      }
+      
+      console.log("BallID = " + ballID + " pocketID = " + pocketID );
+      const probWithCmd = await refineCommand(cmd);
+      if ( probWithCmd.prob > highestProb ) {
+        // found a better command: record the command and its probability
+        bestCommand = probWithCmd.cmd ; 
+        highestProb = probWithCmd.prob ;
+      }
+    }
+  }
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return { 
+    cueballx: -500, cuebally: 0, aimx: 0, aimy: 0, strength: 80
+  }; 
+}      
+  </cleancode>
+</element> -->
+
+<element elementid="200" elementType="Conclusion">
+  <p>Bon travail!</p>
+  <p><b>Summary: </b>you have learned how to use the <b>Hill Climbing</b> algorithm to efficiently find the best strength for a shot. Can't wait to try it out on your friend's bot right?</p>
+  <p>
+    <b>Exercise:</b> try to change the starting strength of 16 and ending step size of 1 to some different values and see how that affects the total number of iterations and the optimal strength found. You can use console.log to print out different strength values that the function scanned. Share your finding in our forum, under <a href="https://forum.tgame.ai/t/avoid-pocketing-cue-ball-or-black-ball/49" target="_blank">this lesson's topic</a>.
+  </p>
+</element>
+
+

@@ -1,0 +1,774 @@
+<element elementid="099" elementType="InitialCode">
+	<cleancode>
+let dangerScores = null;
+let graph = null;
+
+function weaponIsBetter(weaponType1, weaponType2) {    
+  const rankings = {};   
+  rankings[SPECIAL_WEAPON_TYPES.LASER_GUN] = 1;   
+  rankings[SPECIAL_WEAPON_TYPES.NOVA] = 2;   
+  rankings[SPECIAL_WEAPON_TYPES.WAY4] = 3;   
+  rankings[SPECIAL_WEAPON_TYPES.SPLITTER3] = 4;   
+  rankings[SPECIAL_WEAPON_TYPES.MISSILE] = 5;   
+  rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 6;   
+  rankings[0] = 7; // no weapon   
+    
+  const values = Object.values(MyTank.specialPower); 
+  const allPowers = values.reduce((a, b) => a + b, 0); 
+    
+  if (allPowers &lt; 4 * MAX_POWER &amp;&amp; (MyTank.specialPower.damage >= 2)) { 
+    rankings[SPECIAL_WEAPON_TYPES.FREEZER] = 0;  
+  } 
+  
+  return rankings[weaponType1] &lt; rankings[weaponType2];   
+}
+ 
+function freezeOpponent() { 
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) { 
+    const opponents = Tanks.filter(t => !t.isFrozen &amp;&amp; t.color != MyTank.color &amp;&amp; t.color != "white");  
+    const target = getClosestItem(opponents); 
+    return attackTank(target); 
+  } 
+  return ""; 
+}
+ 
+function getNewCommand() {  
+  dangerScores = getDangerScores();  
+  graph = createGraph();  
+    
+  let cmd = upgradeSpecialPowers();  
+  if (cmd.length > 0) return cmd;  
+    
+  // escape from danger  
+  const totalDamage = 180 * dangerScores[MyTank.r][MyTank.c];  
+  if (MyTank.health &lt; 2 * totalDamage) {  
+    cmd = escapeFromDanger();  
+    if (cmd.length > 0) return cmd;  
+  }  
+  
+  // freeze opponents 
+  cmd = freezeOpponent(); 
+  if (cmd.length > 0) return cmd;  
+  
+  // get a crystal    
+  let path = getCrystal();    
+  if (path.length > 0) return path[0];    
+        
+  // get a weapon    
+  path = getSpecialWeapon();    
+  if (path.length > 0) return path[0];    
+        
+  // attack opponent tank   
+  cmd = attackOpponent();   
+  if (cmd.length > 0) return cmd;    
+      
+  // attack white tank    
+  cmd = attackWhiteTank();    
+  if (cmd.length > 0) return cmd;    
+        
+  // random command    
+  return getRandomCommand();   
+}
+ 
+function attackWhiteTank() { 
+  let whiteTanks = Tanks.filter(tank => tank.color == 'white' &amp;&amp;  
+  (MyTank.r != tank.r || MyTank.c != tank.c)); 
+  
+  // if MyTank is equipped with a Freezer 
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.FREEZER) { 
+    whiteTanks = whiteTanks.filter(tank => !tank.isFrozen); 
+  } 
+  
+  const target = getClosestItem(whiteTanks); 
+  return attackTank(target); 
+}
+
+function escapeFromDanger() {  
+  const delta = {  
+    U: [0, -1],  
+    D: [0, 1],  
+    L: [-1, 0],  
+    R: [1, 0],  
+  };  
+  const dirs = Object.keys(delta);  
+  let bestDir = "";  
+  let lowestDS = dangerScores[MyTank.r][MyTank.c];  
+    
+  for (let i = 0; i &lt; dirs.length; i += 1) {  
+    const dir = dirs[i];  
+    const newc = MyTank.c + delta[dir][0];  
+    const newr = MyTank.r + delta[dir][1];  
+    
+    let valid = newc >= 0 &amp;&amp; newc &lt; Maze[0].length;  
+    valid = valid &amp;&amp; newr >= 0 &amp;&amp; newr &lt; Maze.length;  
+    valid = valid &amp;&amp; !['M', 'R', 'T'].includes(Maze[newr][newc]);  
+    
+    if (valid &amp;&amp; dangerScores[newr][newc] &lt; lowestDS) {  
+      lowestDS = dangerScores[newr][newc];  
+      bestDir = dir;  
+    }  
+  }  
+  return bestDir;    
+} 
+
+function isShellBlockedAtPos(col, row, color) { 
+  const hasBlockingTank = Tanks.find( t => t.tankID != MyID &amp;&amp; t.color != color &amp;&amp; t.c == col &amp;&amp; t.r == row ); 
+  return (hasBlockingTank || Maze[row][col] == 'R' || Maze[row][col] == 'T'); 
+} 
+   
+function getDangerScores() {  
+  const scores = createNewGraph();  
+      
+  for (let i = 0; i &lt; Tanks.length; i += 1) {  
+    const t = Tanks[i];  
+    if (t.color == MyTank.color) continue;  
+    const dscore = 1 + t.specialPower.damage;  
+        
+    // tank facing upward  
+    if (t.dir == 'U') {  
+      for (let j = t.r - 1; j >= 0; j -= 1) {  
+        scores[j][t.c] += dscore;  
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;  
+      }  
+    } else if (t.dir == 'D') { // facing downward  
+      for (let j = t.r + 1; j &lt; scores.length; j += 1) {  
+        scores[j][t.c] += dscore;  
+        if (isShellBlockedAtPos(t.c, j, t.color)) break;  
+      }  
+    } else if (t.dir === 'L') { // facing to the left  
+      for (let j = t.c - 1; j >= 0; j -= 1) {  
+        scores[t.r][j] += dscore;  
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;  
+      }  
+    } else if (t.dir === 'R') { // facing to the right  
+      for (let j = t.c + 1; j &lt; scores[t.r].length; j += 1) {  
+        scores[t.r][j] += dscore;  
+        if (isShellBlockedAtPos(j, t.r, t.color)) break;  
+      }  
+    }  
+  }  
+  return scores;  
+}  
+   
+function attackOpponent() {   
+  // rule #1: The health level of my tank has to be greater than 2000.    
+  if (MyTank.health &lt;= 2000) return "";   
+      
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal.   
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";   
+      
+  // get all opponent tanks   
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");   
+  if (opponents.length == 0) return "";   
+      
+  // go through all opponent tanks   
+  for (let i = 0; i &lt; opponents.length; i += 1) {   
+    const target = opponents[i];   
+    // rule #3: Either my tank's health regeneration is greater than the target tank,    
+    // or my tank has higher health level at the begin of the battle.   
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {   
+      return attackTank(target);   
+    }   
+  }   
+  return "";   
+}  
+   
+function attackTank(target) {   
+  if (!target) return "";   
+      
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {   
+      return "R";   
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {   
+      return "L";   
+    } else {   
+      return "S";   
+    }   
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {   
+      return "D";   
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {   
+      return "U";   
+    } else {   
+      return "S";   
+    }   
+  }   
+    
+  const path = getShortestPathCmd(graph, MyTank, target);   
+  if (path.length > 0) return path[0];   
+  return '';   
+}   
+
+function getSpecialWeapon() {    
+  let bestType = MyTank.specialWeapon.type;    
+        
+  for (let i = 0; i &lt; Weapons.length; i += 1) {    
+    const weapon = Weapons[i];    
+    if (weaponIsBetter(weapon.type, bestType)) {    
+      bestType = weapon.type;    
+    }    
+  }    
+  const bestWeapons = Weapons.filter(weapon => weapon.type == bestType);    
+  const closeBestWeapon = getClosestItem(bestWeapons);    
+  if (closeBestWeapon == null) return [];    
+    
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);    
+}   
+   
+function getRandomCommand() {     
+  // random command     
+  const r = Math.random() * 100;     
+  if (r > 10) return "S";     
+  if (r > 8) return "U";     
+  if (r > 6) return "D";     
+  if (r > 4) return "L";     
+  if (r > 2) return "R";     
+  return "";     
+}    
+   
+function createGraph() {    
+  // create a new Set to hold blocking tile types    
+  const blockingTileTypes = ['R', 'M', 'T'];    
+  // create a new graph    
+  graph = createNewGraph();    
+        
+  // set values of graph, 1 = pass and 0 = blockage    
+  for (let i = 0; i &lt; graph.length; i += 1) {    
+    for (let j = 0; j &lt; graph[i].length; j += 1) {    
+      // tile type    
+      const tile = Maze[i][j];    
+      // check if it is a blockage    
+      if (blockingTileTypes.includes(tile)) graph[i][j] = 0;    
+      else graph[i][j] = 1 + dangerScores[i][j];    
+    }    
+  }    
+  return graph;    
+}    
+   
+function getClosestItem(items) {    
+  // initialize variables to hold shortest distance and target    
+  let shortDis = 1000;    
+  let target = null;    
+        
+  // loop through all items    
+  for (let i = 0; i &lt; items.length; i += 1) {    
+    const pos = items[i];    
+    if (MyTank.r === pos.r &amp;&amp; MyTank.c === pos.c) continue;    
+    // calculate the absolute distance    
+    const dis = Math.abs(MyTank.r - pos.r) + Math.abs(MyTank.c - pos.c);    
+    // update shortDis     
+    if (dis &lt; shortDis) {    
+      shortDis = dis;    
+      target = pos;    
+    }    
+  }    
+  return target;    
+}    
+   
+function getCrystal() {    
+  const target = getClosestItem(Crystals);    
+  if (!target) return [];    
+  return getShortestPathCmd(graph, MyTank, target);    
+}    
+   
+function upgradeSpecialPowers() {    
+  let cmd = "";    
+  // if no power point, return blank command cmd    
+  if (MyTank.powerPoint == 0 ) return cmd;    
+  const sp = MyTank.specialPower;    
+        
+  if (MyTank.health &lt; 2000 &amp;&amp; sp.healthRegen &lt; MAX_POWER) cmd = "3";   
+  else if (sp.speed &lt; 2) cmd = "2";  
+  else if (sp.damage &lt; 2) cmd = "1";  
+  else if (sp.reload &lt; 2) cmd = "4";  
+  else if (sp.healthRegen &lt; 2) cmd = "3";  
+  else if (sp.speed &lt; MAX_POWER) cmd = "2";    
+  else if (sp.damage &lt; MAX_POWER) cmd = "1";    
+  else if (sp.reload &lt; MAX_POWER) cmd = "4";    
+  else if (sp.healthRegen &lt; MAX_POWER) cmd = "3";    
+        
+  return cmd;    
+}
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Hello! In this tutorial, we will discuss and implement new strategies for using the Missile. 
+  </p>
+  <P>
+    As you probably know, a missile will fly straight for two tiles immediately after leaving a tank's cannon, then take the shortest path towards an opponent tanks. Therefore, when we are attacking a white tank using a missile, we need to make sure we are no more than two tiles away from it. 
+  </P>
+  <p>
+    Let's implement this special logic in the function <span class="variablenamebold">attackTank</span>.
+  </p>
+</element>
+
+<element elementid="130" elementType="Coding" condition="TestFinishedTanksKilled_3">
+  <p>
+    <b>Challenge: </b>Change the function <span class="variablenamebold">attackTank</span> to handle the special case in which the target is a white tank, and we are carrying the Missile weapon.
+  </p>
+  <p>
+    Please try to complete the challenge <b>before</b> looking at the hints. You can follow the steps suggested below.
+  </p>
+  <p>
+    <ul>
+      <li>
+        At the beginning of the <span class="variablename">attackTank</span> function, after confirming the target is not null, check whether <span class="variablename">MyTank.specialWeapon.type</span> is <span class="variablename">SPECIAL_WEAPON_TYPES.MISSILE</span>, and whether the target's <span class="variablename">color</span> property is "white".
+      </li>
+      <li>
+        If both are true, calculate the row distance and column distance from <span class="variablename">MyTank</span> to <span class="variablename">target</span>.
+      </li>
+      <li>
+        Define a variable <span class="variablename">withinRange</span>, and set it to true if the row distance is zero and the column distance is less than 3, or the column distance is zero and row distance is less than 3. 
+      </li>
+      <li>
+        If we are not <span class="variablename">withinRange</span>, move <span class="variablename">MyTank</span> towards the (white tank) <span class="variablename">target</span> through the shortest path.
+      </li>
+    </ul>
+  </p>
+  <code isHidden="true">
+//TODO
+function attackTank(target) {   
+  if (!target) return "";   
+  
+  // new code starts 
+
+  //h0::check whether MyTank holds a Missile and the target tank is white
+  ::MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE &amp;&amp; target.color == "white"
+  ::MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE || target.color == "white"
+  if ( ? ) {
+    //h1::calculate the row distance and column distance between MyTank and target
+    ::const rowDis = MyTank.r - target.r; const colDis = MyTank.c - target.c;
+    ::const rowDis = target.r - MyTank.r; const colDis = target.c - MyTank.c;
+    ::const rowDis = Math.abs(MyTank.r - target.r); const colDis = Math.abs(MyTank.c - target.c);
+    ::const rowDis = Math.abs(MyTank.r + target.r); const colDis = Math.abs(MyTank.c + target.c);
+    const rowDis = ? ;
+    const colDis = ? ;
+
+    //h2::initial withinRange to 'the row distance is zero and the column distance less than 3'::let withinRange = (rowDis == 0 &amp;&amp; colDis &lt; 3);
+    let withinRange = ? ;
+    //h3::update withinRange to include 'the column distance is zero and row distance less than 3'
+    ::withinRange = withinRange &amp;&amp; (colDis == 0 &amp;&amp; rowDis &lt; 3);
+    ::withinRange = withinRange || (colDis == 0 &amp;&amp; rowDis &lt; 3);
+    withinRange = ? ;
+    if (!withinRange) {
+      const path = getShortestPathCmd(graph, MyTank, target);   
+      if (path.length > 0) return path[0];   
+    }
+  }
+
+  // new code ends 
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {   
+      return "R";   
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {   
+      return "L";   
+    } else {   
+      return "S";   
+    }   
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {   
+      return "D";   
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {   
+      return "U";   
+    } else {   
+      return "S";   
+    }   
+  }   
+    
+  const path = getShortestPathCmd(graph, MyTank, target);   
+  if (path.length > 0) return path[0];   
+  return '';   
+}    
+//ENDTODO
+  </code>
+  <cleancode>
+function attackTank(target) {   
+  if (!target) return "";   
+      
+  if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE &amp;&amp; target.color == "white") {
+    const rowDis = Math.abs(MyTank.r - target.r); 
+    const colDis = Math.abs(MyTank.c - target.c);
+    let withinRange = (rowDis == 0 &amp;&amp; colDis &lt; 3);
+    withinRange = withinRange || (colDis == 0 &amp;&amp; rowDis &lt; 3);
+
+    if (!withinRange) {
+      const path = getShortestPathCmd(graph, MyTank, target);   
+      if (path.length > 0) return path[0];   
+    }
+  }
+
+  if (MyTank.r == target.r &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.c &lt; target.c &amp;&amp; MyTank.dir != "R") {   
+      return "R";   
+    } else if (MyTank.c > target.c &amp;&amp; MyTank.dir != "L") {   
+      return "L";   
+    } else {   
+      return "S";   
+    }   
+  } else if (MyTank.c == target.c &amp;&amp; !isShellBlocked(MyTank, target)) {   
+    if (MyTank.r &lt; target.r &amp;&amp; MyTank.dir != "D") {   
+      return "D";   
+    } else if (MyTank.r > target.r &amp;&amp; MyTank.dir != "U") {   
+      return "U";   
+    } else {   
+      return "S";   
+    }   
+  }   
+    
+  const path = getShortestPathCmd(graph, MyTank, target);   
+  if (path.length > 0) return path[0];   
+  return '';   
+}    
+  </cleancode>
+</element>
+
+<element elementid="140" elementType="Info">
+  <p>
+    Now your tank can attack white tanks even if it carries a Missile weapon, but this is not so convenient, since your tank has to move to within two tiles, either vertically or horizontally, of the target. 
+  </p>
+  <p>
+    How about attacking the opponent tanks? Is the Missile weapon better than other special weapons when we attack opponent tanks? It depends on your preference and fighting style, but the Missile weapon has one unique advantage: your tank doesn't need to have a direct line-of-sight on an opponent tank in order to attack it. It can be attacking from a different row or column, or even while hiding behind an obstacle like a tree or rock.
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    Based on the discussions above, it probably makes sense to adopt two new strategies: 
+  </p>
+  <p>
+    <ul>
+      <li>
+        1) You should not collect the Missile weapon <b>if your tank is NOT ready to attack an opponent</b>;
+      </li>
+      <li>
+        2) If your tank carries a Missile weapon and is attacking an opponent, it doesn't have to be on the same row or column with the target. Instead, it can just stand at a safe place and fire. 
+      </li>
+    </ul> 
+  </p>
+  <p>
+    What would be the best place to make the first change?
+  </p>
+</element>
+
+<element elementid="170" elementType="Info">
+  <p>
+    We can add the logic to avoid the Missile weapon when not ready to attack an opponent in either of two places. We can filter out the Missile weapons in the <span class="variablenamebold">getSpecialWeapon</span> function, or we can change the Missile weapon's ranking in the <span class="variablenamebold">weaponIsBetter</span> function. 
+  </p>
+  <p>
+    Since <span class="variablename">getSpecialWeapon</span> is called less frequently than <span class="variablename">weaponIsBetter</span>, let's add the new logic in <span class="variablename">getSpecialWeapon</span> for now. 
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Before changing your robot code, please update your test script using the code below:
+  </p>
+  <p>
+    <pre class="brush: js">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTank('blue', 6, 7); 
+PlaceWeapon(SPECIAL_WEAPON_TYPES.MISSILE, 10, 3);
+PlaceWeapon(SPECIAL_WEAPON_TYPES.FREEZER, 2, 5);
+PlaceTank('red', 13, 12, false);
+  
+await SetupTickUpdates(300); 
+ReportEndOfTest(); 
+
+    </pre>
+  </p>
+</element>
+
+<element elementid="190" elementType="Coding" condition="TestFinishedGetWeaponAt_3_2_5">
+  <p>
+    <b>Challenge: </b>Change the <span class="variablenamebold">getSpecialWeapon</span> function to filter out all Missile weapons if your tank is not ready to attack opponents. Note that you can check whether your tank is ready to attack its opponent by calling the <span class="variablenamebold">attackOpponent</span> function and testing for an empty command on return. Click the "?" if you need some hints. 
+  </p>
+  <code isHidden="true">
+//TODO
+function getSpecialWeapon() {    
+  let bestType = MyTank.specialWeapon.type;    
+
+  // new code starts
+
+  let candidates = Weapons;
+  //h0::get the command for attacking opponent::call the function attackOpponent()
+  const cmd = ? ;
+  if (cmd == "") {
+    //h1::filter out all Missile weapnons from the candidates list::call candidates.filter using the "type" property::candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);
+    candidates = ? ;
+  }
+
+  // change all 'Weapons' to 'candidates'
+
+  for (let i = 0; i &lt; candidates.length; i += 1) {    
+    const weapon = candidates[i];    
+    if (weaponIsBetter(weapon.type, bestType)) {    
+      bestType = weapon.type;    
+    }    
+  }    
+  const bestWeapons = candidates.filter(weapon => weapon.type == bestType);    
+
+  // new code ends
+
+  const closeBestWeapon = getClosestItem(bestWeapons);    
+  if (closeBestWeapon == null) return [];    
+    
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);    
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getSpecialWeapon() {    
+  let bestType = MyTank.specialWeapon.type;    
+
+  // new code starts
+
+  let candidates = Weapons;
+  const cmd = attackOpponent();
+  if (cmd == "") {
+    candidates = candidates.filter(w => w.type != SPECIAL_WEAPON_TYPES.MISSILE);
+  }
+
+  // change all Weapons to candidates
+
+  for (let i = 0; i &lt; candidates.length; i += 1) {    
+    const weapon = candidates[i];    
+    if (weaponIsBetter(weapon.type, bestType)) {    
+      bestType = weapon.type;    
+    }    
+  }    
+  const bestWeapons = candidates.filter(weapon => weapon.type == bestType);    
+
+  // new code ends
+
+  const closeBestWeapon = getClosestItem(bestWeapons);    
+  if (closeBestWeapon == null) return [];    
+    
+  return getShortestPathCmd(graph, MyTank, closeBestWeapon);    
+}
+  </cleancode>
+</element>
+
+<element elementid="200" elementType="Info">
+  <p>
+    Great! Your tank picked up the Freezer weapon instead of the Missile, because it is not yet ready to attack an opponent in this test setup. 
+  </p>
+  <p>
+    Now we are going to implement the second strategy we discussed earlier: If your tank is equipped with a Missile and is attacking an opponent, it should stay at a safe place and keep firing. 
+  </p>
+</element>
+
+<element elementid="210" elementType="Info">
+  <p>
+    Before moving on to the last challenge, let's set up the test script as follows:
+  </p>
+  <p>
+    <pre class="brush:js">
+ClearMaze(); 
+RemoveAllTanks(); 
+  
+PlaceTank('blue', 6, 7); 
+PlaceTank('red', 10, 5, false); 
+SetTankProperties(0, {specialPower: { 
+  speed: 2, damage: 6, reload: 2, healthRegen: 2}}); 
+SetTankProperties(1, { health: 1000 }); 
+  
+PlaceTank('white', 3, 10, false); 
+PlaceTank('white', 3, 6, false); 
+
+PlaceTank('white', 4, 5, false); 
+sendCommandToWhiteTank(8, "L");
+sendCommandToWhiteTank(8, "R");
+
+PlaceTank('white', 10, 3, false); 
+sendCommandToWhiteTank(9, "U");
+sendCommandToWhiteTank(9, "D");
+
+PlaceWeapon(SPECIAL_WEAPON_TYPES.MISSILE, 3, 3); 
+PlaceTile('R', 2, 2);
+PlaceTile('R', 2, 4);
+  
+await SetupTickUpdates(350); 
+ReportEndOfTest(); 
+
+    </pre>
+  </p>
+</element>
+
+<element elementid="215" elementType="Info">
+  <p>
+    Now, copy the following function to your <b>game bot code</b>. This function checks <span class="variablename">MyTank</span>'s current position and returns all directions in which there are no obstacles within two tiles, so that missiles fired in this direction can hit a target opponent. Read through the function and see if you can understand it.
+  </p>
+  <p>
+    <pre class="brush:js">
+function getMissileDirs() {
+  // get col and row difference for each tile around
+  const delta = {  
+    U: [0, -1],  
+    D: [0, 1],  
+    L: [-1, 0],  
+    R: [1, 0],  
+  };  
+  const dirs = Object.keys(delta);  
+  const ret = [];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const d = delta[dirs[i]];
+    // check if there is no Tree or Rock in that direction
+    // 1 or 2 tiles away
+    if (['T', 'R'].includes(Maze[MyTank.r + d[1]][MyTank.c + d[0]]) || 
+    ['T', 'R'].includes(Maze[MyTank.r + 2 * d[1]][MyTank.c + 2 * d[0]])) {
+      // this dir is blocked
+      continue;
+    }
+    // add this dir to list  
+    ret.push(dirs[i]);
+  }
+  return ret;
+}
+
+    </pre>
+  </p>
+</element>
+
+<element elementid="220" elementType="Coding" condition="TestFinishedStaySafe_0">
+  <p>
+    <b>Challenge: </b>Modify the function <span class="variablenamebold">attackOpponent</span> to move your tank to a safe position and shoot continuously when it is carrying a Missile weapon. 
+  </p>
+  <p>
+    Hint: 
+    <ul>
+      <li>
+        1) Inside the for-loop, when rule #3 is satisfied, before returning the command to attack the target, insert a new block of code if your tank is carrying a Missile weapon; 
+      </li>
+      <li>
+        2) Inside this new block, check if your tank is in danger (such as comparing its position's danger score against some threshold value); 
+      </li>
+      <li>
+        3) If the current position is not safe, then escape;
+      </li>
+      <li>
+        4) If the current position is safe, get all the unblocked directions (unblocked within two tiles) using the <b>getMissileDirs</b> function. If your tank's facing direction is included, fire the missile. Otherwise, turn your tank to an unblocked direction. 
+      </li>
+    </ul>
+  </p>
+  <code isHidden="true">
+//TODO
+function attackOpponent() {  
+  // rule #1: The health level of my tank has to be greater than 2000.   
+  if (MyTank.health &lt;= 2000) return "";  
+    
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal.  
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";  
+    
+  // get all opponent tanks  
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");  
+  if (opponents.length == 0) return "";  
+    
+  // go through all opponent tanks  
+  for (let i = 0; i &lt; opponents.length; i += 1) {  
+    const target = opponents[i];  
+    // rule #3: Either my tank's health regeneration is greater than the target tank,   
+    // or my tank has higher health level at the begin of the battle.  
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {
+
+      // new code starts
+
+      if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE) {
+        //h0::check if MyTank is safe, if not, escape::check the danger score at MyTank's position::dangerScores[MyTank.r][MyTank.c] > 1
+        if ( ? ) {
+          //h1::escape from danger::call escapeFromDanger();  
+          const cmd = ? ;
+          if (cmd.length > 0) return cmd;
+        } else {
+          const dirs = getMissileDirs();
+          //h2::if MyTank.dir is included in dirs, then fire::use array function 'includes'::if (dirs.includes(MyTank.dir)) return "S";
+          if ( ? ) return "S";
+          else if (dirs.length > 0) return dirs[0];
+        }
+      } 
+
+      // new code ends   
+
+      return attackTank(target);  
+    }  
+  }  
+  return "";  
+} 
+//ENDTODO
+  </code>
+  <cleancode>
+function getMissileDirs() {
+  // get col and row difference for each tile around
+  const delta = {  
+    U: [0, -1],  
+    D: [0, 1],  
+    L: [-1, 0],  
+    R: [1, 0],  
+  };  
+  const dirs = Object.keys(delta);  
+  const ret = [];
+  for (let i = 0; i &lt; dirs.length; i += 1) {
+    const d = delta[dirs[i]];
+    // check if there is no Tree or Rock in that direction
+    // 1 or 2 tiles away
+    if (['T', 'R'].includes(Maze[MyTank.r + d[1]][MyTank.c + d[0]]) || 
+    ['T', 'R'].includes(Maze[MyTank.r + 2 * d[1]][MyTank.c + 2 * d[0]])) {
+      // this dir is blocked
+      continue;
+    }
+    // add this dir to list  
+    ret.push(dirs[i]);
+  }
+  return ret;
+}
+
+function attackOpponent() {  
+  // rule #1: The health level of my tank has to be greater than 2000.   
+  if (MyTank.health &lt;= 2000) return "";  
+    
+  // rule #2: Either my tank's damage power is at maximal, or my tank's reload power is at maximal.  
+  if (MyTank.specialPower.damage != MAX_POWER &amp;&amp; MyTank.specialPower.reload != MAX_POWER) return "";  
+    
+  // get all opponent tanks  
+  const opponents = Tanks.filter(t => t.color != MyTank.color &amp;&amp; t.color != "white");  
+  if (opponents.length == 0) return "";  
+    
+  // go through all opponent tanks  
+  for (let i = 0; i &lt; opponents.length; i += 1) {  
+    const target = opponents[i];  
+    // rule #3: Either my tank's health regeneration is greater than the target tank,   
+    // or my tank has higher health level at the begin of the battle.  
+    if (MyTank.specialPower.healthRegen > target.specialPower.healthRegen || MyTank.health > target.health) {  
+      if (MyTank.specialWeapon.type == SPECIAL_WEAPON_TYPES.MISSILE) {
+        if (dangerScores[MyTank.r][MyTank.c] > 1) {
+          const cmd = escapeFromDanger();  
+          if (cmd.length > 0) return cmd;
+        } else {
+          const dirs = getMissileDirs();
+          if (dirs.includes(MyTank.dir)) return "S";
+          else if (dirs.length > 0) return dirs[0];
+        }
+      } 
+      return attackTank(target);  
+    }  
+  }  
+  return "";  
+} 
+  </cleancode>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary: </b>In this tutorial, we discussed and implemented some strategies for using the Missile weapon. Now your tank knows, when it is carrying the Missile, how to attack both white tanks and opponent tanks.
+  </p>
+  <p>
+    <b>Exercise: </b>Implement the following logic in your code: if your tank is ready to attack an opponent, it will choose the Missile weapon over other special weapons. Hint: in the function <span class="variablenamebold">getSpecialWeapon</span>, check whether any Missile weapons are available for collection. If so, go and collect the nearest one. 
+  </p>
+  <p>
+    Share your ideas and questions in our forum under <a href="https://forum.tgame.ai/t/lesson-18-strategies-for-using-the-missile/427" target="_blank">this lesson's topic</a>.
+  </p>
+</element>

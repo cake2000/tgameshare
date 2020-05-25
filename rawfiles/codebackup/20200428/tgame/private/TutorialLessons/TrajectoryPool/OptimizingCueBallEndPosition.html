@@ -1,0 +1,676 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x,
+        aimy: aimPoint.y,
+        strength: 30,
+        targetBallID: ballID,
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}          
+  </cleancode>
+</element>
+  
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome to the second intermediate level lesson. This may be the most important lesson of all, because you'll learn <b>how to increase the chance for your bot to pocket multiple balls consecutively</b>.  
+  </p> 
+  <p>
+      As usual, if you need any help, join the discussions about this lesson <a href="https://forum.tgame.ai/t/optimizing-cue-ball-end-position/53" target="_blank">here in our forum</a>.
+    </p>
+</element>
+
+<element elementid="102" elementType="Info">
+  <p>
+    The strategy is quite simple: in selecting your shot, you need to try to pocket the current target ball, but also prepare for the next shot. 
+  </p>
+  <p>
+    So far your bot has been searching for the shot with highest probability of pocketing a target ball. The problem is that <b>if after one successful shot, the cue ball stops at a really bad position (no good shot in sight)</b>, your bot's next shot is likely to fail, turning over the table to your opponent.
+  </p>
+  <p>
+    For example, in the current test setup, we are asking your bot to take two shots in our test script. For the first shot, your robot could easily shoot ball 2 into pocket 2, but if that shot ends with the cue ball at a long distance from ball 3, <b>your bot would then have a much lower success probability for the second shot</b>.
+  </p>
+</element>
+<!-- 
+<element elementid="104" elementType="Info">
+  <p>
+    So how does your robot find out the cue ball's end position after a shot? We have provided a new helper function <b>calculateEndState</b>, which takes a shot command object as input, and returns the end states of all balls in an array like this (don't forget the <b>await</b> keyword): 
+  </p>
+  <p>
+    <pre class="brush: js">
+const endStates = await calculateEndState(shotCmd);
+    </pre>
+  </p>
+    
+  <p>
+    Since endStates is an array, you can find out the end state of a ball with id "ballID" using <b>endStates[ballID]</b>, and access its properties like this:
+    <ul>
+      <li>
+        <b>endStates[ballID].inPocketID:</b> the id of the pocket (0 to 5) or "null" if the ball is not in any pocket. Note that "null" is a special keyword representing "nothing".
+      </li>
+      <li>
+        <b>endStates[ballID].x:</b> x coordinate of the ball (x is undefined if this ball is already in any pocket)
+      </li>
+      <li>
+        <b>endStates[ballID].y:</b> y coordinate of the ball (y is undefined if this ball is already in any pocket)
+      </li>
+    </ul>
+  </p>
+  <p>
+    So to find out the cue ball's end position, we can look at <b>endStates[0].x and endStates[0].y</b>.
+  </p>
+</element> -->
+
+<element elementid="105" elementType="Coding" condition="TestFinishedCallCalcEndState">
+  <p>
+    If you were playing the game manually, you would solve the problem by varying the strength and spin of the shot so that the cue ball's end position is closer to ball 3, while keeping the probability of pocketing ball 2 relatively high. Now let's try to implement this logic in your robot code. 
+  </p>
+  <p>
+    You have already used the <b class="variablenamebold">calculateEndState</b> function from our last lesson. Remember, to find the cue ball's end position, we can look at <span class="variablenamebold">endStates[0].x</span> and <span class="variablenamebold">endStates[0].y</span>. 
+  </p>
+  <p>
+    <b>Challenge:</b> As shown in the example code below, <b>add a new for-loop in the <span class="variablenamebold">getCallShot</span> function that iterates through different strength values for your shot command</b>, ranging from 20 to 80 with a step size of 20. This loop will be placed inside the existing loop for the six pockets. For each strength value, you need to calculate the cue ball's end position without random errors (since for now we just want to know about the base case). 
+    <!-- When you test run again, you should see the trajectory changes as you change the strength values. Note that the distance between the cue stick and the cue ball is proportional to the shot strength. -->
+  </p>
+  
+  <p>
+    <img src="/images/varyingstrengthforendposition.gif" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+  <code isHidden="false">
+//TODO: iterate through strength values of 20/40/60/80 and get end states
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // new code starts here
+      // iterate through strength values of 20/40/60/80 and get end states
+
+      // Step 1: add for loop on strength value s
+      //h0::s should start at 20 and end at 80::s should increase 20 at each step
+      ::for (let s = 20; s &lt;= 80; s = s + 20) {
+      ::for (let s = 80; s &lt;= 20; s = s + 20) {
+      ::for (let s = 20; s &lt; 80; s = s - 20) {
+      for (let s = ?; s ?; s = ?) {
+        
+        // Step 2: update the strength value on cmd
+        //h1::create command with strength of s::set strength like this: 'strength: s'
+        const cmd = {strength: ?, aimx: aimPoint.x, aimy: aimPoint.y, targetBallID: ballID, targetPocketID: pocketID };
+
+        const endStates = await calculateEndState(cmd, false);
+
+        // Step 3: get cue ball position after shot
+        //h2::read cue ball position from the endStates array::write 'endStates[0]'
+        const cueballPosition = ?;
+
+        const prob = await calculateProbability(cmd);
+        if (prob > highestProb) {
+          bestCommand = cmd; 
+          highestProb = prob;
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+//ENDTODO
+  </code>
+  <cleancode>
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd, false);
+        const cueballPosition = endStates[0];
+
+        const prob = await calculateProbability(cmd);
+
+        // update best command to this command if its probability is higher
+        if (prob > highestProb) {
+          bestCommand = cmd;
+          highestProb = prob;
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+<!-- 
+<element elementid="106" elementType="Info">
+  <p>
+    Now you have added the code to read the cue ball's position, let's ask your robot to print out the position so we can see them. <b>This is called logging, a very common way for reviewing whether your code is working as you expect</b>.
+  </p>
+  <p>
+    In JavaScript, you can use the <b>console.log()</b> function to print out any information that you'd like to review, which takes one parameter as the text string to print out. For example, the following code will print out the value of pocketID. 
+  </p>
+  <p>
+    <pre class="brush: js">
+console.log("ballID " + ballID + " pocketID " + pocketID);
+    </pre>
+  </p>
+  <p>
+    Note that you can create a string using double quote ("") or single quote ('') around it, and you can "add" multiple strings or numbers into a bigger string using the "+" operator. If you need an empty line, use the special character "\n" in your string like this: "line 1\nline2".
+    <!-- For example, you can build a string like this: "1 &nbsp; " + 2 + " &nbsp; " + 3. Behind the scenes, the numbers are converted to a string first, then concatenated with the other strings. -->
+  <!-- </p>
+  <p>
+    You need to open the <b>developer console</b> on your web browser to see the printed log. If you are using <b>Chrome</b> on a <b>Windows</b> or <b>Linux</b> computer, you can simply press <b>F12</b> to open the console. Otherwise, please checkout this reference page: <a href="http://wickedlysmart.com/hfjsconsole/" target="_blank">using the browser console</a>.
+  </p>
+  <p>
+    The developer console should show up as a panel docked on the right or bottom of your browser window, though you can detach it into a seperate window on its own. Please make sure the <b>Console</b> tab is selected, and you'll find your log messages in the console.
+  </p>
+  <p>
+    <img src="/images/consoletab.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+</element> -->
+
+  <element elementid="106.5" elementType="Coding" condition="TestFinishedCallConsoleLog">    
+    <p>
+      Now that you have added the code to read the cue ball's position, let's use <b class="variablenamebold">console.log</b> to print the position for your review. Note that you can add "\n" into the text (to be printed) in order to generate an empty line. This may be particularly helpful in a case in which many log lines are being printed. 
+    </p>
+    <p>
+      <b>Challenge:</b> Add two lines of logging as shown below such that, as you vary the strength of the command, we can see the ID of the ball and pocket being assessed, together with the end position and probability of success for the shot.
+    </p>
+  <code isHidden="false">
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    //TODO: print probability and cue ball end position
+
+    // Step 1: find the loop on pocketID
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+
+      // new code starts here
+
+      // Step 2: print current values of ballID and pocketID
+      //h0::fill in ballID and pocketID
+      console.log("\nballID " + ? + " pocketID " + ?);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { 
+          aimx: aimPoint.x, 
+          aimy: aimPoint.y, 
+          strength: s, 
+          targetBallID: ballID, 
+          targetPocketID: pocketID 
+        };
+        
+        const endStates = await calculateEndState(cmd, false);
+        const cueballPosition = endStates[0];
+
+        const prob = await calculateProbability(cmd);
+
+        // Step 3: log cue ball probability and end position at this strength
+        //h1::fill in s, prob, cueballPosition.x and cueballPosition.y
+        console.log("Strength " + ? + " prob " + ? + " cue ball " + ? + " " + ?);
+
+        // new code ends here
+
+        // update best command to this command if its probability is higher
+        if (prob > highestProb) {
+          bestCommand = cmd; highestProb = prob;
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+    //ENDTODO
+
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+  </code>
+  <cleancode> 
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd, false);
+        const cueballPosition = endStates[0];
+
+        const prob = await calculateProbability(cmd);
+
+        console.log("Strength " + s + " prob " + prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+
+        // update best command to this command if its probability is higher
+        if (prob > highestProb) {
+          bestCommand = cmd;
+          highestProb = prob;
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+
+<element elementid="107" elementType="Info">
+  <p>
+    You should see a log like this in the developer console when you test your code:
+  </p>
+  <p>
+    <img src="/images/consolelogprobpos.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+
+  <p>
+    As shot strength changes, the success probability for shooting ball 2 into pocket 2 remains very high, but the cue ball's end position moves down/left significantly. So what strength should be specified? how do we balance shot success against a favorable after-shot setup? This is the most important question for you to consider as you fine-tune your bot's algorithm.
+  </p>
+</element>
+
+
+<element elementid="108" elementType="Info">
+  <p>
+    There are many approaches to this problem, but here I'm going to describe just one simple method as an example. As we walk through all balls/pockets/strength values, we could compare the new shot command with the best command found so far: <b>if both commands have fairly high success probability (say > 70%), then we save the new command as "best" <b>if it brings the cue ball closer to the table center</b>; otherwise (at least one of them has low probability), we save the new command as 'best' if it has a higher probability</b>. 
+    </p>
+    
+    <p>
+        <img src="/images/simplealgorithmforprobandendpos2.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+    </p>
+    <p>
+    Why is "closer to the table center" better? Because we can assume that <b>if the cue ball ends up near table center, it won't be too far from any possible target ball in the next shot</b>. Again, this is just one simple heuristic for illustration purpose, definitely not the best strategy.
+  </p>
+  </element>
+
+
+<element elementid="109" elementType="Info">
+  <p>
+    Let's walk through an example. Suppose we need to pick one shot command out of the four shown below. We would initially set best command to shot 1. When we compare shot 1 to shot 2, we would find that shot 2 has a higher probability, so we set the best shot command to shot 2. In comparing shot 2 to shot 3, we would choose shot 3, since it has even higher probability. In comparing shots 3 and 4, we find that both shots have excellent probabilities, but shot 4 gives us the "better" cue ball end position that's closer to the table center. In the end, therefore, we would set best command to shot 4.
+  </p>
+  <p>
+      <img src="/images/shotselectionwithprobandendpos.jpg" style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p> 
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    In order to find the distance of the cue ball from table center, you can use the helper function <b class="variablenamebold">dist2</b>. This function calculates the distance between any two points, and is used as shown below, where <b>the two parameters are position objects with properties x and y</b>.
+  </p>
+  <p>
+    <pre class="brush: js">
+const point1 = {x: 0, y: 0};
+const point2 = {x: 3, y: 4};
+// distance will be 5
+const distance = dist2(point1, point2);
+    </pre>
+  </p>
+</element>
+
+<element elementid="111" elementType="Coding" condition="TestPPPocketBall_3_In_6">
+  <p>
+    Now we are finally ready to make this important improvement to your robot. 
+  </p>
+  <p>
+    <b>Challenge:</b> Please use the code below as a guideline to optimize cue ball end position: if both the new command and best command have high success probability (more than 70%), select the command with better end position for the cue ball (smaller distance to the table center); otherwise, select the command with higher probability.
+  </p>
+  <p>
+    Note that quite a few lines need to be changed, so please review the below code very carefully!
+  </p>
+  <code isHidden="false">
+//TODO: consider both probability and cue ball end position 
+async function getCallShot() {
+  
+  // new code starts here
+  // Step 1: changed! store probability as part of best command now
+  let bestCommand = {prob: -1};
+
+  // Step 2: changed! we no longer need this since we store prob as property of the best command
+  //let highestProb = -1;
+
+  // Step 3: new constant object representing table center
+  //h0::table center is at (0,0)::use '{x:0, y:0}'
+  const tableCenter = {x: ?, y: ?};
+
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0 ; k &lt;= legalBallIDs.length-1 ; k=k+1 ) {
+    const ballID = legalBallIDs[k];
+    for (let pocketID = 0; pocketID &lt;= 5 ; pocketID = pocketID + 1 ) {
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = { 
+          aimx: aimPoint.x, 
+          aimy: aimPoint.y, 
+          strength: s, 
+          targetBallID: ballID, 
+          targetPocketID: pocketID 
+        };
+        const endStates = await calculateEndState(cmd, false);
+        const cueballPosition = endStates[0];
+
+        // Step 4: changed! store probability as a new property of cmd
+        cmd.prob = await calculateProbability(cmd);
+
+        // Step 5: get the distance from cue ball position to table center
+        //h1::calculate distance to table center using dist2::use 'dist2(tableCenter, cueballPosition)'
+        cmd.distance = ?;
+
+        // Step 6: changed! prob is now a property of the cmd object
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+
+        // Step 7: new method to update best command 
+
+        //h2::check if both have high probability::use '&amp;&amp;'
+        if (cmd.prob > 70 ? bestCommand.prob > 70) {
+          // both commands are good enough for probability,           
+          // so compare their cue ball end position
+
+          //h3::smaller distance to table center is better::use '&lt;'
+          if (cmd.distance ? bestCommand.distance) {
+            bestCommand = cmd; 
+          }
+        // Step 8: add else statement for old method
+        } else {
+          // simply choose the one with higher probability
+          // Step 9: prob -> cmd.prob, highestProb -> bestCommand.prob
+          if (cmd.prob > bestCommand.prob) {
+            bestCommand = cmd; 
+            // Step 10: delete the update on highestProb
+            // highestProb = prob;
+          }
+        // Step 11: don't forget to end else statement with }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+
+  // new code ends here
+  
+  // return the best command we found
+  return bestCommand;
+}   
+//ENDTODO
+  </code>
+  <cleancode>  
+function getCueBallPlacement() {
+  const legalBallIDs = world.CandidateBallList[MyID];
+  for (let k = 0; k &lt; legalBallIDs.length; k++) {
+    const ballID = legalBallIDs[k];
+    const ballPos = Balls[ballID];
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID++) {
+      const pocketPos = Pockets[pocketID];
+      const isBlocked = isPathBlocked(ballPos, pocketPos);
+      if (!isBlocked) {
+        return extrapolatePoints(pocketPos, ballPos, 2 * BallDiameter);
+      }
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+}
+
+async function getCallShot() {
+  // place holder for best command and its probability
+  let bestCommand = {
+    prob: -1
+  };
+
+  // note that we no longer need this since we store prob as property of best command
+  //let highestProb = -1;
+
+  // new constant representing table center
+  const tableCenter = {
+    x: 0,
+    y: 0
+  };
+
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+
+      console.log("\nballID " + ballID + " pocketID " + pocketID);
+
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+
+      // iterate through strength values of 20/40/60/80
+      for (let s = 20; s &lt;= 80; s = s + 20) {
+        const cmd = {
+          aimx: aimPoint.x,
+          aimy: aimPoint.y,
+          strength: s,
+          targetBallID: ballID,
+          targetPocketID: pocketID
+        };
+
+        const endStates = await calculateEndState(cmd, false);
+        const cueballPosition = endStates[0];
+
+        cmd.prob = await calculateProbability(cmd);
+        cmd.distance = dist2(tableCenter, cueballPosition);
+
+        console.log("Strength " + s + " prob " + cmd.prob + " cue ball " + cueballPosition.x + " " + cueballPosition.y);
+
+        // new method to update best command 
+        if (cmd.prob > 70 &amp;&amp; bestCommand.prob > 70) {
+          // both commands are good enough for probability, 
+          // so compare their cue ball end position
+
+          if (cmd.distance &lt; bestCommand.distance) {
+            bestCommand = cmd;
+          }
+        } else {
+          // simply choose the one with higher probability
+          if (cmd.prob > bestCommand.prob) {
+            bestCommand = cmd;
+          }
+        }
+      } // end of for loop "s"
+    } // end of for loop "pocketID"
+  } // end of for loop "k"
+  
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+}
+  </cleancode>
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! </p>
+  <p><b>Summary:</b> Your bot has "evolved" significantly. Now <b>it not only looks at success probability for the current shot, but also plans for cue ball position for the next shot when the current shot is a "sure" deal</b>.</p>
+  <p>
+    <b>Open Directions:</b> this is the best opportunity for you to start making your bot different and better. Can you improve your shot selection algorithm further? Let me give you some approaches to consider:
+  </p>
+  <ul>
+    <li>
+      <b>Is 70% the best threshold for success probability?</b> You might experiment with a higher or lower value.
+    </li>
+    <li>
+      Currently you are testing four strength values (20/40/60/80). <b>Is there a better way to pinpoint the best strength?</b>
+    </li>
+    <li>
+      Are you convinced that the best ending point for the cue ball is at the table center? Perhaps you would like to investigate some other approach to measuring quality of end position for the cue ball. Could you choose a shot command that brings the cue ball closer to another remaining ball of yours, for example? Or closer to two of your remaining balls on average? This approach would be more useful when there are only one or two balls left to finish, including the black ball.
+    </li>
+    <li>
+      So far we have considered the end position only for the cue ball, but you can also <b>take advantage of the knowledge of end positions for other balls</b>. Is there some way in which you could take advantage of this information? For example, can you try to avoid accidentally pocketing the cue ball or the black ball? 
+    </li>
+    <li>
+      Besides the strength value, you can also <b>vary the "spin" of the shot command</b>. The <span class="variablename">spin</span> property can be a number between -1 and 1, where -1 means full back spin, and 1 means full top spin. Its default value is 0 if you don't specify it in the command object. You can easily add another for-loop similar to the strength value loop to optimize the spin property, trying spin values of -1, -0.5, 0, 0.5 and 1, for example. Note that you need to add the spin attribute to the shot command you return for it to take effect.
+    </li>
+    <!-- <li>
+      You have probably discovered that searching takes time. Can you find a way to reduce the number of probability and end state inquiries in order to save your robot some time? You might try bypassing those balls already blocked from the cue ball by other balls when you search for the best shot. Since the cue ball cannot hit them, it is a waste of time to query for their success probabilities. You can use the <b class="variablenamebold">isPathBlocked</b> function for this check. <b>Without this change, your robot may time out and lose a game!</b>
+    </li> -->
+    <!-- <li>
+      Another practical use for <b class="variablenamebold">isPathBlocked</b>might be to check whether the cue ball's end position is blocked from the end positions of any of your other legal target balls. That possibility should be avoided, right?
+    </li> -->
+    <!-- <li>
+      When the success probability of pocketing the current target ball is very high, <b>even if you shift your aim position slightly, you will still be able to get the current target ball pocketed, but the cue ball's end position can change dramatically</b>. 
+      For example, you can aim at (targetPosOld.x  BallDiameter/10, targetPosOld.y + BallDiameter/10) in our current test scenario with no issues. This will give you more possible end states to explore, to your advantage.
+      </li> -->
+  </ul>
+  <p>
+    If you have trouble implementing a new idea, feel free to check out the discussions and ask questions in our forum, under <a href="https://forum.tgame.ai/t/optimizing-cue-ball-end-position/53" target="_blank">this lesson's topic</a>.
+  </p>
+  <!-- <p>
+    <b>Open Challenge:</b> try to adjust <b>strength</b> in the return object of <b>calculateShotCommand</b> function, and see how this variable influences the results of simulations in calculateEndState. 
+  </p> -->
+</element>
+

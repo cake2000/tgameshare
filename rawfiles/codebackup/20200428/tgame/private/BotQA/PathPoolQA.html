@@ -1,0 +1,66 @@
+<qa>
+    <question key="break shot" />
+    <answer>
+        <p>Every game starts with a break shot, where all the colored balls are placed in a compact triangle shape, and a player shoots the cue ball towards this pack. </p>
+        <p>After a break shot is taken: </p>
+        <ul>
+            <li>If the cue ball or the black ball is not pocketed, the break is invalid, and the opponent takes the break shot with the table reset;</li>
+            <li>otherwise, if any colored ball is pocketed, the break shot is valid and the breaking player continues to take a called shot;</li>
+            <li>otherwise, if 3 or less colored balls hit the rails (sides), the break shot is invalid, and the opponent takes the break shot with the table reset;</li>
+            <li>otherwise, the break shot is valid, but the opponent takes a called shot next since no ball was pocketed.</li>
+        </ul>
+    </answer>
+</qa>
+
+<qa>
+    <question key="call shot" />
+    <answer>
+        <p>In a Trajectory Pool game, after a successful break shot, every shot needs to be a call shot.</p>
+        <p>In a call shot, a player needs to "call" a target colored ball and a target pocket to aim for, and he/she will continue to take call shots as long as the targets are satisfied.</p>
+        <!--<p>In Trajectory Pool games, calls are made implicitly using the baseline forecast of your shot. So you only need to specify how you want to take the shot (aim and strength).</p>-->
+        <p>When neither player has chosen a ball color, cue ball can touch and pocket either red or yellow balls first in each call shot.</p>
+        <p>Once one player has successfully called and pocketed a colored ball, then that color (yellor or red) becomes the chosen color for that player, and the other color (red or yellow) is assigned to the opponent. From this point on, both players can only call balls of his/her chosen color, and the first ball his/her cue ball touches in any shot has to be of that color too.</p>
+        <p>Only when all balls of his/her chosen color have been pocketed, a player can start to target the black ball (id = 1).</p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="table" />
+    <answer>
+      <p>
+        <img src="/images/PathPoolTableDimension5.jpg" style="width: 96%; height: auto; margin: 0px; vertical-align: top;"/>
+      </p>
+      <p>The pool table is 2000 by 1000 units, with the <b>X</b> axis pointing to the right, and <b>Y</b> axis pointing down. </p>
+      <p>The coordinate of the center of the table is {x:0, y:0}, and a point with coordinate of {x:300, y:200} is at the bottom right quarter of the table. Similarly, a point with coordinate of {x:-300, y:200} is in the bottom left quarter of the table. </p>
+      <p>Before any break shot, the cue ball is placed at the center of the left half of the table {x:-500, y:0}, and the tip point of the pack of colored balls is at the center of the right half of the table {x:500, y:0}.</p>    
+      <p>There are 6 pockets, numbered 0 to 5, as illustrated in the picture.</p>
+    </answer>
+</qa>
+
+<qa>
+    <question key="ball" />
+    <answer>
+        <p>
+            In all levels, there is one cue ball (the white ball, with ballID = 0) and one black ball (with ballID = 1).
+            In the beginner level, there are 3 red balls and 3 yellow balls. In the advanced level, we increase red and yellow balls to 7 each, and in professional level, there are 10 each.
+        </p>
+        <p>Your robot can retrieve the exact value of ball diameter using world.BallDiameter, which is about 30.2 units.</p> 
+    </answer>
+</qa>
+
+<qa>
+    <question key="rail" />
+    <answer>
+        <p>The <b>rail</b> is just the borders of the table on the 4 sides.</p> 
+    </answer>
+</qa>
+    
+<qa>
+    <question key="pocket" />
+    <answer>
+        <p>For the BEGINNER and ADVANCED levels, the pocket radius is 41.5 units for the 4 corner pockets, and 34 for the 2 side pockets.</p> 
+        <p>For the PROFESSIONAL level, the pocket radius is 38.5 for the 4 corner pockets, and 31 for the 2 side pockets.</p>
+        <p>The top left pocket has pocketID of 0, followed by the top middle pocket with pocketID = 1, etc. The left bottom pocket has pocketID of 5. You can get the position of a pocket using the array "world.Pockets", so "world.Pockets[3]" gives you the position of the right bottom pocket. </p>
+    </answer>
+</qa>
+    

@@ -1,0 +1,13 @@
+.step-rows {
+	display: flex;
+	&__item {
+		margin-right: 10px;
+		&--active {
+			background-color: #1985ac !important;
+			border-color: #187fa3 !important;
+		}
+	}
+	&__add-btn {
+		margin-left: 10px;
+	}
+}

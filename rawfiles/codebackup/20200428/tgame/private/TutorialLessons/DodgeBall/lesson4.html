@@ -1,0 +1,343 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Seeking Balls to Pick Up</h5> 
+    <p>By the last tutorial, your robot can already drive the car aimlessly through the field. Unfortunately, that's not good enough to win the game for you.</p>
+    <p>In this tutorial, we'll teach your robot how to scan and pick up balls.</p>
+    <p>Are you ready?</p>
+</element>
+
+<element elementid="103"  elementType="Coding" condition="TestDBTurningLeftThenRight"  conditionind="600">
+  <h5 class="elementheader">Turning towards the ball</h5>
+  <p>Turning towards the ball is a new behavior, so it's natural to handle it by adding a new state <b>TURNTOBALL</b>. Specifically, three changes are needed: </p>
+  <p>
+      <ul>
+          <li>
+              First, you to implement a new function <b>getBallColumn</b> that scans for the ball of your team's color. It would return the column of the ball, or return <b>null</b> if no ball is found. This function should be similar to the isForwardPathBlocked function, except that your robot will be looking for <b>MyInfo.myBallColor</b> instead of obstacles. Also, you want to scan the higher-numbered rows first, so you can find balls closest to you first.
+          </li>
+          <li>
+              Second, you need to call the getBallColumn in the "GOFORWARD" state, and transit to the new <b>TURNTOBALL</b> state when we need to turn towards the ball. 
+          </li>
+          <li>
+              Thrid, you need to implement the new <b>TURNTOBALL</b> state, in which you turn the car left or right based on the return value of getBallColumn. 
+          </li>
+      </ul>
+  </p>
+
+  <p>
+    When you click <b>TEST</b>, your car should starting turning left towards the ball, then turn right after it overshoots.
+  </p>
+
+
+    <code isHidden='false'>
+// getting ball column in camera image
+this.getBallColumn = function(info) {
+  //TODO: scan image for my ball
+  //h0::iterate through rows bottom-up::use for-loop on row decreasingly
+  ::for (let row=37; row&gt;=30; row--) {
+  ::for (let row=37; row&gt;=10; row--) {
+  ::for (let row=20; row&lt;=40; row++) {
+  for (let row=37; row&gt;=10; row--) {
+      //h1::iterate through columns::use for-loop on col
+      ::for (let col=0; col&lt;=63; col++) {
+      ::for (let col=26; col&lt;=37; col++) {
+      ::for (let col=10; col&lt;=30; col++) {
+      ::for (let col=15; col&lt;=48; col++) {
+      for (let col=0; col&lt;=63; col++) {
+          //h2::read pixel value at row/col::refer to isForwardPathBlocked
+          let pixel = data.frontView[row*64+col];
+          //h3::check if pixel is MyInfo.myBallColor
+          if (pixel == MyInfo.myBallColor) {
+            //h4::return the column number
+            return col;
+          //h5::close h3 block with }
+          }            
+      //h6::close h1 block with }
+      }
+  //h7::close h0 block with }
+  }
+  return null;
+};  
+                    
+this.isForwardPathBlocked = function(info) {
+    for (let row=27; row&lt;=40; row++) {
+        for (let col=22; col&lt;=41; col++) {
+            let pixel = info.frontView[row*64+col];     
+            if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+                return true;
+            }            
+        }
+    }
+    return false;
+};  
+    
+this.initialize = function(info) {  
+    this.state = "GOFORWARD";  
+};                                
+
+this.update = function(info) {  
+  if (this.state == "TURNLEFT") { 
+    sendCommand("L"); 
+  if (!this.isForwardPathBlocked(info))
+    this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) { 
+    sendCommand("R"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") { 
+    sendCommand("NR"); 
+    sendCommand("NL"); 
+    
+    if (this.isForwardPathBlocked(info)) {
+      if (Math.random() > 0.5)
+        this.state = "TURNRIGHT"; 
+      else
+        this.state = "TURNLEFT";
+    } else {
+      let col = this.getBallColumn(info);
+      //TODO: switch to TURNTOBALL if ball is on either side
+      //h8::check if col is not at image center::check if col is too small or too big
+      ::if (col &lt;= 26 || col >= 37)
+      ::if (col &gt;= 26 || col &lt;= 37)
+      ::if (col &lt;= 26 &amp;&amp; col >= 37)
+      if (col &lt;= 26 || col >= 37)
+        //h9::transit to state "TURNTOBALL"
+        this.state = "TURNTOBALL";
+    }
+  } else if (this.state == "TURNTOBALL") {
+    let col = this.getBallColumn(info);
+    //TODO: turn left or right based on ball column
+    //h10::check if ball is on left side::check if col &lt;= 26
+    if (col &lt;= 26) 
+      //h11::turn right
+      sendCommand("R");
+    //h12::otherwise check if ball is on right side::check if col &gt;= 37
+    else if (col >= 37)
+      //h13::turn left 
+      sendCommand("L");
+    //h14::otherwise
+    else
+      //h15::transit to state "GOFORWARD"
+      this.state = "GOFORWARD";
+  }
+  if (MyInfo.mySpeed &lt; 10)
+    sendCommand("F");  
+  else 
+    sendCommand("NF");
+};            
+    </code>
+</element>
+
+
+
+
+<element elementid="114"  elementType="Coding" condition="TestDBPickUpBall"  conditionind="660">
+    <h5 class="elementheader">Fixing the overshoot</h5> 
+    <p>
+        As you can see, when your car turns towards the ball, it tends to overshoot and then has to turn to the opposite direction. Let's fix that problem now.
+    </p>
+    <p>
+        The reason for the overshoot is the following: as your car turns left, when the ball enters the center of the camera image and your robot transits to the GOFORWARD state, the car will still take some time to unwind its wheel angle before the car is running straight. During this unwind phase, your car will still be turning left more, therefore overshooting to the other side.
+    </p>
+    <p>
+      Therefore, to avoid overshooting, one simple solution is to turn less each time. Given how far the ball is from the center of the image, we can define a proportional target wheel angle, and turn left or right by comparing our car's current wheel angle (MyInfo.mySteering) against the target wheel angle. 
+    </p>
+    <p>
+        <img src="/images/dodgeballovershootfix.png" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+    </p>
+    <p>
+      Now the only question left is: given the ball's column, how to come up with a target wheel steering angle? To get a <b>perfect</b> angle, you will need to do some serious math using control theory. However, here we only need a <b>good enough</b> answer for now, which is also called a <b>heuristic</b>. Heuristic is often much simpler to understand and to implement, and it often takes much less time to calculate in run time.
+      </p>
+      <p>
+        Our insight here is that the more skewed the ball is, the larger steering angle we need. Also, when the ball column is on the left side, we want steering angle to be greater than 0, which means turning left for our car; when the ball is on the right, we want the steering angle to be less than 0, which means turning right. Therefore, our first idea is to set target angle to (31.5 - ball column). 
+      </p>
+      <p> 
+        In addition, we probably shouldn't steer our wheel for more than 30 degrees, which is about 0.5 in radian angle, so we need to scale down our target angle to that range. If the ball is at column 0, and we want the steering angle to be 0.5, then the scaling factor would be 1/60, since (31.5 - 0) / 60 is approximately 0.5. So our initial formula for target angle is <b>(31.5 - ball column)/60</b>. 
+      </p>
+      <p>
+        With a good target steering angle, all that's left to do is to turn left or right based on whether your car's actual steering angle <b>MyInfo.mySteering</b> is smaller or larger than the target angle. Of course, since the minimum increment step of the angle is 0.06, your robot should transit to GOFORWARD when the angle difference is less than half of that. Now, when you test, your robot should be able to reduce the overshoot and pick up the ball.
+    </p>
+    <code isHidden='false'>
+// getting ball column in camera image
+this.getBallColumn = function(info) {
+  for (let row=37; row&gt;=10; row--) {
+      for (let col=0; col&lt;=63; col++) {
+          let pixel = data.frontView[row*64+col];
+          if (pixel == MyInfo.myBallColor) {
+            return col;
+          }            
+      }
+  }
+  return null;
+};  
+                    
+this.isForwardPathBlocked = function(info) {
+    for (let row=27; row&lt;=40; row++) {
+        for (let col=22; col&lt;=41; col++) {
+            let pixel = info.frontView[row*64+col];     
+            if (pixel != GameInfo.GROUND_COLOR_IND &amp;&amp; pixel != MyInfo.myBallColor &amp;&amp; pixel != MyInfo.myCarColor) {
+                return true;
+            }            
+        }
+    }
+    return false;
+};  
+    
+this.initialize = function(info) {  
+    this.state = "GOFORWARD";  
+};                                
+
+this.update = function(info) {  
+  if (this.state == "TURNLEFT") { 
+    sendCommand("L"); 
+  if (!this.isForwardPathBlocked(info))
+    this.state = "GOFORWARD";
+  } else if (this.state == "TURNRIGHT" ) { 
+    sendCommand("R"); 
+    if (!this.isForwardPathBlocked(info))
+      this.state = "GOFORWARD";
+  } else if (this.state == "GOFORWARD") { 
+    sendCommand("NR"); 
+    sendCommand("NL"); 
+    
+    if (this.isForwardPathBlocked(info)) {
+      if (Math.random() > 0.5)
+        this.state = "TURNRIGHT"; 
+      else
+        this.state = "TURNLEFT";
+    } else {
+      let col = this.getBallColumn(info);
+      if (col &lt;= 26 || col >= 37)
+        this.state = "TURNTOBALL";
+    }
+  } else if (this.state == "TURNTOBALL") {
+    let col = this.getBallColumn(info);
+
+    if (col != null) {
+      //TODO: implement a target angle based behavior
+      //h0::calculate targetAngle as function of col::start with scaling factor of 60
+      ::const targetAngle = (31.5 - col) / 60;
+      ::const targetAngle = (31.5 - col) * 60;
+      ::const targetAngle = (31.5 - col) + 60;
+      const targetAngle = (31.5 - col) / 60;
+      //h1::check if targetAngle is different enough from MyInfo.mySteering::check if their difference is larger than 0.03
+      ::if (targetAngle - MyInfo.mySteering > 0.03) {
+      ::if (Math.abs(targetAngle - MyInfo.mySteering) > 0.03) {
+      ::if (Math.abs(targetAngle - MyInfo.mySteering) &lt; 0.03) {
+      if (Math.abs(targetAngle - MyInfo.mySteering) > 0.03) {
+        //h2::if actual steering is smaller than targetAngle::compare MyInfo.mySteering vs targetAngle
+        if (MyInfo.mySteering &lt; targetAngle) {
+          //h3::turn left
+          sendCommand("L");
+        //h4::else
+        } else {
+          //h5::turn right
+          sendCommand("R");
+        //h6::close block with }
+        }        
+      //h7::else
+      } else {
+        //h8::transit to "GOFORWARD"
+        this.state = "GOFORWARD";
+      //h9::close block with }
+      }
+    } else 
+      this.state = "GOFORWARD";
+  }
+  if (MyInfo.mySpeed &lt; 10)
+    sendCommand("F");  
+  else 
+    sendCommand("NF");
+};            
+    </code>
+</element> 
+
+
+<element elementid="140" elementType="Conclusion">
+    <h5 class="elementheader">Tutorial Completed!</h5> 
+    <p>Congratulations! Now your robot can scan and pick up balls while wandering around the maze.</p>
+    <p>
+        For more exercise, try to fine tune the scaling factor for target steering angle by trying different values and observing your car's behavior, such as 30, 120, 240, etc.
+    </p>
+</element>
+
+<!--     
+
+// getting ball column in camera image 
+this.getBallColumn = function(info) { 
+  for(let row=37;row>=10;row--) {
+  	for(let col=0;col<=63;col++) {
+  	  let pixel = info.frontView[row*64+col];
+      if (pixel == MyInfo.myBallColor) {
+        console.log("ball col is " + col + " row " + row);
+        return col;
+      }
+    }
+  }  
+  return null; 
+};   
+                      
+this.isForwardPathBlocked = function(info) { 
+    for (let row=27; row<=40; row++) { 
+        for (let col=22; col<=41; col++) { 
+            let pixel = info.frontView[row*64+col];      
+            if (pixel != GameInfo.GROUND_COLOR_IND && pixel != MyInfo.myBallColor && pixel != MyInfo.myCarColor) { 
+                return true; 
+            }             
+        } 
+    } 
+    return false; 
+};   
+      
+this.initialize = function(info) {   
+    this.state = "GOFORWARD";   
+};                                 
+  
+this.update = function(info) {   
+  if (this.state == "TURNLEFT") {  
+    sendCommand("L");  
+  if (!this.isForwardPathBlocked(info)) 
+    this.state = "GOFORWARD"; 
+  } else if (this.state == "TURNRIGHT" ) {  
+    sendCommand("R");  
+    if (!this.isForwardPathBlocked(info)) 
+      this.state = "GOFORWARD"; 
+  } else if (this.state == "GOFORWARD") {  
+    sendCommand("NR");  
+    sendCommand("NL");  
+      
+    if (this.isForwardPathBlocked(info)) { 
+      if (Math.random() > 0.5) 
+        this.state = "TURNRIGHT";  
+      else 
+        this.state = "TURNLEFT"; 
+    } else { 
+      let col = this.getBallColumn(info); 
+      //TODO: switch to TURNTOBALL if ball is on either side 
+      if (col <= 26 || col >= 37) 
+        this.state = "TURNTOBALL";
+    } 
+  } else if (this.state == "TURNTOBALL") { 
+    let col = this.getBallColumn(info); 
+    if (col != null) {
+      const targetAngle = (31.5 - col) / 60;
+      console.log("targetAngle " + targetAngle + " steering " + MyInfo.mySteering);
+      if (Math.abs(MyInfo.mySteering - targetAngle) > 0.03) {
+        if (MyInfo.mySteering < targetAngle) {
+          sendCommand("L");
+          console.log("send L");
+        } else {
+          sendCommand("R");
+          console.log("send R");
+        }        
+      } else {
+        console.log("switch back " + col);
+        this.state = "GOFORWARD";
+      }
+    }
+  } 
+  if (MyInfo.mySpeed < 10) 
+    sendCommand("F");   
+  else  
+    sendCommand("NF"); 
+};
+
+-->

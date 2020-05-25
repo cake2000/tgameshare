@@ -1,0 +1,170 @@
+<element elementid="100" elementType="Info">
+  <p>
+    In JavaScript, <b>an array is a collection of similar objects bound together</b>. An array can hold a list of numbers, strings, or other types of objects. For example, like the toy cabinet below, the <b class="variablenamebold">bears</b> array holds four bear objects. Each bear object can be accessed by an integer (<b>element index</b>) specified in a square bracket.
+  </p>
+  <p>
+    <img src="/images/beararray.jpg" style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+    JavaScript arrays are <b>zero-indexed</b>, which means that <b>the index of the first element of an array is 0</b>. Therefore, bears[0] is the first bear, and bears[3] is the 4th bear. 
+    <!-- If an array's length is n, then the index values must be integers between 0 and n - 1. -->
+  </p>
+  <p AScratchExample>
+    A JavaScript array is equivalent to <img src='/images/scratch_list.png' style='width: auto; height: 25px; vertical-align: bottom;'/> in Scratch, and when you use <span class="variablename">bears[0]</span>, it is like reading an item from a list using <img src='/images/scratch_itemoflist.png' style='width: auto; height: 25px; vertical-align: bottom;'/> in Scratch.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    The easiest way to create an array is to use an <b>array literal</b> like this, with <b>a pair of square brackets</b> wrapping up a list of items <b>separated by commas</b>:
+  </p>
+  <pre class="brush: js">
+bears = ["bear0", "bear1", "bear2", "bear3"];
+  </pre>
+  <p>
+    You can access or modify any element using its index number. 
+  </p>
+  <pre class="brush: js">
+// get the first element
+firstBear = bears[0];
+// modify the last element
+bears[3] = "Teddy";
+  </pre>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    You can find out how many elements are contained in an array using its <b>length</b> property like this:  
+  </p>
+  <pre class="brush: js">
+// four bears in total
+numberOfBears = bears.length;
+  </pre>
+</element>
+
+<!-- <element elementid="130" elementType="Info">
+  <p>
+    Please note the differences between square brackets (<b>[]</b>) and dots (<b>.</b>). The square bracket is used to define a new array or access an element of the array:
+    <ul>
+      <li>
+        To define a new array: <span class="variablename">aNewArray = [1, 2, 3, 4, 5]</span>;
+      </li>
+      <li>
+        To refer to an array element with an index number: <span class="variablename">aNewArray[0]</span> (the first element in aNewArray)
+      </li>
+    </ul>
+    The dot "." is used with an object name to access one of the object's properties: <b class="variablenamebold">aNewArray.length</b>.   
+  </p>
+</element> -->
+
+<element elementid="132" elementType="Quiz" answerKey="C" answerReason="There are six elements in the array.">
+  <p>
+    <b>Quiz</b>: out of the four choices below, which one is the value of <span class="variablename">[2, 4, 1, 6, 8, 0].length</span>?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 2
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 8
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 6
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 1
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="135" elementType="Quiz" answerKey="C" answerReason="">
+  <p>
+    Good job. Let's take another quiz to reinforce what you have learned. 
+  </p>
+  <p>
+    <b>Quiz:</b> what's wrong with the following code?
+  </p>
+  <pre class="brush: js">
+index = { x: 0, y: 1 };
+ball = Balls[index];
+  </pre>
+  <p>
+    <ul>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> We should use Balls.index
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> Balls[index] should be changed to Balls["index"] 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> "index" is not a number, so it cannot be used as an array index
+      </li>
+    </ul>
+  </p>
+</element>
+
+<!-- <element elementid="139" elementType="Quiz" answerKey="D" answerReason="'index.x' is 0, so Balls[index.x] = Balls[0]." optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Great! Let's have another one. 
+  </p>
+  <p>
+    <b>Quiz:</b> out of the four choices below, which one has no syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> aNewArray = [0, 1, 1, ];
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> console.log(Balls[length]);
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> index = {x: 0, y: 1}; 
+          ballPos = Balls[index[x]];  
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> index = {x: 0, y: 1}; 
+          ballPos = Balls[index.x];  
+      </li>
+    </ul>
+  </p>
+</element> -->
+
+<element elementid="142" elementType="Quiz" answerKey="B" answerReason="A:The index 3 is out of bounds [0, 2].|B:aNewArray.length is 3, so the result is 6. |C:aNewArray[2] = 2, so the result is 4. |D:The result is 5." optional="True" showCondition="PreNonZeroFailures">
+  <p>
+    Here we have one more!  
+  </p>
+  <p>
+    <b>Quiz:</b> out of the four choices below, which one has value of 6?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> aNewArray = [0, 1, 2]; 
+        aNewArray[3] * 3;
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> aNewArray = [0, 1, 2]; 
+          aNewArray.length * 2;
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> aNewArray = [0, 1, 2]; 
+          aNewArray[2] * 2; 
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> aNewArray = [0, 1, 2]; 
+          aNewArray[0] + aNewArray[1] * 1 + aNewArray[2] * 2;
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="SkillLearned" skill="Array">
+  <p>
+    That's all you need to know about arrays for now. Let's go back to the game bot code.
+  </p>
+</element>
+  
+  

@@ -1,0 +1,168 @@
+<element elementid="100" elementType="Info">
+  <p>
+    A <b>conditional statement</b> is used to run certain code statement only when a particular condition is satisfied.
+  </p>
+  <pre class="brush: js">
+if (condition) {
+  // code to run when condition is true
+} else {
+  // code to run when condition is false
+}     
+  </pre>     
+  <p>
+    Here <b>"condition"</b> can be a variable or an expression, and its value is either "true" or "false". It is usually a <b>comparison statement</b> using one of the following comparison operations: <b>equal to ( == ), not equal to ( != ), greater than ( > ), less than ( &lt; ), greater than or equal to ( >= ), less than or equal to ( &lt;= )</b>.
+  </p>
+  <p>
+    For example, you can write:
+    <pre class="brush: js">
+if (number1 > number2) {
+  // some code to run when number1 is greater than number2
+} else {
+  // some code to run when number1 is not greater than number2
+}     
+  </pre>     
+  </p>
+  <p>
+    If you know Scratch, this is equivalent to using the control block <img src='/images/scratch_ifthenelse.png' style='width: auto; height: 80px; vertical-align: bottom;'/> together with boolean blocks like <img src='/images/scratch_lessthan.png' style='width: auto; height: 25px; vertical-align: bottom;'/>.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    When making more complicated decisions, you can combine multiple conditions with one or more of the following logical operators: "&amp;&amp;" (and), "||" (or), and "!" (not). This table below shows when the variables <b>A</b> and <b>B</b> take on different values, the value we get by combining them using logical operators.
+  </p>
+  <p>
+    <img src='/images/logicaloperations.png' style="width: 70%; height: auto; margin-left: 15%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="123" elementType="Quiz" answerKey="D" answerReason="A is false since b1 is false; B is false since b1 is false; C is false since b2 is true, so !b2 is false; D is true since b1 &amp;&amp; b2 is false, and b3 is false, so not(false) is true">
+  <p><b>Quiz</b>: </p>
+  <pre class="brush: js">
+const b1 = false;
+const b2 = (1 &lt;= 2);
+const b3 = (1 == 2);
+  </pre>
+  <p>
+    Out of the four choices, which one will be evaluated to 'true'?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> b1 &amp;&amp; b2
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> b1 || b3
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> !b1 &amp;&amp; !b2
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> !(b3 || b1 &amp;&amp; b2)
+      </li>
+    </ul>
+  </p>    
+</element>
+
+<element elementid="125" elementType="Quiz" answerKey="A" answerReason="" optional="True" showCondition="PreNonZeroFailures">
+  <p><b>Quiz</b>: </p>
+  <pre class="brush: js">
+const a = 5;
+const b = 1;
+let count = 0;
+if (b > a) count += b;
+else if (b == a) count += 1;
+else if (b &lt; a &amp;&amp; count > 0) count += a;
+else count *= 2;
+console.log(count);
+  </pre>
+  <p>
+    Out of the four choices, which one is the output of above code?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 0
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a> 1
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a> 5
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 2
+      </li>
+    </ul>
+  </p> 
+</element>
+
+<element elementid="130" elementType="Quiz" answerKey="C" answerReason="">
+  <p>
+    <pre class="brush: js">
+      if (condition) {
+        // code to run when condition is true
+      } else {
+        // code to run when condition is false
+      }     
+    </pre>    
+  </p>
+  <p>
+    <b>Quiz</b>: given the syntax for if-else statements above, which choice below has NO syntax errors?
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a> 
+        <pre class="brush: js">
+function max(a, b) {
+  if a &lt;= b:
+    return b;
+  else:
+    return a;
+}
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt; b):
+    return b;
+  else:
+    return a;
+}
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt;= b) {
+    return b;
+  } else {
+    return a;
+  }
+}
+        </pre>
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a> 
+        <pre class="brush: js">
+function max(a, b) {
+  if (a &lt;= b) {
+    return b;
+  } else {
+    return a;
+}
+        </pre>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="200" elementType="SkillLearned" skill="IfCondition">
+  <p>
+    Now let's go back to the game bot code.
+  </p>
+</element>

@@ -1,0 +1,83 @@
+<element elementid="100" elementType="Info">
+    <h5 class="elementheader">Introduction</h5> 
+    <p>Hi there, I am <b>TBot</b>, a robot to help you building your Trajectory Pool robot through a series of tutorials. You can chat with me by typing your questions or commands in the box below, such as: </p>
+    <p>
+        <ul>
+            <li>
+                <b>Please tell me about objects</b> or <b>How to use an array?</b>
+            </li>
+            <li>
+                <b>continue</b> or <b>next</b>
+            </li>
+            <li>
+                <b>help</b> or <b>hint</b>
+            </li>
+        </ul>
+    </p>
+    <p>Are you ready to get started?</p>
+</element>
+
+<element elementid="101" elementType="Info">
+    <h5 class="elementheader">The Break Shot</h5> 
+    <p>In this tutorial, we teach your robot how to take a <b>break shot</b>, which breaks the ball pack to start a new game.</p>
+    <p>Let's start by adding a new function <b>this.getBreakShot</b> to your robot program. The game engine calls this function to get your robot's break shot command.</p>
+    <p>Please copy or type the code into the robot code editor on the right. When you are done, you can chat me "next" or "ok" to continue.</p>
+    <code isHidden='false'>
+this.getBreakShot = function() {
+};                                 
+    </code>
+</element>
+
+<element elementid="110" elementType="Coding" condition="TestFinishedAnyResultAimXY">
+    <p>Now let's enhance your break shot function to return an object with 2 properties <b>aimx</b> and <b>aimy</b>, both with a initial value of 0. This will tell the game engine to aim at the center of the table for the shot.</p>
+    <p><b>Hint:</b> ask about "table coordinate system" for more information.</p>
+    <p>When you are done, click the <b>TEST</b> button on the top right to watch your robot's break shot in action!</p>
+    <p>Note that after the test, you can click the "Exit" button or press the <b>ESC</b> key to dismiss the game window.</p>
+    <code isHidden='true'>
+this.getBreakShot = function() {
+    return {     
+        aimx: 0, aimy: 0
+    };                   
+};                                 
+    </code>
+</element>
+
+
+<element elementid="125"  elementType="Coding" condition="TestFinishedYellowBallFirstTouch">
+    <h5 class="elementheader">Hitting yellow ball first</h5> 
+    <p>Now I have a new challenge for you. Can you change the value of <b>aimx</b> and <b>aimy</b> so that the cue ball will hit a <b>yellow</b> ball first?</p>
+    <p>You can try different values of aimx and aimy, and click the "TEST" button to check the result.</p>
+    <code isHidden="true">
+this.getBreakShot = function() {
+    return {             
+        aimy: 41,
+        aimx: 0, 
+    };                   
+};                                 
+    </code>
+</element>
+
+
+<element elementid="130" elementType="Coding" condition="TestFinishedValidBreakShot">
+    <h5 class="elementheader">Taking valid break shots</h5>         
+    <p>At this time you probably have found out an issue with your break shot: it is not strong enough. Remember your break shot needs to pocket a colored ball or drive at least 4 balls to the rails.</p> 
+    <p>So far your shot has been using a default strength of 500. You can set the strength by adding a new field <b>strength</b> in the object returned.</p>
+    <p><b>Challenge:</b> please specify the shot strength to get a valid break shot.</p>
+    <code isHidden="true">
+// new function to specify break shot command        
+this.getBreakShot = function() {
+    return {             
+        strength: 1000, 
+        aimx: 0, 
+        aimy: 0,
+    };                   
+};                                 
+    </code>
+</element>
+
+<element elementid="140" elementType="Conclusion">
+    <p>Congratulations on completing your first tutorial! </p>
+    <p>
+        For more exercise, please try to improve your robot's break shot by changing strength/aimx/aimy until you are satisfied. Ideally you want to pocket one or more colored balls (but not the cue ball or the black ball) in the break shot.
+    </p>
+</element>

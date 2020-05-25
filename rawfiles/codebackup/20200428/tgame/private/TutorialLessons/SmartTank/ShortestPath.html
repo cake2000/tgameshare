@@ -1,0 +1,340 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+function getNewCommand() {
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color == "white") {
+      if (MyTank.r == curTank.r) {
+        if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+          return "R";
+        } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+          return "L";
+        } else {
+          return "S";
+        }
+      } else if (MyTank.c == curTank.c) {
+        if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+          return "D";
+        } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+          return "U";
+        } else {
+          return "S";
+        }
+      } // end of column check
+    } // end of color check
+  } // end of for loop
+  return "";
+}    
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>
+    Welcome back! In the last few tutorials, you learned how to create battlefields using test scripts. Starting from this lesson, we will get back to the robot code and add several basic skills to your tank. The first skill you'll add is collecting crystals using the shortest path.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    After tutorial 3, your tank can already shoot a white tank on the same row or column. If you are lucky, you may see a crystal appear after the white tank is killed. If you are playing a game, you would probably move your tank to pick up that crystal, right? But your opponent(s) might be thinking the same thing! Your tank must race against other tanks, moving to the crystal as quickly as possible. To do that, you need to find the <b>shortest path</b> from your tank to the crystal, bypassing any obstacle tiles.
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    As illustrated below, if we would like to travel from <b>point A</b> to <b>point B</b>, which path is shorter, Path I or Path II? We can count the steps. If we take Path I, we need to move <b>9</b> steps; for Path II, we need to move <b>13</b> steps. So Path I is shorter. But is it the shortest path out of all paths?
+  </p>
+  <p>
+    <img src='/images/shortestpath1.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element> 
+
+<element elementid="140" elementType="Info">
+  <p>
+    The answer is yes. We need to move at least 3 steps vertically from point A's row to point B's row, and at least 6 steps horizontally to move from point A's column to point B's column. So overall we have to move at least 3 + 6 = 9 steps from point A to point B, which is the length of Path I. 
+  </p>
+  <p>
+    How about Path III shown below? If you count the steps, you will see it also has 9 steps. So <b>there can be multiple paths that are of the shortest length</b>. 
+  </p>
+  <p>
+    <img src='/images/shortestpath2.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    Now let's look at a more complicated example. 
+  </p>
+  <p>
+    <img src='/images/shortestpath3.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+  <p>
+    In the picture above, there is a wall between point A and point B, and we cannot walk through it. So any path from A to B has to bypass the wall.
+  </p>
+</element>
+
+<element elementid="170" elementType="Quiz" answerKey="C" answerReason="Both Path I and Path II have 13 steps.">
+  <p>
+    <b>Quiz:</b> Out of the three choices (<a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton">A</a>, <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton">B</a>, and <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton">C</a>), which one is a correct description about the two paths? Please type or click the letter of your chosen answer.
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>Path I is shorter.
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>Path II is shorter.
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>Path I and Path II have the same number of steps.
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="180" elementType="Info">
+  <p>
+    Do you think Path I and Path II are the shortest possible routes? Well, maybe. Let me introduce a very useful algorithm, called the <b>A* (pronounced "A star")</b> algorithm, which can search for and identify the shortest path.  
+  </p>
+</element>
+
+<element elementid="190" elementType="Info">
+  <p>
+    Given coordinates for desired starting and ending points on a grid, the A* algorithm searches for a path of the <b>least cost</b>. "least" means the smallest, but what is "cost"? Actually <b>we can set cost to be any metric we want to minimize</b>. 
+  </p>
+  <p>
+    For example, suppose we write a software program that is similar to google maps, and it calculates driving direction between any two cities. If we set cost to be the length of each road, then A* algorithm will minimize the total distance we travel; but if we set cost to be the toll fare for each road, then the "least cost path" is the one that literally costs the least amount of toll fare.
+  </p>
+</element>
+<element elementid="192" elementType="Info">  
+  <p>
+    So how does the A* algorithm work? Essentially it keeps track of a set of paths originating from the starting point, and extends the most promising path further repeatedly, until one of the paths reaches the target point. Envision a tree that is rooted at the starting point and extends its branches step by step until one of the branches reaches the target. Feel free to read more about A* in the algorithm's <a href="https://en.wikipedia.org/wiki/A*_search_algorithm" target="_blank">Wiki page</a>. 
+  </p>
+</element> 
+
+<element elementid="200" elementType="Info">
+  <p>
+    Sounds complicated, right? No worries. Let me show you some examples. 
+  </p>
+  <p>
+    <img src='/images/astar.gif' style="width: 60%; height: auto; margin-left: 20%; vertical-align: top;"/>
+  </p>
+  <p>
+    In the animation above, we start from point A and "flood" the maze one step at a time. With each step we number all possible “next steps.” The <b>step number</b> of any given box in the grid, there, represents the minimum number of steps required to go from point A to that particular box.  
+  </p>
+  <p>
+    Note that when one of our next steps takes us to point B (step 13), we have identified a shortest path between points A and B, with a length of thirteen steps.
+  </p>
+</element>
+
+<!-- <element elementid="210" elementType="Info">
+  <p>
+    From the animation above, note that both paths I and II from our previous question (as well as other, interior paths) reach point B with step 13. Each of these approaches, then, represents a “shortest path” with a length of thirteen steps. 
+  </p>
+  <p>
+    <img src='/images/shortestpath3.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element> -->
+
+<element elementid="220" elementType="Quiz" answerKey="B" answerReason="I will explain next.">
+  <p>
+    <b>Quiz:</b> In the picture below, how many steps are in a shortest path from Point A to Point B? Please type or click the letter of your chosen answer.
+  </p>
+  <p>
+    <img src='/images/shortestpath4.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>8
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>9
+        </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>10
+      </li>
+      <li>
+          <a href="#" onclick="ClickToSendChat(event, 'D')" class="inlinebutton"><b>D.</b></a>11
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="230" elementType="Info">
+  <p>
+    This is how the A* algorithm searches for the shortest path step by step.
+  </p>
+  <p>
+    <img src='/images/shortestpath4-2.png' style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="240" elementType="Info">
+  <p>
+    Here is a more complicated example. 
+  </p>
+  <p>
+    <img src='/images/astar1.gif' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="250" elementType="Info">
+  <p>
+    Now you have some idea about how the A* algorithm works, let's get back to the tank game and take a couple of questions.
+  </p>
+</element> 
+
+<element elementid="252" elementType="Quiz" answerKey="B" answerReason="The path from the blue tank to B is eight-step long, which is the shortest.">
+  <p>
+    <b>Quiz:</b> Out of the three crystals in the picture below, which one is closest to the blue tank?
+  </p>
+  <p>
+    <img src='/images/spquiz1.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>(11, 2)
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>(8, 8)
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>(7, 11)
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="254" elementType="Quiz" answerKey="A" answerReason="I'll explain next.">
+  <p>
+    <b>Quiz:</b> In the same picture, if the blue tank has to avoid being shot by the red tank, which crystal is closest to it?
+  </p>
+  <p>
+    <img src='/images/spquiz1.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+  <p>
+    <ul>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'A')" class="inlinebutton"><b>A.</b></a>(11, 2)
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'B')" class="inlinebutton"><b>B.</b></a>(8, 8)
+      </li>
+      <li>
+        <a href="#" onclick="ClickToSendChat(event, 'C')" class="inlinebutton"><b>C.</b></a>(7, 11)
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="256" elementType="Info">
+  <p>
+    To avoid being shot by the red tank, we can treat the range of the red tank as a wall, shown below. One shortest path from the blue tank to the crystal at (8, 8) is shown as the orange line. The total number of steps is 10, greater than the step number to the crystal at (11, 2), which is 9. 
+  </p>
+  <p>
+    <img src='/images/spquiz2.jpg' style="width: 80%; height: auto; margin-left: 10%; vertical-align: top;"/>
+  </p>
+</element> 
+
+<element elementid="258" elementType="Info">
+  <p>
+    After the warm-up with those questions, let's discuss how we can find a shortest path when we need to collect a crystal.
+  </p>
+</element> 
+
+<element elementid="260" elementType="Info">
+  <p>
+    In the current test setup, for example, there are two mud puddles between the blue tank and the crystal. When you manually control the tank, you will probably choose the path shown below, sending the following commands: <b>"U"</b> to move it up one tile, <b>"R"</b> to turn right and move right across six tiles, <b>"D"</b> to turn and move down one tile. 
+  </p>
+  <p>
+    <img src='/images/getcrystal.jpg' style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+</element>
+
+<element elementid="265" elementType="Coding" condition="TestFinishedPowerPointOne">
+  <p>
+    <b>Challenge:</b> In your robot code, replace the question marks with the right column or row numbers, such that your tank will pick up the crystal.
+  </p>
+  <code isHidden="true">
+function getNewCommand() {
+  if (MyTank.c == 4 &amp;&amp; MyTank.r == 5 ) return "U";
+  if (MyTank.c >= ? &amp;&amp; MyTank.c &lt; ? &amp;&amp; MyTank.r == 4 ) return "R";
+  if (MyTank.c == ? &amp;&amp; MyTank.r == ? ) return "D";
+
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+  </code>
+  <cleancode>
+function getNewCommand() {
+  if (MyTank.c == 4 &amp;&amp; MyTank.r == 5 ) return "U";
+  if (MyTank.c >= 4 &amp;&amp; MyTank.c &lt; 10 &amp;&amp; MyTank.r == 4 ) return "R";
+  if (MyTank.c == 10 &amp;&amp; MyTank.r == 4 ) return "D";
+
+  for (let i = 0; i &lt; Tanks.length; i += 1){
+    const curTank = Tanks[i];
+    if (curTank.color != "white") continue;
+
+    if (MyTank.r == curTank.r) {
+      if (MyTank.c &lt; curTank.c &amp;&amp; MyTank.dir != "R") {
+        return "R";
+      } else if (MyTank.c > curTank.c &amp;&amp; MyTank.dir != "L") {
+        return "L";
+      } else {
+        return "S";
+      }
+    } else if (MyTank.c == curTank.c) {
+      if (MyTank.r &lt; curTank.r &amp;&amp; MyTank.dir != "D") {
+        return "D";
+      } else if (MyTank.r > curTank.r &amp;&amp; MyTank.dir != "U") {
+        return "U";
+      } else {
+        return "S";
+      }
+    }
+  }
+  return "";
+} 
+  </cleancode>
+</element>
+
+<element elementid="270" elementType="Info">
+  <p>
+    Right now you hardcoded the coordinates and corresponding commands in your code, in the next tutorial, you will enhance your gamebot to automatically move your tank along this path, with the help of the A* algorithm.
+  </p>
+</element>
+
+<element elementid="500" elementType="Conclusion">
+  <p>
+    <b>Summary:</b> In this tutorial, the A* algorithm was introduced and I showed you some examples of how it searches for the shortest paths. In our next tutorial, we'll use this awesome algorithm to collect crystals. 
+  </p>
+  <p>
+    <b>Exercise:</b> Check out this <a href="http://ashblue.github.io/javascript-pathfinding/" target="_blank">interactive demo</a> for the A* algorithm and play with different start/end settings. Does the algorithm always find the shortest path? 
+  </p>
+  <p>
+    If you have any questions, feel free to post them on our forum, under <a href="https://forum.tgame.ai/t/lesson-7-the-a-algorithm-for-shortest-path/404" target="_blank">this lesson's topic</a>. 
+  </p>
+</element>

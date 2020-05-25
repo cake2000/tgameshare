@@ -1,0 +1,242 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTile('R', 5, 2);
+PlaceTank('blue', 5, 5, 0, false, true);
+PlaceTank('white', 10, 5);
+
+await SetupTickUpdates(180);
+
+ReportEndOfTest();
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>Hi! Welcome back! </p>    
+  <p>
+    In this lesson we are going to talk about test scripts. You will learn how to add tiles and tanks to the battlefield in order to setup a test environment. 
+  </p> 
+  <!-- <p>
+    You might have learned about test scripts from the pool game, now we are going to write test scripts for the tank war game by using a new set of functions. 
+  </p> -->
+  <p>
+    The discussions about this lesson can be found <a href="https://forum.tgame.ai/t/lesson-4-setting-up-a-test/401" target="_blank">here in our forum</a>.
+  </p>
+</element>
+
+<element elementid="110" elementType="Info">
+  <p>
+    Please click the <b>Test Script</b> tab and take a look at the test script for this tutorial. You will understand this script by the end of this lesson.
+  </p>
+  <p>
+    Note that <b>the test script is not part of your robot's code</b>. Instead, it sets up a scenaria to test your robot. Usually, a test script specifies placements of tiles and tanks, and then asks your robot to send a command based on the current setup. 
+  </p>
+</element>
+
+<element elementid="120" elementType="Info">
+  <p>
+    A set of special functions are provided to allow configuration of your game world to a specific scenario:
+  </p>
+  <p>
+    <ul>
+      <li>
+        <p><b class="variablenamebold">RemoveAllTanks()</b>:</p> 
+        <p>Usually the first line in your test script, this command removes all tanks from the battlefield. </p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">PlaceTile(tileType, columnNumber, rowNumber)</b>:</p> 
+        <p>This command places a specific type of tile at the intersection point of the specified column and row. There are three types of tiles you can place: </p>
+        <table class="ReferenceTable2">
+          <thead>
+            <tr>
+              <th>Input Value</th>
+              <th>Tile Type</th>
+              <th>Tile Image</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>R</td>
+              <td>Rock</td>
+              <td><img src="/images/Obs_Rock_64.png" style="width: auto; height: 25;"/></td>
+            </tr>
+            <tr>
+              <td>M</td>
+              <td>Mud</td>
+              <td><img src="/images/Obs_Mud_64.png" style="width: auto; height: 25;"/></td>
+            </tr>
+            <tr>
+              <td>T</td>
+              <td>Tree</td>
+              <td><img src="/images/Obs_Shorttree_64.png" style="width: auto; height: 25;"/></td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- <ur>
+          <li>
+            &nbsp;&nbsp;&nbsp;&nbsp;"<b>R</b>" for rocks. <img src="/images/Obs_Rock_64.png" style="width: auto; height: 25;"/>
+          </li>
+          <li>
+            &nbsp;&nbsp;&nbsp;&nbsp;"<b>M</b>" for muddy puddles. <img src="/images/Obs_Mud_64.png" style="width: auto; height: 25;"/>
+          </li>
+          <li>
+            &nbsp;&nbsp;&nbsp;&nbsp;"<b>T</b>" for trees. <img src="/images/Obs_Shorttree_64.png" style="width: auto; height: 25;"/>
+          </li>
+        </ur> -->
+        <br/>
+        <p>For example, <span class="variablename">PlaceTile("R", 5, 2)</span> will place a rock tile at column 5 and row 2.</p>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="130" elementType="Info">
+  <p>
+    <ul>
+      <li>
+        <p>
+          <b class="variablenamebold">PlaceTank(tankColor, columnNumber, rowNumber, addAI = true)</b>:
+        </p> 
+        <p>
+          This command places a tank at the intersection of the specified column and row. The parameter <span class="variablename">tankColor</span> could be "blue", "red" or "white". 
+        </p>
+        <p>
+          In case you are adding a "white" tank, by default the game engine would add a system AI to control that tank, so it would move or shoot when you click "Test". If you set the last argument to <span class="variablenamebold">false</span>, then the newly added tank will stay stationary, such as in this example: <span class="variablename">PlaceTank("white", 10, 5, false);</span>.
+        </p>
+      </li>
+    </ul>
+  </p>
+</element> 
+
+<element elementid="140" elementType="Info">
+  <p>
+    <ul>
+      <li>
+        <p><b class="variablenamebold">CalculateCommand()</b>:</p> 
+        <p>Use this command to ask your robot to generate a command (using its getNewCommand function) and then execute that command through the game engine.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">await WaitForAllShellsToExplode()</b>:</p> 
+        <p>Use this command to pause the test script until all bomb shells have exploded.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">await SetupTickUpdates(updateCount)</b>:</p> 
+        <p>Use this command to keep your robot running for the given number of tick updates. Normally the game engine updates 60 times per second, so if you pass in an argument of 180, the game engine will call your robot's <span class="variablename">getNewCommand</span> function approximately 180 times, which will take about 3 seconds. 
+        </p> 
+      </li>
+      <li>
+        <p><b class="variablenamebold">ReportEndOfTest()</b>:</p> 
+        <p>This command informs the game engine that the test has completed. <b>This is required as the last line of your test script.</b></p>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="150" elementType="Info">
+  <p>
+    The above functions allow you to customize your battlefield and test your robot under a specific scenario. Imagine you are playing a game online, and your bot does something really silly. <b>You can reproduce the problem by setting up an identical battlefield scenario for testing</b>. Then you can improve your bot until it handles the problem scenario properly in the test.
+  </p>
+  <p>
+    This practice of 1) setting up a test case for your code and 2) improving your code until it passes the test is called <b>Test-Driven Development, or TDD for short</b>. Professional programmers usually spend more time creating and running tests than writing the application code itself, and, from now on, you will probably do the same for your bot.
+  </p>
+</element>
+
+<element elementid="160" elementType="Info">
+  <p>
+    In the current test script, we first clear the tanks from the battlefield, then place a rock tile at (5, 2), a blue tank at (5, 5), and a white tank at (10, 5). After that, we wait 180 ticks, or 3 seconds, for the game engine to repeatedly call your <span class="variablename">getNewCommand</span> function and execute the returned commands. Finally we report the end of this test. So when you run it, your tank will shoot the white tank at (10, 5) until it is destroyed.
+  </p>
+</element>
+
+<element elementid="170" elementType="Coding" condition="TestFinishedKillTanksAt_5_10_10_5">
+  <p>
+    Now let's practice setting up a new test scenario. 
+  </p>
+  <p>
+    <b>Challenge:</b> Can you go to the <b>Test Script</b> tab and add another white tank at (5, 10) by calling the "PlaceTank" function? In addition, please change the argument to the <span class="variablenamebold">SetupTickUpdates</span> function such that your tank will have enough time to kill both white tanks. Apparently 180 tick updates are not enough.
+  </p> 
+  <cleancode>
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTile('R', 5, 2);
+PlaceTank('blue', 5, 5);
+PlaceTank('white', 10, 5, false);
+PlaceTank('white', 5, 10, false);
+
+await SetupTickUpdates(500);
+
+ReportEndOfTest(); 
+  </cleancode> 
+</element>
+
+<element elementid="180" elementType="Coding" condition="TestFinishedWithTiles_M_6_5_T_5_4_R_4_5">
+  <p>
+    Good job! Now, let's make the battlefield prettier by adding some more tiles. 
+  </p>
+  <p>
+    <b>Challenge:</b> Can you add the following tiles around your blue tank at (5, 5), by calling function <span class="variablenamebold">PlaceTile(tileType, colNum, rowNum)</span>? 
+    <ul>
+      <li>A mud puddle to the right of the blue tank</li>
+      <li>A tree above the blue tank</li>
+      <li>A rock to the left of the blue tank</li>
+    </ul>
+  </p> 
+  <p>
+    You can use the code below as a template:
+  </p>
+  <code isHidden="false">
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTile('R', 5, 2);
+PlaceTank('blue', 5, 5);
+PlaceTank('white', 10, 5, false);
+PlaceTank('white', 5, 10, false);
+
+//TODO: add more tiles
+// a muddy puddle to the right
+//h1::column and row number of the muddy puddle::same row number but one more column than the blue tank's::(6, 5)
+PlaceTile('M', ?, ?);
+// a short tree above
+//h2::"T" for a tree::same column but one less row than the blue tank's::(5, 4)
+PlaceTile( ? );
+// a rock to the left
+//h3::"R" for a stone::same row but one less column than the blue tank's::(4, 5)
+PlaceTile( ? );
+//ENDTODO
+await SetupTickUpdates(500);
+
+ReportEndOfTest(); 
+  </code>
+  <cleancode>
+ClearMaze();
+RemoveAllTanks();
+
+PlaceTile('R', 5, 2);
+PlaceTank('blue', 5, 5);
+PlaceTank('white', 10, 5, false);
+PlaceTank('white', 5, 10, false);
+
+PlaceTile('M', 6, 5);
+PlaceTile('T', 5, 4);
+PlaceTile('R', 4, 5);
+
+await SetupTickUpdates(500);
+
+ReportEndOfTest(); 
+  </cleancode> 
+</element>
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! </p>
+  <p><b>Summary:</b> We reviewed the concept of Test-Driven Development (TDD), and learned a new set of functions to set up the test script for the tank game.</p>
+  <p>
+    <b>Exercise 1:</b> Change your test script so that a third white tank is added at (11, 5), and your tank will kill all three white tanks.
+  </p>
+  <p>
+    <b>Exercise 2:</b> Add some tree tiles between your tank and the white tanks.
+  </p>
+</element>
+

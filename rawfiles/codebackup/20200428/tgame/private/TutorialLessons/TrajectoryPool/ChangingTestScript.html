@@ -1,0 +1,316 @@
+<element elementid="099" elementType="InitialCode">
+  <cleancode>
+
+// test script: 
+
+ResetTable(true);
+PlaceBallOnTable(0, 0, 0);
+PlaceBallOnTable(2, -270, 180);
+PlaceBallOnTable(3, 0, -150);
+PlaceBallOnTable(4, 0, 250);
+PlaceBallOnTable(6, 400, 350);
+PlaceBallOnTable(7, -886, -250);
+
+//set robot to shoot red balls only
+ChooseRedColor(); 
+//prompt robot to send a call shot command
+TakeCallShot();
+
+await WaitForAllBallStop();
+ReportEndOfTest(); 
+
+
+// robot code: 
+async function getCallShot() {
+  // place holder for best command and highest probability
+  let bestCommand = null;
+  let highestProb = -1;
+  const legalBallIDs = world.CandidateBallList[MyID];
+
+  for (let k = 0; k &lt;= legalBallIDs.length - 1; k = k + 1) {
+    const ballID = legalBallIDs[k];
+
+    for (let pocketID = 0; pocketID &lt;= 5; pocketID = pocketID + 1) {
+      const aimPoint = getAimPosition(Balls[ballID], Pockets[pocketID]);
+      const cmd = {
+        aimx: aimPoint.x, 
+        aimy: aimPoint.y, 
+        strength: 30,
+        targetBallID: ballID, 
+        targetPocketID: pocketID
+      };
+      const prob = await calculateProbability(cmd);
+
+      if (prob > highestProb) {
+        bestCommand = cmd;
+        highestProb = prob;
+      }
+    } // end of "pocketID" for-loop 
+  } // end of "k" for-loop 
+  
+  // return the best command we found
+  return bestCommand;
+}
+
+function getBreakShot() {
+  return {
+    aimx: 0,
+    aimy: 0,
+    strength: 80
+  };
+} 
+  </cleancode>
+</element>
+
+<element elementid="100" elementType="Info">
+  <p>Hi! Welcome to the last batch of lessons for the beginner level!</p>    
+  <p>In this lesson I'm going to introduce one of the advanced features of our platform: <b>changing the test scripts</b>.</p> 
+  <p>
+    The discussions on this lesson can be found <a href="https://forum.tgame.ai/t/changing-test-script/43" target="_blank">here in our forum</a>.
+  </p>
+</element>
+
+<element elementid="104" elementType="Info">
+    <p>
+      If you click the <b>Test Script</b> tab, you should see the script that sets up the game world for this particular tutorial. 
+    </p>
+    <p>
+      <img src="/images/switchtotesttab.gif" style="width: 50%; height: auto; margin-left: 25%; vertical-align: top;"/>
+    </p>
+    <p>
+      Note that <b>test script is not your bot's code</b>. Instead, it controls your bot for the purpose of testing. Usually, the test script specifies where to place the balls, and then asks your robot to take an action (such as taking a call shot). <b>If we think of your bot as a self-driving car, then the test script builds a network of roads and then test-drives the car</b>.
+    </p>
+</element>
+
+<!-- <element elementid="106" elementType="Info">
+  <p>
+    So why do we need to run tests? 
+  </p>
+</element> -->
+
+<element elementid="110" elementType="Info">
+  <p>
+    To configure the game world to a specific scenario, the test script uses a set of special functions, such as:
+  </p>
+  <p>
+    <ul>
+      <li>
+        <p><b class="variablenamebold">ResetTable(clearTable)</b>:</p> 
+        <p>If the parameter <b class="variablenamebold">clearTable</b> is true (i.e. you use "<span class="variablename">ResetTable(true)</span>" in your test script), this function moves all balls into pockets; if <b class="variablenamebold">clearTable</b> is false, this function moves all balls to their initial position of a triangle pack. For example, in the current test script, we just want to place a few balls on table, so we are calling <span class="variablename">ResetTable(true)</span> to clear away all balls first.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">PlaceBallOnTable(ballID, x, y)</b>:</p> 
+        <p>Places a ball with the specified id of ballID at the coordinates (x,y) on table. For example, <span class="variablename">PlaceBallOnTable(1, 0, 0)</span> would place the black ball at table center.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">ChooseRedColor() or ChooseYellowColor()</b>:</p> 
+        <p>Sets the red or yellow color as your robot's chosen color suite, so that your bot can only legally shoot red or yellow balls on table. This command will impact the value of <i class="variablenamebold">world.CandidateBallList[MyID]</i>).</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">TakeCallShot()</b>:</p> 
+        <p>prompts your bot to take a call shot.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">TakeBreakShot()</b>:</p> 
+        <p>Prompt your bot to take a break shot.</p>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="115" elementType="Info">
+  <p>
+    <ul>
+      <li>
+        <p><b class="variablenamebold">await PlaceCueBallFromHand()</b>:</p> 
+        <p>Prompts your bot to place the cue ball on table as if the opponent has just made a foul.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">await WaitForAllBallStop()</b>:</p> 
+        <p>Pauses execution of script until all balls have stopped. This is needed if you need to ask your robot to take more than one shots.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">await UpdateWorld()</b>:</p> 
+        <p>Retrieves the latest ball position from the game engine, usually done after a shot that would change the ball positions.</p>
+      </li>
+      <li>
+        <p><b class="variablenamebold">ReportEndOfTest()</b>:</p> 
+        <p>Informs the game engine the test script has completed. This is required as the last line of your test script.</p>
+      </li>
+    </ul>
+  </p>
+</element>
+
+<element elementid="116" elementType="Info">
+  <p>
+    These functions allow you to customize the game world to test your bot under a specific scenario. Imagine you are playing a game online, and your bot does something really silly. Now <b>you can reproduce that issue by setting up the balls on table just as they were in the game</b>, and you can continue to improve your bot until it handles this situation properly.
+  </p>
+  <p>
+    This practice of 1) setting up a test case for your code and 2) improving your code until it passes the test is called <b>Test-Driven Development, or TDD for short</b>. Professional programmers usually spend more time creating and running tests than writing the application code itself, and, from now on, you will probably do the same for your bot as well.
+  </p>
+</element>
+<element elementid="117" elementType="Info">
+  <p>
+    <b>Testing is a very common practice in the field of engineering</b>. For example, all modern cars go through crash tests to ensure they can handle certain level of impact before they go to mass production. We can't let a car out on the road before it copes well with certain test scenarios. Similarly, you don't want to take your game bot to a serious match before you know it can handle some basic test scenarios well.
+  </p>
+  <p>
+    <img src="images/carcrashtest.gif" style="width: 90%; height: auto; margin-left: 5%; vertical-align: top;"/>
+  </p>
+
+</element>
+
+<element elementid="118" elementType="Coding" condition="TestPPPocketBall_2_In_4">
+  <p>
+    Now let's practice setting up the test script. In the current test script, we first clear all the balls on the table, then place a few balls back. After that, we tell your robot it can only shoot red balls and prompt it to make a call shot. Finally we wait for all balls to stop moving, and then report the end of this test. Currently your bot would choose to shoot ball 3 into pocket 1 since that's most likely to succeed. 
+  </p>
+  <p>
+    <b>Challenge:</b> can you <b>modify the placement of the cue ball in the test script</b> such that your bot would choose to shoot ball 2 into pocket 4 (bottom center)? <b>You need to modify the line "<span class="variablename">PlaceBallOnTable(0, 0, 0);</span>" so that shooting ball 2 into pocket 4 becomes the high probability choice</b>. Note: this challenge is only for the <b>test script</b>, and you shouldn't change your robot code at all.
+  </p>
+  <code isHidden="true">
+ResetTable(true);
+
+//TODO: change cue ball placement
+
+//h0::place cue ball in line with ball 2 and pocket 4 and close to ball 2
+::PlaceBallOnTable(0, -450, 396);
+::PlaceBallOnTable(0, -350, 96);
+::PlaceBallOnTable(0, -250, -96);
+PlaceBallOnTable(0, 0, 0);
+//ENDTODO
+
+PlaceBallOnTable(2, -270, 180);
+PlaceBallOnTable(3, 0, -150);
+PlaceBallOnTable(4, 0, 250);
+PlaceBallOnTable(6, 400, 350);
+PlaceBallOnTable(7, -886, -250);
+
+//set robot to shoot red balls only
+ChooseRedColor(); 
+//prompt robot to send a call shot command
+TakeCallShot();
+
+await WaitForAllBallStop();
+ReportEndOfTest();
+  </code>   
+  <cleancode>
+ResetTable(true);
+PlaceBallOnTable(0, -350, 96);
+PlaceBallOnTable(2, -270, 180);
+PlaceBallOnTable(3, 0, -150);
+PlaceBallOnTable(4, 0, 250);
+PlaceBallOnTable(6, 400, 350);
+PlaceBallOnTable(7, -886, -250);
+
+//set robot to shoot red balls only
+ChooseRedColor(); 
+//prompt robot to send a call shot command
+TakeCallShot();
+
+await WaitForAllBallStop();
+ReportEndOfTest();
+  </cleancode> 
+</element>
+
+
+<element elementid="119" elementType="Info">
+  <p>
+    For the last challenge of this lesson, let's execute two shots in a row. Please <b>add two new lines of script</b> below the existing line for <span class="variablename">TakeCallShot()</span> in your <b>test script</b> as shown below. Note that the last two lines of the test script (<span class="variablename">WaitForAllBallStop</span> and <span class="variablename">ReportEndOfTest</span>) should remain unchanged. 
+  </p>
+  <p>
+    <pre class="brush: js">
+// existing line
+TakeCallShot();  
+
+// TODO: insert these 2 new lines:
+await WaitForAllBallStop();
+TakeCallShot();
+
+// existing line
+await WaitForAllBallStop();
+ReportEndOfTest();
+
+    </pre>
+  </p>    
+  <p>
+    As you may have guessed, these two new lines asks your robot to wait until all the balls have stopped moving after the first shot, and then to take another call shot.
+  </p>
+  <p>
+    Click <img src='/images/icon-next.png' style='width: auto; height: 25px; vertical-align: bottom;'/> when you are done with adding these two lines.
+  </p>
+</element>
+
+<element elementid="131" elementType="Coding" condition="TestPPPocketBall2_2_In_4_3_In_2">
+  <p>
+    <b>Challenge:</b> please <b>modify the placement of both the cue ball and ball 3</b> so that your robot will choose to shoot ball 2 into pocket 4, and then shoot ball 3 into pocket 2. Note that the key strategy is to place ball 3 at such a position that after the cue ball hits ball 2 and stops, ball 3 plus pocket 2 become the next optimal ball/pocket combination. 
+  </p>
+  <code isHidden="true">
+ResetTable(true);
+
+//TODO: adjust cue ball and ball 3
+//h0::cue ball should move towards pocket 2 after hitting ball 2::cue ball should be moved a bit left compared to previous challenge
+::PlaceBallOnTable(0, -544, 326);
+::PlaceBallOnTable(0, -444, 226);
+::PlaceBallOnTable(0, -344, 126);
+PlaceBallOnTable(0, 0, 0);
+
+PlaceBallOnTable(2, -270, 180);
+
+//h1::ball 3 should be close to pocket 2
+::PlaceBallOnTable(3, 747, -420);
+::PlaceBallOnTable(3, 902, -420);
+::PlaceBallOnTable(3, 402, -120);
+PlaceBallOnTable(3, 0, -150);
+
+PlaceBallOnTable(4, 0, 250);
+PlaceBallOnTable(6, 400, 350);
+PlaceBallOnTable(7, -886, -250);
+
+//set robot to shoot red balls only
+ChooseRedColor(); 
+TakeCallShot();
+
+// wait to take another shot
+await WaitForAllBallStop();
+TakeCallShot();
+
+// report end of test when all balls stop again
+await WaitForAllBallStop();
+ReportEndOfTest();
+
+//ENDTODO
+
+  </code>
+  <cleancode>
+ResetTable(true);
+PlaceBallOnTable(0, -344, 126);
+PlaceBallOnTable(2, -270, 180);
+PlaceBallOnTable(3, 747, -420);
+PlaceBallOnTable(4, 0, 250);
+PlaceBallOnTable(6, 400, 350);
+PlaceBallOnTable(7, -886, -250);
+
+//set robot to shoot red balls only 
+ChooseRedColor();  
+TakeCallShot(); 
+  
+// wait to take another shot 
+await WaitForAllBallStop(); 
+TakeCallShot(); 
+
+await WaitForAllBallStop();
+ReportEndOfTest();    
+  </cleancode>
+</element>
+
+
+<element elementid="200" elementType="Conclusion">
+  <p>Well done! </p>
+  <p><b>Summary:</b> You have learned the concept of <b>Test-Driven Development (TDD)</b> and the basics of setting up a test script using a set of special commands.</p>
+  <p>
+    <b>Exercise 1:</b> change your test script so that your bot will take a third shot to knock ball 6 into pocket 0 after the first two shots. Basically you need to add 2 more lines in your test script.
+  </p>
+  <p>
+    <b>Exercise 2:</b> go back to lessons 9 and change the test script to take 2 call shots instead of one, and also add a yellow ball so that ball 6 is no longer the best choice to shoot first.
+  </p>
+</element>
+

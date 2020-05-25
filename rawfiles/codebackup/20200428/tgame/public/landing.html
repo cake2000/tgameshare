@@ -1,0 +1,796 @@
+<html>
+  <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
+      :root {
+        --theme-color-blue: #2793ff;
+        --theme-color-green: #3ec9b2;
+        --theme-color-pinkish: #F26060;
+        --theme-color-yellow: #ffdd3d;
+        --theme-color-deepblue: #0A2635;
+        --theme-color-white: #fff;
+        --theme-color-black: #000;
+        --accent-color-gray: #9b9b9b;
+        --accent-color-light: #e5e5e5;
+        --accent-color-graylight: #f3f3f3;
+        --accent-color-blue: #3572f1;
+        --accent-color-green: #18bb5a;
+      }
+      body{
+        background-color: black;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        color: #fff;
+      }
+      a{
+        box-sizing: border-box;
+      }
+      .landing-top-navbar{
+        display: flex;
+        justify-content: left;
+        height: 70px;
+        background-color: black;
+        align-items: center;
+        position: fixed;
+        top: 0px;
+        z-index: 100;
+        width: 100%
+      }
+      @media(max-width: 1024px){
+        .landing-top-navbar{
+          height: 50px;
+        }
+        .open #menuMobileOpen{
+          right: 0px;
+        }
+      }
+      .landing-top-navbar-group{
+        background: var(--theme-color-blue);
+        margin: 0px auto;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+      .landing-menu-list{
+        flex: 1;
+        align-items: center;
+      }
+      .landing-menu-list a{
+        padding: 0 35px;
+        text-decoration: none;
+        color: var(--theme-color-white);
+        font-size: 14px;
+        flex: 1;
+        text-transform: uppercase;
+        font-weight: 500;
+        letter-spacing: 1px;
+        flex: 1;
+        position: relative;
+        text-align: center;
+      }
+      .landing-menu-list a:last-child{
+        padding-right: 0px;
+      }
+      .landing-menu-list a:hover{
+        color: #002535
+      }
+      .landing-menu-list a:after{
+        height: 22px;
+        content: '';
+        position: absolute;
+        top: calc(50% - 11px);
+        right: 0px;
+        width: 1px;
+        background-color: var(--theme-color-white);
+      }
+      .landing-menu-list a:last-child::after{
+        display: none;
+      }
+      @media (max-width: 1680px){
+        .landing-menu-list a{
+          padding: 0 30px;
+        }
+      }
+      @media (max-width: 1550px){
+        .landing-menu-list a{
+          padding: 0 25px;
+        }       
+      }
+      @media (max-width: 1440px){
+        .landing-menu-list a{
+          padding: 0 20px;
+          font-size: 13px;
+        }       
+      }      
+      @media (max-width: 1280px){
+        .landing-menu-list a{
+          font-size: 12px;
+          padding: 0 15px;
+        }       
+        .landing-menu-list a:after{
+          height: 16px;
+          top: calc(50% - 8px);
+        }
+      }
+      @media (max-width: 1170px){
+        .landing-menu-list a{
+          font-size: 11px;
+          padding: 0 12px;
+        }
+        .landing-menu-list a:after{
+          height: 12px;
+          top: calc(50% - 6px);
+        }
+        .menu-item {
+          padding-left: 0px;
+        }
+      }
+      @media (max-width: 1170px){
+        .landing-menu-list a{
+          font-size: 10px;
+          padding: 0 8px;
+        }
+      }
+      @media (max-width: 940px){
+        .landing-menu-list{
+          display: inline-block;
+          position: absolute;
+          max-width: 100%;
+          background: #000000d6;
+          height: 100vh;
+          top: 0px;
+          right: -100%;
+          width: 100%;
+          transition: right 400ms ease;
+          z-index: 9;
+        }
+        .landing-menu-list a{
+          width: 100%;
+          display: inline-block;
+          margin-bottom: 25px;
+        }
+        .landing-menu-list a::after{
+          display: none;
+        }
+        .landing-menu-list a:hover{
+          color: var(--theme-color-pinkish);
+        }
+      }
+      .landing-logo{
+        flex: 0 0 200px;
+        height: 100%;
+        align-items: center;
+        display: flex;
+      }
+      .landing-logo img{
+        width: 100%;
+        height: 100%;
+        vertical-align: top;
+        object-fit: contain;
+      }
+      .landing-logo a{
+        padding: 0 20px 0px 10px;
+        height: 100%;
+        background: #002535;
+      }
+      @media(max-width: 1280px){
+        .landing-logo {
+          flex: 0 0 165px;
+        }
+      }
+      @media(max-width: 1024px){
+        .landing-logo a{
+          padding: 0 15px 0px 10px;
+          width: 160px;
+        }
+      }
+      @media(max-width: 940px){
+        .landing-logo{
+          flex: 1
+        }
+      }
+      .landing-news{
+        height: 400px;
+        background-image: url("/images/landing_1.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+      .landing-news-group{
+        position: relative;
+      }
+      .landing-news-content{
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+      }
+      .landing-news-left{
+        flex: 1;
+      }
+      .landing-news-right{
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .landing-time-countdown{
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .time-countdown{
+        text-align: center;
+      }
+      .time-countdown-sub{
+        flex: 0 0 150px;
+      }
+      .time-number{
+        display: flex;
+        width: 65px;
+        height: 65px;
+        background-color: #191516;
+        color: #4281ea;
+        align-items: center;
+        justify-content: center;
+        margin: 0 12px 15px 12px;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .time-content{
+        font-size: 14px;
+        /* font-weight: 100; */
+        text-transform: uppercase;
+        color: lightskyblue; 
+        letter-spacing: 1px;
+      }
+      .landing-breaking-new p{
+        position: relative;
+        padding-left: 60px;
+      }
+      .landing-breaking-new p::after{
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 0;
+        width: 45px;
+        height: 2px;
+        background-color: #13b3ed;
+      }
+      .landing-info{
+        display: flex;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 30px;
+        height: 420px;
+        /* background-color: #171717; */
+        background-image: url(/images/keyboardback2.jpg);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;        
+      }
+      .landing-info-group{
+        display: flex;
+        margin-top: 50px;
+      }
+      .landing-info-group img{
+        flex: 1;
+        height: 60%;
+        width: 40%;
+        margin-right: 30px;
+      }
+      .landing-info-content{
+        flex: 1;
+        text-align: left;
+      }
+      .landing-info-content p:first-child{
+        margin-bottom: 0px;
+        margin-top: 0px;
+      }
+      .landing-duration{
+        background-image: url(/images/awardsback.jpg);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        height: 400px;
+        display: flex;
+        align-items: center;
+      }
+      .landing-duration-block-content{
+        display: flex;
+      }
+      .landing-duration-left{
+        flex: 1;
+      }
+      .landing-duration-right{
+        flex: 1;
+      }
+      .landing-duration-content{
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .landing-duration-content-left{
+        flex: 0 0 50%;
+      }
+      .landing-duration-content .content-size{
+        margin: 0;
+      }
+      .landing-duration-title {
+        text-align: center;
+        text-transform: uppercase;
+        padding-bottom: 30px;
+      }
+      .landing-action-group {
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+      }
+      .landing-action-group a{
+        width: 205px;
+        height: 50px;
+        padding: 5px;
+        border: 1px solid #13b3ed;
+        color: #13b3ed;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+      }
+      .landing-action-group .action-button-sub{
+        background-color: #0d397a;
+        color: #fff;
+        /* margin-left: 10px; */
+      }
+      .landing-action-group .join-button{
+        width: 245px;
+        font-size: 22px;
+      }
+      .landing-faq{
+        height: 1360px;
+        background-image: url("/images/landing_3.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        display: flex;
+        align-items: center;
+        text-align: justify;
+      }
+      .landing-faq-group{
+        display: flex;
+      }
+      .landing-faq-content-left{
+        flex: 0 0 75%;
+      }
+      .landing-faq-content-right{
+        flex: 1;
+      }
+      .landing-faq-content{
+        margin-bottom: 40px;
+      }
+      .landing-footer{
+        height: 25px;
+        position: fixed;
+        width: 100%;
+        bottom: 0px;
+      }
+      .landing-footer-wrapper{
+        border-top: 1px solid #6c6c6c;
+        background-color: #060606;
+        background-image: url(images/bg-p-500.png);
+        background-position: 50% 50%;
+        background-size: auto;
+        background-repeat: repeat-x;
+        text-align: center;
+        font-size: 12px;
+        padding: 2px 0px;
+        line-height: 20px;
+      }
+      .landing-container{
+        background-color: var(--theme-color-white);
+        background-image: url(images/dark-geometric-copy.png);
+        background-position: 50% 50%;
+        background-size: 35px;
+        font-family: 'Montserrat', sans-serif;
+        color: var(--accent-color-gray);
+      }
+      .landing-container-wrapper{
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding-top: 70px;
+      }
+      @media(max-width: 1024px){
+        .landing-container-wrapper{
+          padding-top: 50px;
+        }
+      }
+      .width-content{
+        max-width: 960px;
+        width: calc(100% - 50px);
+        margin: 0 auto;
+      }
+      .header-size{
+        font-size: 22px;
+        color: #13b3ed;
+        text-transform: uppercase;
+        margin: 0;
+        margin-bottom: 40px;
+      }
+      .title-size{
+        font-size: 38px;
+        font-weight: 600;
+        margin: 20px 0px;
+        letter-spacing: 1px;
+        line-height: 50px;
+      }
+      .title-sizea {
+        font-size: 34px;
+        font-weight: 600;
+        margin: 20px 0px;
+        letter-spacing: 1px;
+        line-height: 50px;
+      }
+      .title-size-sub{
+        font-size: 18px;
+        font-weight: 600;
+        margin: 10px 0px;
+        letter-spacing: 1px;
+      }
+      .title-size-sub2{
+        font-size: 18px;
+        font-weight: 600;
+        margin: 10px 0px;
+        letter-spacing: 1px;
+        color: lightskyblue;
+      }
+      .content-size{
+        font-size: 16px;
+        line-height: 20px;
+        color: #dcd2d1;
+      }
+      .content-size li {
+        margin-bottom: 10px;
+      }
+      .justifyContent{
+        justify-content: center;
+      }
+      .sub-color{
+        color: lightskyblue; 
+      }
+      .menu-icon-mobile{
+        display: flex;
+        cursor: pointer;
+        width: 55px;
+        display: none;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .menu-icon-mobile:hover{
+        background: var(--accent-color-blue);
+      }
+      @media(max-width: 940px){
+        .menu-icon-mobile{
+          display: flex;
+        }       
+      }
+      .menu-icon-mobile span{
+        display: inline-block;
+        width: 32px;
+        height: 3px;
+        margin-bottom: 5px;
+        background-color: var(--theme-color-white);
+      }
+      .menu-icon-mobile span:last-child{
+        margin: 0px;
+      }
+      .landing-menu-list  .closebtn{
+        font-size: 45px;
+        text-align: left;
+        padding-left: 10px;
+        margin-top: 10px;
+        display: none;
+      }
+      @media (max-width: 940px){
+        .landing-menu-list  .closebtn{
+          display: inline-block
+        }
+      }
+    </style>
+    <script>
+      function countdown(endDate) {
+        let days, hours, minutes, seconds;
+        
+        endDate = new Date(endDate).getTime();
+        
+        if (isNaN(endDate)) {
+        return;
+        }
+        
+        setInterval(calculate, 1000);
+        
+        function calculate() {
+          let startDate = new Date();
+          startDate = startDate.getTime();
+          console.log()
+          
+          let timeRemaining = parseInt((endDate - startDate) / 1000);
+          
+          if (timeRemaining >= 0) {
+            days = parseInt(timeRemaining / 86400);
+            timeRemaining = (timeRemaining % 86400);
+            
+            hours = parseInt(timeRemaining / 3600);
+            timeRemaining = (timeRemaining % 3600);
+            
+            minutes = parseInt(timeRemaining / 60);
+            timeRemaining = (timeRemaining % 60);
+            
+            seconds = parseInt(timeRemaining);
+            
+            document.getElementById("daysTime").innerHTML = parseInt(days, 10);
+            document.getElementById("hoursTime").innerHTML = ("0" + hours).slice(-2);
+            document.getElementById("minutesTime").innerHTML = ("0" + minutes).slice(-2);
+            document.getElementById("secondTime").innerHTML = ("0" + seconds).slice(-2);
+          } else {
+            return;
+          }
+        }
+      }
+      // (function () { 
+      //   countdown('08/25/2018 02:00:00 PM'); 
+      // }());
+
+      document.addEventListener("DOMContentLoaded", function() {
+        //countdown(new Date('07/15/2018'));
+        countdown('10/29/2018 00:00:00 AM'); 
+        const checked = localStorage.getItem('Meteor.userId');
+        if (checked) {
+          document.getElementById("signUpButton").outerHTML = '';
+          document.getElementById("signUpSubButton").outerHTML = '<a class="join-tournament-button" onclick="checkedUser()">Join the tournament</a>';
+        }
+      });
+
+      function checkedUser() {
+        const checked = localStorage.getItem('Meteor.userId');
+        if(checked){
+          window.location.href = "/tournament/uN9W4QhmdKu94Qi2Y"
+        }else{
+          window.location.href = "/signup"
+        }
+      };
+      function openNav() {
+        document.getElementById("landing-top-navbar").classList.add("open");
+      }
+
+      function closeNav() {
+        document.getElementById("landing-top-navbar").className = 'landing-top-navbar';
+      }
+    </script>
+
+  </head>
+  <body id="landing-page">
+    <div class="landing-container">
+      <div class="landing-top-navbar" id="landing-top-navbar">
+        <div class="landing-top-navbar-group">
+          <div class="landing-logo">
+            <a href="/"><img src="/images/white-logo.png"/></a>
+          </div>
+          <div class="menu-icon-mobile" onclick="openNav()">
+            <span class="icon-1"></span>
+            <span class="icon-2"></span>
+            <span class="icon-3"></span>
+          </div>
+          <div id="menuMobileOpen" class="landing-menu-list">
+            <a id="menuMobileClose" href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="/gamesBoard">Games</a>
+            <a href="/courses">Courses</a>
+            <a href="/leaderboard">Leaderboard</a>
+            <a href="https://forum.tgame.ai/">Forum</a>
+            <a href="/about">About</a>
+            <a href="/contact-us">Contact</a>
+            <a id="signUpSubButton2" href="/signup">Free Sign Up</a>
+            <a id="signUpSubButton" href="/signin">Login</a>
+          </div>
+        </div>
+      </div>
+      <div class="landing-container-wrapper" id="landing-page">
+        <div class="landing-news">
+          <div class="landing-news-content width-content">
+            <div class="landing-news-left">
+              <!-- <div class="landing-breaking-new">
+                <p class="header-size">Breaking News</p>
+              </div> -->
+              <div class="title-size">National <span style="color: yellow">Game Bot</span> Tournament</div>
+              <p class="content-size">Learn to program your game bot and compete online.</p>
+              <div class="landing-action-group">
+                  <a id="signUpButton" href="/signup">Sign Up Free Account</a>
+                <a class="action-button-sub" onclick="checkedUser()">Register For Tournament</a>
+              </div>
+            </div>
+            <div class="landing-news-right">
+              <div style="margin-top: 48px" class="landing-time-countdown">
+                <div class="time-countdown">
+                  <div class="time-number" id="daysTime"></div>
+                  <div class="time-content">Day</div>
+                </div>
+                <div class="time-countdown">
+                  <div class="time-number" id="hoursTime"></div>
+                  <div class="time-content">Hours</div>
+                </div>
+                <div class="time-countdown">
+                  <div class="time-number" id="minutesTime"></div>
+                  <div class="time-content">Minutes</div>
+                </div>
+                <div class="time-countdown">
+                  <div class="time-number" id="secondTime"></div>
+                  <div class="time-content">Second</div>
+                </div>
+              </div>
+              <div class="time-countdown-sub"></div>
+            </div>
+          </div>
+        </div>
+        <div class="landing-info">
+          <div class="landing-info-block width-content">
+            <!-- <p class="header-size">More Info About</p> -->
+            <!-- <div class="title-sizea">&middot; PLAY &middot; LEARN &middot; COMPETE &middot;</div> -->
+            <div class="title-sizea">Play Games &middot; Learn Coding </div>
+            <div class="landing-info-group">
+              <img src="/images/gameplayanimation.gif">
+              <div class="landing-info-content">
+                <p class="content-size">
+                  The Trajectory Pool game can be fairly played by both human and game bots. With random errors added to each shot, strategy and optimization become much more important than aiming.
+                </p>
+                <p class="content-size">
+                  Game bot is a great project for anyone interested in learning to code, from beginner to intermerdiate levels, especially students from 6 to 12 grades.
+                </p>
+                <p class="content-size">You can follow our tutorials to write the JavaScript code for a game bot that plays the Trajectory Pool game, and then use this game bot to compete with other players' bots in our online tournament.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="landing-duration">
+          <div class="landing-duration-block width-content">
+            <div class="landing-duration-block-content">
+              <div class="landing-duration-left">
+                <div class="landing-duration-title title-size-sub">Time Table</div>
+                <div class="landing-duration-group">
+                  <div  class="landing-duration-content">
+                    <div class="landing-duration-content-left">
+                      <p class="content-size">Regional</p>
+                      <p class="title-size-sub">October 29 2018</p>
+                    </div>
+                    <div class="landing-duration-content-right sub-color">
+                      <p class="content-size sub-color">US Eastern Time</p>
+                      <p class="title-size-sub">00:00 AM</p>
+                    </div>
+                  </div>
+                  <div style="margin-top: 30px" class="landing-duration-content">
+                    <div class="landing-duration-content-left">
+                      <p class="content-size">National</p>
+                      <p class="title-size-sub">October 30 2018</p>
+                    </div>
+                    <div class="landing-duration-content-right sub-color">
+                      <p class="content-size sub-color">US Eastern Time</p>
+                      <p class="title-size-sub">00:00 AM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="landing-duration-right">
+                <div class="landing-duration-title title-size-sub" >Awards</div>
+                <p style="margin: 8px" class="content-size">The top players at the regional and national levels will be recognized on our leaderboard. The national top players will receive a cash award up to $1000 (depending on number of participants). <br/> <br />More importantly, your will learn to build an smart game bot in JavaScript using some kick-ass algorithms. You can continue to improve your game bot and play in future tournament as well.
+                </p>
+              </div>
+            </div>
+            <div class="landing-action-group justifyContent">
+              <a class="join-button" onclick="checkedUser()">Register Now</a>
+            </div>
+          </div>
+        </div>
+        <div class="landing-faq">
+          <div class="ladding-faq-block width-content">
+            <div class="landing-faq-title">
+              <p class="header-size">Frequently Asked Questions</p>
+            </div>
+            <!-- <div class="title-size">Things you need to know</div> -->
+            <div class="landing-faq-group">
+              <div class="landing-faq-content-left">
+
+
+                  <div class="landing-faq-content">
+                    <div class="title-size-sub2">Why should I play in the tournament?</div>
+                    <div class="content-size">
+                      Top players are awarded with national leaderboard recognition and cash awards up to $1000 (depending on number of participants). 
+                      <br/> <br/>
+                      In addition, after each tournament, we will assign a new <i>rating</i> to your game bot based on its performance. As you enhance your bot and play in more tournaments, your bot's rating should rise over time, serving as a measurement of how much improvement you are making.
+                    </div>
+                  </div>
+                                  
+                <div class="landing-faq-content">
+                  <div class="title-size-sub2">How to register?</div>
+                  <div class="content-size">
+                    You need to first sign up for a free account and then click the 'Tournament' menu link on top to register for this tournament. To learn to build your game bot, you can follow the tutorials under the 'Robot' menu link.
+                  </div>
+                </div>
+
+                <div class="landing-faq-content">
+                  <div class="title-size-sub2">How much money does it cost?</div>
+                  <div class="content-size">
+                    There is no cost. You can sign up, take tutorials and compete in the tournament all for free. 
+                  </div>
+                </div>
+                
+                <div class="landing-faq-content">
+                  <div class="title-size-sub2">How much time does it take to build my bot?</div>
+                  <div class="content-size">
+                    To build a starting game bot, you only need to complete the 12 beginner tutorials, which takes about 10 to 20 minutes each. <br/><br/>
+                    
+                    To make your bot smarter and unique, you need to take the more open-ended intermediate level tutorials. Usually it takes 20 to 30 minutes to complete each intermediate lesson, but the more time you invest to explore the open challenges, the stronger your bot will be.
+                  </div>
+                </div>
+
+                <div class="landing-faq-content">
+                    <div class="title-size-sub2">What if I don't know how to code?</div>
+                    <div class="content-size">
+                      No problem. Our tutorials teach you how to create the game robot program in JavaScript from scratch. Prior knowledge in programing is helpful but not required.
+                    </div>
+                  </div>
+
+                <div class="landing-faq-content">
+                  <div class="title-size-sub2">Do I play in both regional and national levels?</div>
+                  <div class="content-size">
+                    All players will be playing in regional tournament on October 29, and the top players from each region will be <b>invited</b> to play in the national level on October 30. <br/><br/>The regional sections will be determined based on the number of players from each region (city or state) to ensure there are not too many players in a section. You will find out your assigned section from our tournament page one day before the regional tournament starts.
+                  </div>
+                </div>
+
+
+                <div class="landing-faq-content">
+                    <div class="title-size-sub2">What's the tournament like?</div>
+                    <div class="content-size">
+                        <p>If you have ever seen a chess tournament, this is very similar, except it is all done automatically online. </p>
+                        <p>
+                          All that you need to do is to register for the tournament. At the tournament day, our game server will pair up all participants' game bots and run the match game on your behalf.
+                        </p>
+                        <p>
+                          You will be able to view your bot's pairing and match results online.
+                        </p>
+                          
+                          <!-- <br/>Here is an overview of the process:</p>
+                        <ul>
+
+                        <li>After registration, you will be listed under the 'New Registration" section of the tournament.</li>
+
+                        <li>About 3 days before the tournament date, we'll stop accepting registration, and divide all registered players into regional sections, depending on number of players registered and their geographical distribution (using zipcode).</li>
+
+                        <li>When it's time for the tournament, all players in your section will be paired up (using the&nbsp;<a href="https://en.wikipedia.org/wiki/Swiss-system_tournament" style="color: lightblue;" >Swiss System</a>), and you will receive a game invitations from our tournament administrator bot to join a game room to compete with your assigned opponent. The game starts 5 seconds after both you and your opponent are ready. After your game finishes, the winner gets 1 point.</li>
+
+                        <li>When all games in a section are finished for the first round, we will review the results of all games. If there is no issue, we generate new player pairings for the second round, and then kick it off.</li>
+
+                        <li>When all games of the last round of your section are finished, we will calculate the top players for each section based on cumulative points, and invite them into a new section for the national level competition on the second day.</li>
+
+                        <li>If your bot is selected to participate in the national level competition, you will go through a similar process on the second day with a few rounds of games.</li>
+
+                        <li>The top players from the national level competition will be given cash awards, and all players will get an official rating for their game bots. You can find top players listed on our leaderboards as sorted by rating and grouped by region, gender, school grade, etc.</li>
+                        </ul> -->
+                    </div>
+                  </div>
+
+              </div>
+              <div class="landing-faq-content-right">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="landing-footer">
+        <div class="landing-footer-wrapper">
+          Copyright © 2018 Uplifting Technology Inc. All Rights Reserved.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
