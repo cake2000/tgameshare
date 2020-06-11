@@ -13,7 +13,7 @@ function copyfiles() {
         exec(cmd);
         curInd ++;
         if (curInd < 2)
-            setTimeout(moveNextFile, 30000);
+            setTimeout(moveNextFile, 20000);
     }
     moveNextFile();
 };
