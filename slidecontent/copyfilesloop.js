@@ -12,7 +12,7 @@ function copyfiles() {
         console.log("" + curInd + " " + cmd);
         exec(cmd);
         curInd ++;
-        // if (curInd < 2)
+        // if (curInd < 1)
             setTimeout(moveNextFile, 25000);
     }
     moveNextFile();
