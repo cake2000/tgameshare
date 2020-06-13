@@ -43,12 +43,13 @@ function purse() {
                         console.log("rm " + curInd + " " + fn);
                         exec(cmd);
                     } else {
-                        console.log("keep " + curInd + " " + fn);
+                        // console.log("keep " + curInd + " " + fn);
+                        console.log(curInd + " ");
                     }
                     curInd ++;
                     if (curInd < files.length)
                     // if (curInd < 2)
-                        setTimeout(rmFile, 1000);
+                        setTimeout(rmFile, 10);
                 }
                 rmFile();
 
