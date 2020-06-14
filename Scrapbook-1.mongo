@@ -1,0 +1,1 @@
+db.SlideContent.findOne({_id: /school_a_lesson_2/})
