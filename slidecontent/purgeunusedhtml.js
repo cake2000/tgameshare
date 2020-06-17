@@ -44,7 +44,7 @@ function purse() {
                         exec(cmd);
                     } else {
                         // console.log("keep " + curInd + " " + fn);
-                        console.log(curInd + " ");
+                        // console.log(curInd + " ");
                     }
                     curInd ++;
                     if (curInd < files.length)
