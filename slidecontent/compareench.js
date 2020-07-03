@@ -118,7 +118,7 @@ function docompare(idroot) {
                     const se = slidese[i];
                     const sc = slidesc[i];
                     if (se.length != sc.length) {
-                        console.log("note line count different ");
+                        console.log((i+1) + " note line count different ");
                         console.log(se);
                         console.log(sc);
                         console.log("\n\n");
@@ -126,27 +126,6 @@ function docompare(idroot) {
                 }
 
                 process.exit(0);
-                
-
-                // const files = fs.readdirSync("/home/binyu/dev/tgameshare/slidecontent/");
-                // var curInd = 0;
-                // function rmFile() {
-                //     const fn = files[curInd];
-                //     if (!goodfiles.includes(fn) && fn.endsWith(".html")) {
-                //         const cmd = "rm /home/binyu/dev/tgameshare/slidecontent/"+fn+" ";
-                //         console.log("rm " + curInd + " " + fn);
-                //         exec(cmd);
-                //     } else {
-                //         // console.log("keep " + curInd + " " + fn);
-                //         // console.log(curInd + " ");
-                //     }
-                //     curInd ++;
-                //     if (curInd < files.length)
-                //     // if (curInd < 2)
-                //         setTimeout(rmFile, 10);
-                // }
-                // rmFile();
-
 
 
           }
@@ -154,4 +133,4 @@ function docompare(idroot) {
     });
 };
 
-docompare("school_a_lesson_1");
+docompare("school_a_lesson_2");
