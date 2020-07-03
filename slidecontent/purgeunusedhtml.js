@@ -47,9 +47,13 @@ function purse() {
                         // console.log(curInd + " ");
                     }
                     curInd ++;
-                    if (curInd < files.length)
-                    // if (curInd < 2)
+                    if (curInd < files.length) {
+
                         setTimeout(rmFile, 10);
+                    } else {
+                        process.exit(0);
+                    }
+                    
                 }
                 rmFile();
 
