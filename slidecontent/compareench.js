@@ -133,4 +133,4 @@ function docompare(idroot) {
     });
 };
 
-docompare("school_a_lesson_8");
+docompare("school_a_lesson_9");
