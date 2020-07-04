@@ -122,6 +122,22 @@ function docompare(idroot) {
                         console.log(se);
                         console.log(sc);
                         console.log("\n\n");
+                    } else {
+                        for (let j=0; j<se.length; j++) {
+                            const e1 = se[j];
+                            const c1 = sc[j];
+                            if (e1.includes("#ID")) {
+                                const linese1 = e1.replace("//", "").split("||");
+                                const linesc1 = c1.replace("//", "").split("||");
+                                if (linese1[0] != linesc1[0]) {
+                                    console.log((i+1) + " ID different ");
+                                    console.log(se);
+                                    console.log(sc);
+                                    console.log("\n\n");
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -133,4 +149,4 @@ function docompare(idroot) {
     });
 };
 
-docompare("school_a_lesson_9");
+docompare("school_a_lesson_10");
