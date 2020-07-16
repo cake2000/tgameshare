@@ -149,4 +149,4 @@ function docompare(idroot) {
     });
 };
 
-docompare("school_b_lesson_4");
+docompare("school_b_lesson_5");
