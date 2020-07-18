@@ -145,29 +145,41 @@ function grab(idroot) {
 };
 
 
-grab("tianzige_lesson_1_ch");
-
-
-for (let i=1; i<50; i++) {
-    grab("school_a_lesson_" + i);
+var files=fs.readdirSync("./");
+// console.log("files " + files.length + " " + files);
+for (let i=0; i<files.length; i++) {
+    let fn = files[i];
+    if (fn.indexOf("-") > 0) {
+        fn = fn.substring(0, fn.indexOf("-"));
+        console.log("\n\n\n" + fn);
+        grab(fn);
+    }
+    // break;
 }
 
-for (let i=1; i<50; i++) {
-    grab("school_a_lesson_" + i + "_ch");
-}
+// grab("tianzige_lesson_1_ch");
 
-for (let i=1; i<8; i++) {
-    grab("school_b_lesson_" + i);
-}
 
-for (let i=1; i<8; i++) {
-    grab("school_b_lesson_" + i + "_ch");
-}
+// for (let i=1; i<50; i++) {
+//     grab("school_a_lesson_" + i);
+// }
 
-for (let i=0; i<7; i++) {
-    grab("python_lesson_" + i);
-}
+// for (let i=1; i<50; i++) {
+//     grab("school_a_lesson_" + i + "_ch");
+// }
 
-for (let i=0; i<6; i++) {
-    grab("teacher_lesson_" + i + "_ch");
-}
+// for (let i=1; i<8; i++) {
+//     grab("school_b_lesson_" + i);
+// }
+
+// for (let i=1; i<8; i++) {
+//     grab("school_b_lesson_" + i + "_ch");
+// }
+
+// for (let i=0; i<7; i++) {
+//     grab("python_lesson_" + i);
+// }
+
+// for (let i=0; i<6; i++) {
+//     grab("teacher_lesson_" + i + "_ch");
+// }
