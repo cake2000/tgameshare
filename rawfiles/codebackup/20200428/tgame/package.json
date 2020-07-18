@@ -98,7 +98,7 @@
     "lapack": "^0.1.0",
     "literallycanvas": "^0.5.2",
     "localforage": "^1.7.1",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.19",
     "mantra-core": "^1.7.0",
     "meteor-node-stubs": "^0.2.11",
     "moment": "^2.22.2",
