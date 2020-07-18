@@ -57,9 +57,14 @@ function getOneFile(s) {
 
     try {
         if (!fs.existsSync("./rawimages/" + path)) {
-            let cmd = "wget -P ./rawimages/" + path + " " + backs.substring(0, ind);
+
+            let lastslash = path.lastIndexOf("/");
+            let pathp = path.substring(0, lastslash+1);
+
+            let cmd = "wget -P ./rawimages/" + pathp + " " + backs.substring(0, ind);
             console.log("execsync " + cmd);
             execSync(cmd);
+            // process.exit(0);
 
         } else {
 
@@ -143,8 +148,7 @@ function grab(idroot) {
 grab("tianzige_lesson_1_ch");
 
 
-//grab("school_a_lesson_1");
-for (let i=2; i<50; i++) {
+for (let i=1; i<50; i++) {
     grab("school_a_lesson_" + i);
 }
 
@@ -164,3 +168,6 @@ for (let i=0; i<7; i++) {
     grab("python_lesson_" + i);
 }
 
+for (let i=0; i<6; i++) {
+    grab("teacher_lesson_" + i + "_ch");
+}
