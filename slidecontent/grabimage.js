@@ -39,18 +39,17 @@ function getOneFile(s) {
 
     let ind = s.indexOf("https://s3.amazonaws.com/media-p.slid.es/");
     if (ind < 0) return "";
-    // console.log("slen " + s.length +  " ind " + ind + " " + s.substr(ind, 60));
+    console.log("slen " + s.length +  " ind " + ind + " " + s.substr(ind, 160));
 
     let backs = s.substring(ind);
     let ind1 = backs.indexOf(".gif\">");
     let ind2 = backs.indexOf(".png\">");
-    if (ind1 < 0 && ind2 < 0) return "";
-    if (ind1 > ind2 && ind2 > 0) 
-        ind = ind2;
-    else if (ind1 < ind2 && ind1 > 0) ind = ind1;
-    else if (ind1 > 0) ind = ind1;
-    else if (ind2 > 0) ind = ind2;
+    let ind3 = backs.indexOf(".jpg\">");
+    if (ind1 < 0 && ind2 < 0 && ind3 < 0) return "";
+    
+    ind = Math.min(ind1 > 0 ? ind1 : 100000000, ind2 > 0 ? ind2 : 100000000, ind3 > 0 ? ind3 : 100000000);
     ind += 4;
+    console.log("backs " + backs.substring(0, 100));
     let path = backs.substring("https://s3.amazonaws.com/media-p.slid.es/".length, ind);
     console.log("ind " + ind + " " + ind1 + " " + ind2 + " path " + path); 
     if (path.includes("><")) return "";
@@ -149,7 +148,19 @@ for (let i=2; i<50; i++) {
     grab("school_a_lesson_" + i);
 }
 
+for (let i=1; i<50; i++) {
+    grab("school_a_lesson_" + i + "_ch");
+}
+
 for (let i=1; i<8; i++) {
     grab("school_b_lesson_" + i);
+}
+
+for (let i=1; i<8; i++) {
+    grab("school_b_lesson_" + i + "_ch");
+}
+
+for (let i=0; i<7; i++) {
+    grab("python_lesson_" + i);
 }
 
