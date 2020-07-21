@@ -13,7 +13,7 @@ function warm() {
         try {
             execSync(cmd);
         } catch (e) {}
-        break;
+        // break;
     }
 };
 
