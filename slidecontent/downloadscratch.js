@@ -71,12 +71,12 @@ function getOneProject(s) {
     // console.log("slen " + s.length +  " ind " + ind + " " + s.substr(ind, 160));
 
     let backs = s.substring(ind+10);
-    console.log("backs " + backs.substring(0, 100) + "\n\n");
+    // console.log("backs " + backs.substring(0, 100) + "\n\n");
 
     ind = backs.indexOf("||")-1;
-    console.log(ind);
+    // console.log(ind);
     let ind2 = backs.trim().indexOf("\\n");
-    console.log(ind2);
+    // console.log(ind2);
     if (ind2 < ind && ind2 >= 0) {
         ind = ind2;
     }
@@ -84,7 +84,7 @@ function getOneProject(s) {
         ind = ind2;
     }
     let projectid = backs.substring(0, ind+1).trim();
-    console.log(" projectid " + projectid + "\n \n"); 
+    console.log("projectid " + projectid + ""); 
 
     downloadFile("https://projects.scratch.mit.edu/" + projectid, "/home/binyu/dev/tgameshare/scratchstorage/projects/"+projectid);
     const fcontent = fs.readFileSync("/home/binyu/dev/tgameshare/scratchstorage/projects/"+projectid, 'utf8');
@@ -170,7 +170,7 @@ async function init() {
             fn = fn.substring(0, fn.indexOf("-"));
             // console.log(i + " " + fn);
             grab(fn);
-            await sleep(20000);
+            await sleep(1000);
         }
     }
 
