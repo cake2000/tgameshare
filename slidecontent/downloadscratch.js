@@ -163,14 +163,14 @@ async function init() {
         let fn = files[i];
         // console.log("\n\n\n" + fn);
         console.log("next file " + i + " " + fn + " " + fn.indexOf("flappybird"));
-        if (fn.indexOf("flappybird") < 0) {
+        if (fn.indexOf("introai") < 0) {
             continue;
         }
         if (fn.indexOf("-") > 0) {
             fn = fn.substring(0, fn.indexOf("-"));
             // console.log(i + " " + fn);
             grab(fn);
-            // await sleep(20000);
+            await sleep(20000);
         }
     }
 
