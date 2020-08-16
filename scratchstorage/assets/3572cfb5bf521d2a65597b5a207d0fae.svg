@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="51.81979533218836" height="75.57779475235438" viewBox="-1.0266965438102469 -1.885096605536817 51.81979533218836 75.57779475235438">
+  <defs>
+    <radialGradient id="grad_1" cx="0.2823" cy="0.23629999999999998" r="0.9928100000000001">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.3233" cy="0.7575" r="0.9847499999999999">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.6685" cy="0.7055" r="0.91715">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_4" cx="0.7051999999999999" cy="0.7429000000000001" r="0.96577">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.06072998046875,0,0,0.9815068244934082,-304.5,-181.5" cx="14.4571" cy="17.0097" r="61.5764" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_2-.9666151404380798,0,0,0.9181135892868042,-275.3,-167.7" cx="17.1465" cy="52.9204" r="56.3423" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_3-.7566120624542236,0,0,4.0918192863464355,-1264.4,-796.3" cx="30.5028" cy="28.6101" r="30.7399" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_4-.1247735023498535,0,0,1.0553191900253296,-245.2,-192.35" cx="30.7631" cy="58.4465" r="29.5141" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.5812288164161146">
+    <path id="ID0.601689965929836" fill="url(#grad_1-.06072998046875,0,0,0.9815068244934082,-304.5,-181.5)" stroke="none" stroke-linecap="round" d="M 1.3615 2.5325 L 2.104 1.4038 L 3.3238 0.4714 L 4.7028 0.0788 L 44.9575 0.0788 L 46.2304 0.3732 L 47.5563 1.3056 L 48.2988 2.3853 L 48.8292 3.9066 L 48.67 67.8518 L 48.2988 69.2259 L 47.5563 70.4037 L 46.3895 71.238 L 44.7984 71.7288 L 5.021 71.7288 L 3.3769 71.2871 L 2.2101 70.6 L 1.3615 69.4713 L 0.9372 68.0481 L 0.9902 4.0048 L 1.3615 2.5325 Z " stroke-width="1.021886426662075"/>
+    <path id="ID0.601689965929836" fill="url(#grad_2-.9666151404380798,0,0,0.9181135892868042,-275.3,-167.7)" stroke="none" stroke-linecap="round" d="M 3.4235 4.4463 L 4.1001 3.3905 L 5.2117 2.5183 L 6.4683 2.151 L 43.1514 2.151 L 44.3113 2.4264 L 45.5196 3.2987 L 46.1962 4.3086 L 46.6795 5.7317 L 46.5345 65.5468 L 46.1962 66.8321 L 45.5196 67.9339 L 44.4563 68.7142 L 43.0064 69.1733 L 6.7583 69.1733 L 5.26 68.7602 L 4.1968 68.1175 L 3.4235 67.0616 L 3.0368 65.7304 L 3.0852 5.8235 L 3.4235 4.4463 Z " stroke-width="0.9426763475756744"/>
+    <g id="ID0.4002021146006882">
+      <path id="ID0.2698860499076545" fill="url(#grad_3-.7566120624542236,0,0,4.0918192863464355,-1264.4,-796.3)" stroke="none" stroke-linecap="round" d="M 24.8693 5.0828 C 29.4824 5.0828 33.6597 6.9528 36.6876 9.9684 C 39.7116 12.9882 41.5862 17.1578 41.5862 21.757 C 41.5862 26.3562 39.7116 30.5257 36.6876 33.5455 C 33.6597 36.5612 29.4824 38.4311 24.8693 38.4311 C 20.2561 38.4311 16.0788 36.5612 13.051 33.5455 C 10.0269 30.5257 8.1523 26.3562 8.1523 21.757 C 8.1523 17.1578 10.0269 12.9882 13.051 9.9684 C 16.0788 6.9528 20.2561 5.0828 24.8693 5.0828 Z " stroke-width="3.9277932264754742"/>
+      <path id="ID0.4286513770930469" fill="url(#grad_4-.1247735023498535,0,0,1.0553191900253296,-245.2,-192.35)" stroke="none" stroke-linecap="round" d="M 16.4786 34.9658 L 33.2377 34.9658 L 39.3677 66.5726 L 10.1798 66.256 L 16.4786 34.9658 Z " stroke-width="1.0905993820886004"/>
+    </g>
+    <g id="ID0.9469603588804603">
+      <path id="ID0.2698860499076545" fill="#000000" stroke="none" stroke-linecap="round" d="M 24.7161 6.3432 C 28.9698 6.3432 32.8216 8.0675 35.6136 10.8482 C 38.402 13.6327 40.1305 17.4774 40.1305 21.7182 C 40.1305 25.9591 38.402 29.8038 35.6136 32.5882 C 32.8216 35.369 28.9698 37.0932 24.7161 37.0932 C 20.4624 37.0932 16.6105 35.369 13.8186 32.5882 C 11.0301 29.8038 9.3016 25.9591 9.3016 21.7182 C 9.3016 17.4774 11.0301 13.6327 13.8186 10.8482 C 16.6105 8.0675 20.4624 6.3432 24.7161 6.3432 Z " stroke-width="3.6217599407929737"/>
+      <path id="ID0.4286513770930469" fill="#000000" stroke="none" stroke-linecap="round" d="M 17.35 35.15 L 32.25 35.15 L 37.7 65.1 L 11.75 64.8 L 17.35 35.15 Z " stroke-width="1"/>
+    </g>
+  </g>
+</svg>

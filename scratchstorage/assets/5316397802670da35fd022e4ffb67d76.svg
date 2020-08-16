@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="481.95091063301356" height="303.10090452949794" viewBox="-0.7229492094148824 -0.4893492188085744 481.95091063301356 303.10090452949794">
+  <defs>
+    <radialGradient id="grad_1" cx="0.5006" cy="0.3193" r="0.88491">
+      <stop offset="0" stop-color="#FFFFCC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFCC" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.4874" cy="0.5245000000000001" r="0.6818500000000001">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.4902" cy="0.9947" r="1.29311">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.180688738822937,0,0,1.4545893669128418,-46.95,-66.4" cx="240.5405" cy="96.6523" r="378.1296" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFCC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFCC" stop-opacity="0"/>
+    </radialGradient><radialGradient id="grad_2-.9629921317100525,0,0,1.0365536212921143,7.3,16.5" cx="237.8161" cy="201.9319" r="128.928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <path id="ID0.8883960330858827" fill="url(#grad_1-.180688738822937,0,0,1.4545893669128418,-46.95,-66.4)" stroke="none" d="M 0.2775 0.5111 L 480.2275 0.5111 L 480.2275 301.6111 L 0.2775 301.6111 L 0.2775 0.5111 Z " stroke-width="1.3247369784827476"/>
+  <path id="ID0.9176602242514491" fill="url(#grad_2-.9629921317100525,0,0,1.0365536212921143,7.3,16.5)" stroke="url(#grad_3)" stroke-width="2.000898425982322" d="M 240.1033 98.906 C 265.144 98.906 287.8341 109.9111 304.2646 127.6901 C 320.6952 145.4701 330.8654 170.0229 330.8654 197.1195 C 330.8654 224.216 320.6952 248.7689 304.2646 266.5489 C 287.8341 284.3278 265.144 295.3329 240.1033 295.3329 C 215.0627 295.3329 192.3726 284.3278 175.9421 266.5489 C 159.5115 248.7689 149.3413 224.216 149.3413 197.1195 C 149.3413 170.0229 159.5115 145.4701 175.9421 127.6901 C 192.3726 109.9111 215.0627 98.906 240.1033 98.906 Z "/>
+  <path id="ID0.48670328641310334" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.249474797395232" d="M 239.9122 168.2945 C 246.6319 168.2945 252.7216 171.2279 257.1308 175.9666 C 261.5401 180.7057 264.2696 187.2502 264.2696 194.4724 C 264.2696 201.6945 261.5401 208.239 257.1308 212.9781 C 252.7216 217.7168 246.6319 220.6502 239.9122 220.6502 C 233.1925 220.6502 227.1028 217.7168 222.6935 212.9781 C 218.2843 208.239 215.5548 201.6945 215.5548 194.4724 C 215.5548 187.2502 218.2843 180.7057 222.6935 175.9666 C 227.1028 171.2279 233.1925 168.2945 239.9122 168.2945 Z "/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="11.94527713020617" height="6.385976707537713" viewBox="-0.9338884530463527 -1.1093884548046897 11.94527713020617 6.385976707537713">
+  <defs>
+    <radialGradient id="grad_1" cx="0.5" cy="0.3776" r="0.8091200000000001">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.1678507328033447,0,0,0.574740469455719,-765.3,-99.2" cx="5.5965" cy="1.5806" r="9.9548" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.40023205801844597">
+    <path id="ID0.5429549212567508" fill="#666666" stroke="none" d="M 0.2044 1.2352 L 2.0462 1.2352 L 2.0462 3.0801 L 0.2044 3.0801 L 0.2044 1.2352 Z " stroke-width="1.52472860083903"/>
+    <path id="ID0.43770528165623546" fill="url(#grad_1-.1678507328033447,0,0,0.574740469455719,-765.3,-99.2)" stroke="none" d="M 1.3199 0.0289 L 9.8731 0.0289 L 9.8731 4.1383 L 1.3199 4.1383 L 1.3199 0.0289 Z " stroke-width="2.276576912005486"/>
+  </g>
+</svg>

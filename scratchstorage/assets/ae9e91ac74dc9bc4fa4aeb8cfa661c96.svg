@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="48.74621035158634" height="45.87371279299259" viewBox="-0.29030591994524 -0.2674059346318245 48.74621035158634 45.87371279299259">
+  <defs>
+    <radialGradient id="grad_1" cx="0.2531" cy="0.19690000000000002" r="1.04403">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#663B00" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.0137" cy="0.027999999999999997" r="1.28219">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#663B00" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.08929999999999999" cy="0.1894" r="1.18391">
+      <stop offset="0" stop-color="#FFE9CC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_4" cx="0.9457" cy="0.8974" r="1.2294100000000001">
+      <stop offset="0" stop-color="#FFE9CC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_5" cx="0.0109" cy="0.0359" r="1.28583">
+      <stop offset="0" stop-color="#FFE9CC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.2001713216304779,0,0,0.23415836691856384,-25.400000000000006,-40.05" cx="21.7373" cy="24.2502" r="17.4638" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#663B00" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_3-.13059644401073456,0,0,0.11829166114330292,-4.300000000000011,-5.5" cx="11.716" cy="7.6394" r="25.99" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE9CC" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <path id="ID0.6994185303337872" fill="#00FFFF" stroke="#000000" stroke-width="1.000015311822754" d="M 0.6627 0.6856 L 47.5029 0.6856 L 47.5029 44.6533 L 0.6627 44.6533 L 0.6627 0.6856 Z "/>
+  <g id="ID0.6055448846891522">
+    <path id="ID0.8069424303248525" fill="url(#grad_1-.2001713216304779,0,0,0.23415836691856384,-25.400000000000006,-40.05)" stroke="none" stroke-linecap="round" d="M 19.5385 19.6604 L 28.1959 19.6604 L 28.2259 41.6244 L 27.5853 42.1747 L 25.9239 42.725 L 23.8421 42.9708 L 21.4301 42.7016 L 19.9788 42.0576 L 19.5585 41.32 L 19.5385 19.6604 Z " stroke-width="0.2178287157392948"/>
+    <g id="ID0.18478647898882627">
+      <path id="ID0.9784005633555353" fill="none" stroke="url(#grad_2)" stroke-width="1.8989547807790645" d="M 7.7885 19.0359 L 7.7513 3.7441 L 39.9771 3.6724 L 40.6243 4.3818 L 40.6243 19.645 L 8.4878 19.645 L 7.7885 19.0359 Z "/>
+      <path id="ID0.060687479097396135" fill="none" stroke="#666666" stroke-width="1.9060118347406387" stroke-linecap="round" d="M 32.9864 15.2993 L 32.9864 9.8745 "/>
+      <path id="ID0.12123426608741283" fill="url(#grad_3-.13059644401073456,0,0,0.11829166114330292,-4.300000000000011,-5.5)" stroke="url(#grad_4)" stroke-width="1.8689406576942804" d="M 9.0861 5.2645 L 38.5356 5.2645 L 38.5356 17.8035 L 9.0861 17.8035 L 9.0861 5.2645 Z "/>
+      <path id="ID0.9784005633555353" fill="none" stroke="url(#grad_5)" stroke-width="1.8989547807790645" d="M 7.7378 3.6818 L 39.8743 3.6818 L 39.8743 18.945 L 7.7378 18.945 L 7.7378 3.6818 Z "/>
+      <text id="ID0.3322071945294738" fill="#666666" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.420931 0 0 0.420931 10.1419 4.13721)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Exit</tspan></text>
+      <text id="ID0.3322071945294738" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.420931 0 0 0.420931 9.64186 3.98721)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Exit</tspan></text>
+      <path id="ID0.34304957557469606" fill="none" stroke="#666666" stroke-width="1.9060118347406387" stroke-linecap="round" d="M 29.9545 11.8512 L 32.8868 8.4057 L 36.0391 11.558 "/>
+      <path id="ID0.060687479097396135" fill="none" stroke="#000000" stroke-width="1.9060118347406387" stroke-linecap="round" d="M 32.4864 15.0993 L 32.4864 9.6745 "/>
+      <path id="ID0.34304957557469606" fill="none" stroke="#000000" stroke-width="1.9060118347406387" stroke-linecap="round" d="M 29.3545 11.7012 L 32.2868 8.2557 L 35.4391 11.408 "/>
+    </g>
+  </g>
+</svg>

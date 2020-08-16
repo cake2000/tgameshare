@@ -85,6 +85,7 @@ function getOneProject(s) {
     }
     let projectid = backs.substring(0, ind+1).trim();
     console.log("projectid " + projectid + ""); 
+    if (projectid.length < 6) return "";
 
     downloadFile("https://projects.scratch.mit.edu/" + projectid, "/home/binyu/dev/tgameshare/scratchstorage/projects/"+projectid);
     const fcontent = fs.readFileSync("/home/binyu/dev/tgameshare/scratchstorage/projects/"+projectid, 'utf8');
@@ -164,7 +165,7 @@ async function init() {
         // console.log("\n\n\n" + fn);
         console.log("next file " + i + " " + fn + " " + fn.indexOf("flappybird"));
         if (fn.indexOf("maze") < 0) {
-            continue;
+            // continue;
         }
         if (fn.indexOf("-") > 0) {
             fn = fn.substring(0, fn.indexOf("-"));

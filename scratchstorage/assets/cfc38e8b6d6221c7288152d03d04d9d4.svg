@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="559.1654550624752" height="333.5506784511471" viewBox="0.6629694902467547 0.1986807786989031 559.1654550624752 333.5506784511471">
+  <defs>
+    <radialGradient id="grad_1" cx="0.5036" cy="0.49420000000000003" r="0.6575399999999999">
+      <stop offset="0" stop-color="#000000" stop-opacity="1"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.4902" cy="0.9947" r="1.29311">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.4819" cy="0.0103" r="1.28661">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.020742654800415,0,0,3.2514922618865967,-450.45,-232.15" cx="282.2361" cy="130.8185" r="291.0739" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000000" stop-opacity="1"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient><radialGradient id="grad_3-.180688738822937,0,0,1.4545893669128418,-8.95,-37.4" cx="269.5654" cy="32.6124" r="549.7794" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <path id="ID0.9176602242514491" fill="url(#grad_1-.020742654800415,0,0,3.2514922618865967,-450.45,-232.15)" stroke="url(#grad_2)" stroke-width="6.276478011693991" d="M 279.8145 26.3436 C 360.0304 25.7486 459.5034 -26.285 520.7188 28.132 C 574.1346 78.6504 559.6561 214.3254 531.2914 256.5493 C 513.4418 283.0945 466.6898 190.4432 427.6799 170.8725 C 380.2693 147.0845 327.5785 126.9481 275.5855 128.6031 C 216.3367 130.4922 158.1028 154.4362 104.6115 181.9275 C 74.3557 197.4794 39.5145 280.3242 28.3377 255.5738 C 5.658 205.322 -16.5626 78.4065 36.6448 29.1074 C 98.5549 -26.5256 198.8798 26.9452 279.8145 26.3436 Z "/>
+  <path id="ID0.8883960330858827" fill="url(#grad_3-.180688738822937,0,0,1.4545893669128418,-8.95,-37.4)" stroke="none" d="M 38.2775 29.5111 L 518.2275 29.5111 L 518.2275 330.6111 L 38.2775 330.6111 L 38.2775 29.5111 Z " stroke-width="1.3247369784827476"/>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="61.346679262915245" height="27.492875628271694" viewBox="-0.698337342639265 -0.5376373492673014 61.346679262915245 27.492875628271694">
+  <defs>
+    <radialGradient id="grad_1" cx="0.7666" cy="0.14279999999999998" r="1.11436">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.7666" cy="0.11810000000000001" r="1.14647">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.1103" cy="0.174" r="1.15661">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_4" cx="0.1103" cy="0.1444" r="1.15661">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_5" cx="0.354" cy="0.2097" r="1.02739">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_6" cx="0.354" cy="0.19510000000000002" r="1.04637">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_7" cx="0.3968" cy="0.4839" r="0.78416">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#7F7F7F" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_8" cx="0.3492" cy="0.4839" r="0.84604">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#7F7F7F" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_9" cx="0.9354" cy="0.47229999999999994" r="1.21602">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad_10" cx="0.9765" cy="0.47229999999999994" r="1.26945">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.0004505401011556387,-0.698337197303772,0.698337197303772,0.0004505401011556387,3.3000000000000114,27.900000000000006" cx="18.0556" cy="8.3737" r="16.3858" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_3-.9594146609306335,0,0,0.9603174328804016,-196,-153.75" cx="29.2485" cy="9.4089" r="24.0168" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_5-,0,0,1,-207.95,-167.1" cx="56.0417" cy="10.68" r="7.4323" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#99B2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_7-,0,0,1.3985764980316162,-194.7,-236.5" cx="16.4114" cy="12.7608" r="8.9462" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#7F7F7F" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_9-,0,0,1.2606853246688843,-177.85,-194.3" cx="15.0132" cy="12.4859" r="25.6269" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.472738787997514">
+    <path id="Fill" fill="url(#grad_1-.0004505401011556387,-0.698337197303772,0.698337197303772,0.0004505401011556387,3.3000000000000114,27.900000000000006)" stroke="url(#grad_2)" stroke-width="1.39667468527853" d="M 16.4384 12.9641 C 16.4512 10.3502 16.4613 7.7105 16.9323 5.143 C 17.0228 4.4964 17.3428 4.1858 17.9454 4.3406 C 20.3556 4.9601 23.0328 5.4214 24.8921 7.0686 C 26.5476 8.5431 27.7563 10.8959 27.7513 13.1459 C 27.7792 15.3429 26.6401 17.6858 24.9541 19.1498 C 23.0515 20.7988 20.2894 21.0896 17.8294 21.6942 C 17.212 21.8313 16.9886 21.7362 16.8871 21.0651 C 16.4607 18.3985 16.4255 15.6666 16.4384 12.9641 Z "/>
+    <path id="ID0.25581852719187737" fill="url(#grad_3-.9594146609306335,0,0,0.9603174328804016,-196,-153.75)" stroke="url(#grad_4)" stroke-width="0.9598661530397473" stroke-linecap="round" d="M 26.2484 7.4873 L 53.4478 9.0718 L 53.3998 17.0425 L 26.2964 18.5309 L 26.2484 7.4873 Z "/>
+    <path id="ID0.08080003643408418" fill="url(#grad_5-,0,0,1,-207.95,-167.1)" stroke="url(#grad_6)" stroke-width="1" stroke-linecap="round" d="M 53.9 8.95 L 59.95 9.2 L 59.95 16.9 L 53.9 17.2 L 53.9 8.95 Z "/>
+    <path id="Button" fill="#231F20" d="M 32.2784 12.1537 L 32.2796 10.3562 L 38.4773 10.3602 L 38.4761 12.1577 L 32.2784 12.1537 Z " stroke-width="0.698337342639265"/>
+    <path id="ID0.07518937904387712" fill="url(#grad_7-,0,0,1.3985764980316162,-194.7,-236.5)" stroke="url(#grad_8)" stroke-linecap="round" d="M 17.45 4.6146 C 17.362 3.1978 16.635 4.244 16.5 4.6845 C 15.966 6.4299 15.855 8.3893 15.7 10.2788 C 15.552 12.0816 15.522 13.8983 15.6 15.7333 C 15.723 17.6409 15.752 19.6675 16.3 21.4674 C 16.45 21.9597 17.355 22.866 17.45 21.4674 C 17.829 15.8731 17.758 10.1977 17.45 4.6146 Z " stroke-width="1.21573356884771"/>
+    <path id="ID0.7630628109909594" fill="url(#grad_9-,0,0,1.2606853246688843,-177.85,-194.3)" stroke="url(#grad_10)" stroke-linecap="round" d="M 0 0.1607 L 16.05 4.0688 L 15.95 21.9706 L 0 26.2569 L 0 0.1607 Z " stroke-width="1.1378329156417233"/>
+  </g>
+</svg>

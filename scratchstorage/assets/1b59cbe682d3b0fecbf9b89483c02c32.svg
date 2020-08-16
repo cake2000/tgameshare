@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="103.72779846191406" height="31.74020004272461" viewBox="1.8482999801635742 -0.29610002040863037 103.72779846191406 31.74020004272461">
+  <defs>
+    <radialGradient id="grad_1" cx="0.34159999999999996" cy="0.5353" r="0.8559200000000001">
+      <stop offset="0" stop-color="#CC7700" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FF9400" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.2515" cy="0.4075" r="0.9730500000000001">
+      <stop offset="0" stop-color="#CC7700" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FF9400" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.2934" cy="0.4227" r="0.9185800000000001">
+      <stop offset="0" stop-color="#003FFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-,0,0,1,-185.2,-295.9" cx="13.6482" cy="24.3721" r="10.8228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CC7700" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FF9400" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_3-.9806549549102783,-0.1957443654537201,0.1957443654537201,0.9806549549102783,-240.75,-236" cx="43.3701" cy="17.7425" r="57.2599" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#003FFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#0033CC" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.1881810836493969">
+    <path id="ID0.9101240211166441" fill="#000000" stroke="#000000" stroke-width="1.204268537299194" stroke-linecap="round" d="M 2.8483 28.5537 L 10.7811 23.7771 L 11.5923 29.1365 L 2.8483 28.5537 Z "/>
+    <path id="ID0.5389971425756812" fill="url(#grad_1-,0,0,1,-185.2,-295.9)" stroke="url(#grad_2)" stroke-width="2" stroke-linecap="round" d="M 17.8 18.35 L 8.9 24.4 L 9.9 28.15 L 19.55 29.6 L 22.8 26.35 L 21.55 20.35 L 17.8 18.35 Z "/>
+    <path id="ID0.6500821742229164" fill="url(#grad_3-.9806549549102783,-0.1957443654537201,0.1957443654537201,0.9806549549102783,-240.75,-236)" stroke="none" stroke-linecap="round" d="M 20.35 20.7072 L 17.4585 17.4603 L 99.3629 0.7039 L 103.1174 3.6764 L 104.5761 9.9625 L 102.6234 13.4624 L 19.8462 30.4441 L 21.603 26.2185 L 20.35 20.7072 Z " stroke-width="0.9999999985984798"/>
+    <path id="ID0.28959078807383776" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 20.3 20.6 L 102.55 4.35 "/>
+    <path id="ID0.18150450848042965" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 103.9 9.5 L 21.5 25.9 "/>
+  </g>
+</svg>

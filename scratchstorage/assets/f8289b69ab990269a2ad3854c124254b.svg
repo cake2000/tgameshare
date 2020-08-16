@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="65.9756851196289" height="29.257427215576172" viewBox="0.7733380794525146 -0.9229271411895752 65.9756851196289 29.257427215576172">
+  <defs>
+    <radialGradient id="grad_1" cx="0.3025" cy="0.2833" r="0.93171">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.0039154291152954,0,0,0.2947036027908325,-105.25,-35.35000000000002" cx="20.9285" cy="10.7156" r="50.5551" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.35917876195162535">
+    <path id="ID0.7366980100050569" fill="url(#grad_1-.0039154291152954,0,0,0.2947036027908325,-105.25,-35.35000000000002)" stroke="#000000" stroke-width="0.7398298460840994" stroke-linecap="round" d="M 33.8927 3.9487 C 44.222 4.1527 51.923 7.359 61.2494 8.5166 C 63.5805 8.806 64.5312 7.9031 64.9639 8.7229 C 66.1585 12.0036 66.9908 15.3785 65.265 18.6397 C 64.0383 20.9575 61.7302 23.4752 56.019 25.1397 C 50.3077 26.8042 42.4209 27.8345 33.717 27.8345 C 25.013 27.8345 17.1263 26.8042 11.415 25.1397 C 5.7037 23.4752 3.4449 20.9552 2.169 18.6397 C 0.4472 15.5153 1.5616 12.3372 2.5705 9.2239 C 2.8476 8.4306 3.3606 8.4374 5.6325 8.1188 C 14.7179 6.8442 23.3295 4.0032 33.8927 3.9487 Z "/>
+    <path id="ID0.7366980100050569" fill="#FFFFFF" stroke="#000000" stroke-width="0.7398298460840994" stroke-linecap="round" d="M 33.917 0.6949 C 42.6209 0.6949 50.5077 1.7252 56.219 3.3897 C 61.9302 5.0542 65.465 7.3529 65.465 9.8897 C 65.465 12.4265 61.9302 14.7252 56.219 16.3897 C 50.5077 18.0542 42.6209 19.0845 33.917 19.0845 C 25.213 19.0845 17.3263 18.0542 11.615 16.3897 C 5.9037 14.7252 2.369 12.4265 2.369 9.8897 C 2.369 7.3529 5.9037 5.0542 11.615 3.3897 C 17.3263 1.7252 25.213 0.6949 33.917 0.6949 Z "/>
+    <text id="ID0.8532821531407535" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.679376 0 0 0.199025 27.8588 -0.597074)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">N</tspan></text>
+    <text id="ID0.8532821531407535" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.679376 0 0 0.199025 28.6588 13.1529)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">S</tspan></text>
+    <path id="ID0.3161723455414176" fill="#FF0000" stroke="#000000" stroke-width="0.6099350183768568" stroke-linecap="round" d="M 33.7534 11.8204 L 23.9855 15.7005 L 33.5051 5.091 L 43.6869 15.6398 L 33.7534 11.8204 Z "/>
+    <text id="ID0.8532821531407535" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.679376 0 0 0.199025 53.4088 6.15293)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">E</tspan></text>
+    <text id="ID0.8532821531407535" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.679376 0 0 0.199025 5.10875 6.15293)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">W</tspan></text>
+  </g>
+</svg>

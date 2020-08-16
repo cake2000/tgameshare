@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="486.36526732688606" height="364.40515380149543" viewBox="-0.5826790583405028 0.8580205189910401 486.36526732688606 364.40515380149543">
+  <defs>
+    <radialGradient id="grad_1" cx="0.2865" cy="0.325" r="0.92755">
+      <stop offset="0" stop-color="#E5E5E5" stop-opacity="1"/>
+      <stop offset="1" stop-color="#B2B2B2" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.022000000000000002" cy="0.0359" r="1.2714">
+      <stop offset="0" stop-color="#E5E5E5" stop-opacity="1"/>
+      <stop offset="1" stop-color="#7F7F7F" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.6300618648529053,0,0,4.46324348449707,-487.95,-368.15" cx="142.2351" cy="122.1373" r="403.3583" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E5E5E5" stop-opacity="1"/>
+      <stop offset="1" stop-color="#B2B2B2" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <path id="ID0.9228970566764474" fill="url(#grad_1-.6300618648529053,0,0,4.46324348449707,-487.95,-368.15)" stroke="url(#grad_2)" stroke-width="16.27215819602671" d="M 7.5534 8.9941 L 477.6465 8.9941 L 477.6465 357.1271 L 7.5534 357.1271 L 7.5534 8.9941 Z "/>
+  <text id="ID0.8420086605474353" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1 0 0 1 21.75 17.35)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Options</tspan></text>
+  <text id="ID0.8420086605474353" fill="#666666" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1 0 0 1 20.75 16.25)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Options</tspan></text>
+  <text id="ID0.600571621209383" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1 0 0 1 121.5 205.65)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Select Player Character</tspan></text>
+  <text id="ID0.5348935658112168" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1 0 0 1 177 240.15)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">SFX</tspan></text>
+  <text id="ID0.19164826814085245" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1 0 0 1 160.5 280.15)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Music</tspan></text>
+  <text id="ID0.9320061448961496" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(1.11791 0 0 1.11791 56.2358 244.346)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Volume</tspan><tspan x="0" style="white-space: pre" dy="1.13em">Control</tspan></text>
+  <g id="ID0.21102356538176537">
+    <path id="ID0.10142800211906433" fill="#E5E5E5" stroke="#E5E5E5" d="M 243.4243 270.1057 L 243.0031 246.2373 L 443.1709 247.1154 L 443.0129 269.7066 L 243.4243 270.1057 Z " stroke-width="1.3523503461266901"/>
+    <path id="ID0.10142800211906433" fill="#0033CC" stroke="none" d="M 242.9534 270.2242 L 442.9534 247.0742 L 442.9534 270.2242 L 242.9534 270.2242 Z " stroke-width="1.3428202083478074"/>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 240.46 232.71)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">0</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 433.56 232.61)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">100</tspan></text>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 243.05 246.3 L 243.05 269.8 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 283.15 246.1 L 283.15 269.6 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 322.95 246.1 L 322.95 269.6 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 363.05 246.1 L 363.05 269.6 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 403 246.05 L 403 269.55 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 443.05 246.1 L 443.05 269.6 "/>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 397.21 232.91)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">80</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 357.46 232.71)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">60</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 317.36 232.66)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">40</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 277.21 232.71)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">20</tspan></text>
+  </g>
+  <g id="ID0.21102356538176537">
+    <path id="ID0.10142800211906433" fill="#E5E5E5" stroke="#E5E5E5" d="M 243.5743 310.7057 L 243.1531 286.8373 L 443.3209 287.7154 L 443.1629 310.3066 L 243.5743 310.7057 Z " stroke-width="1.3523503461266901"/>
+    <path id="ID0.10142800211906433" fill="#0033CC" stroke="none" d="M 243.1034 310.9242 L 443.1034 287.7742 L 443.1034 310.9242 L 243.1034 310.9242 Z " stroke-width="1.3428202083478074"/>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 240.61 273.31)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">0</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 433.71 273.21)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">100</tspan></text>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 243.2 286.9 L 243.2 310.4 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 283.3 286.7 L 283.3 310.2 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 323.1 286.7 L 323.1 310.2 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 363.2 286.7 L 363.2 310.2 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 403.15 286.65 L 403.15 310.15 "/>
+    <path id="ID0.16006950847804546" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 443.2 286.75 L 443.2 310.25 "/>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 397.36 273.46)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">80</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 357.61 273.31)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">60</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 317.51 273.21)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">40</tspan></text>
+    <text id="ID0.2961477115750313" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.480069 0 0 0.480069 277.36 273.31)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">20</tspan></text>
+  </g>
+  <text id="ID0.6343667204491794" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.622575 0 0 0.622575 39.4951 320.182)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">In-game Resolution Controls   1:Low 2:Medium 3:High (Default)</tspan></text>
+  <text id="ID0.6461453335359693" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.534497 0 0 0.534497 111.269 28.7465)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Game Paused</tspan></text>
+  <text id="ID0.4123475872911513" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.45874 0 0 0.45874 364.667 158.674)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">Use space key to </tspan><tspan x="0" style="white-space: pre" dy="1.13em">pick up objects</tspan></text>
+  <text id="ID0.4123475872911513" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.45874 0 0 0.45874 365.167 186.324)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">0 (zero) to toggle FP</tspan></text>
+</svg>

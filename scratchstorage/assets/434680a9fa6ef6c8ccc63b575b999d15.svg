@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="54.34911346435547" height="25.299999237060547" viewBox="0.0221480131149292 0.3500000238418579 54.34911346435547 25.299999237060547">
+  <defs>
+    <radialGradient id="grad_1" cx="0.5045000000000001" cy="0.47609999999999997" r="0.68107">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.5045000000000001" cy="0.47609999999999997" r="0.68107">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-,0,0,1,-218.55,-159.85" cx="27.4368" cy="14.7684" r="27.4075" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_2-,0,0,1,-218.5,-165.15" cx="27.4863" cy="9.8959" r="26.8883" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFF99" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CC7700" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.5196061790920794">
+    <path id="ID0.22109504276886582" fill="url(#grad_1-,0,0,1,-218.55,-159.85)" stroke="#000000" stroke-linecap="round" d="M 27.2 6.15 C 35.074 6.172 43.545 4.346 51.05 7.1 C 53.805 8.059 54.399 12.738 53.45 15.65 C 52.393 18.881 50.12 20.787 45.757 22.366 C 40.724 24.187 34.442 25.15 27.2 25.15 C 19.958 25.15 13.395 24.085 8.643 22.366 C 3.891 20.646 1.976 18.89 0.95 15.65 C 0.003 12.644 0.54 7.749 3.45 6.7 C 10.89 4.003 19.289 6.128 27.2 6.15 Z " stroke-width="1"/>
+    <path id="ID0.22109504276886582" fill="url(#grad_2-,0,0,1,-218.5,-165.15)" stroke="#000000" d="M 27.25 0.85 C 34.492 0.85 41.055 1.915 45.807 3.634 C 50.559 5.354 53.5 7.729 53.5 10.35 C 53.5 12.971 50.559 15.346 45.807 17.066 C 41.055 18.785 34.492 19.85 27.25 19.85 C 20.008 19.85 13.445 18.785 8.693 17.066 C 3.941 15.346 1 12.971 1 10.35 C 1 7.729 3.941 5.354 8.693 3.634 C 13.445 1.915 20.008 0.85 27.25 0.85 Z " stroke-width="1"/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 4.15 15.65 L 4.15 19.65 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 6.45 16.9 L 6.45 20.9 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 9.95 18.1 L 9.95 22.1 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 13.6 19.15 L 13.6 23.15 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 17.35 19.65 L 17.35 23.65 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 21.25 20.35 L 21.25 24.35 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 25.45 20.4 L 25.45 24.4 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 29.5 20.25 L 29.5 24.25 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 2.4 13.95 L 2.4 17.95 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 33.45 20.1 L 33.45 24.1 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 37.5 19.65 L 37.5 23.65 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 41.25 19.15 L 41.25 23.15 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 44.7 17.9 L 44.7 21.9 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 47.95 16.6 L 47.95 20.6 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 50.25 15.6 L 50.25 19.6 "/>
+    <path id="ID0.3292710706591606" fill="none" stroke="#000000" stroke-width="1" stroke-linecap="round" d="M 52.1 13.7 L 52.1 17.7 "/>
+  </g>
+</svg>

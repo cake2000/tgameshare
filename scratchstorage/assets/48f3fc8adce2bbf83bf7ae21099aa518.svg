@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="32.73720704876971" height="11.70402204358172" viewBox="0.028746667685153215 -1.0228348640779235 32.73720704876971 11.70402204358172">
+  <defs>
+    <radialGradient id="grad_1" cx="0.4058" cy="0.8484999999999999" r="1.10305">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_2" cx="0.4058" cy="0.9573" r="1.2444899999999999">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_3" cx="0.4058" cy="0.8484999999999999" r="1.10305">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_4" cx="0.4058" cy="0.9573" r="1.2444899999999999">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="grad_5" cx="0.2761" cy="0.3503" r="0.94107">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient>
+  <radialGradient id="grad_1-.011600928381085396,0,0,0.16470588743686676,28.30000000000001,-24.25" cx="31.1728" cy="7.8103" r="13.4776" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_3-.019448615610599518,0,0,0.08382353186607361,-3.0500000000000114,-9.5" cx="1.7662" cy="6.8164" r="7.0239" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#666666" stop-opacity="1"/>
+      <stop offset="1" stop-color="#CCCCCC" stop-opacity="1"/>
+    </radialGradient><radialGradient id="grad_5-.3608018159866333,0,0,1,-310.55,-174" cx="10.1325" cy="4.8024" r="18.8254" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF9400" stop-opacity="1"/>
+      <stop offset="1" stop-color="#995900" stop-opacity="1"/>
+    </radialGradient></defs>
+  <!-- Exported by Scratch - http://scratch.mit.edu/ -->
+  <g id="ID0.22962855314835906">
+    <path id="ID0.12529345648363233" fill="url(#grad_1-.011600928381085396,0,0,0.16470588743686676,28.30000000000001,-24.25)" stroke="url(#grad_2)" stroke-width="0.2335063634921708" d="M 30.4926 3.3382 L 32.1689 3.3382 L 32.1689 8.6088 L 30.4926 8.6088 L 30.4926 3.3382 Z "/>
+    <path id="ID0.12529345648363233" fill="url(#grad_3-.019448615610599518,0,0,0.08382353186607361,-3.0500000000000114,-9.5)" stroke="url(#grad_4)" stroke-width="0.12169332885307652" d="M 0.6258 4.5404 L 3.4361 4.5404 L 3.4361 7.2228 L 0.6258 7.2228 L 0.6258 4.5404 Z "/>
+    <path id="ID0.21284186467528343" fill="url(#grad_5-.3608018159866333,0,0,1,-310.55,-174)" stroke="none" stroke-linecap="round" d="M 1.754 3.15 L 2.2983 2.35 L 3.1829 2 L 30.4669 2 L 31.5556 2.3 L 32.0999 3.2 L 32.0999 8.65 L 31.5556 9.6 L 30.4669 10 L 3.1148 10 L 2.1623 9.4 L 1.754 8.35 L 1.754 3.15 Z " stroke-width="1.1941066917140442"/>
+    <text id="ID0.4302267893217504" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.328261 0 0 0.328261 2.30652 -0.584783)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">+</tspan></text>
+    <text id="ID0.5064997910521924" fill="#000000" text-anchor="start" font-family="Sans Serif" font-size="22" transform="matrix(0.313059 0 0 0.313059 27.2761 0.310823)" stroke-width="1" alignment-baseline="text-before-edge" xml:space="preserve"><tspan x="0" style="white-space: pre" dy="1.13em">-</tspan></text>
+  </g>
+</svg>
