@@ -163,7 +163,7 @@ async function init() {
         let fn = files[i];
         // console.log("\n\n\n" + fn);
         console.log("next file " + i + " " + fn + " " + fn.indexOf("flappybird"));
-        if (fn.indexOf("balloon") < 0) {
+        if (fn.indexOf("maze") < 0) {
             continue;
         }
         if (fn.indexOf("-") > 0) {
