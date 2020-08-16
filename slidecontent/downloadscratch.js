@@ -68,17 +68,22 @@ function getOneProject(s) {
 
     let ind = s.indexOf("#PROJECTID");
     if (ind < 0) return "";
-    console.log("slen " + s.length +  " ind " + ind + " " + s.substr(ind, 160));
+    // console.log("slen " + s.length +  " ind " + ind + " " + s.substr(ind, 160));
 
     let backs = s.substring(ind+10);
     console.log("backs " + backs.substring(0, 100) + "\n\n");
 
-    ind = backs.indexOf("||");
-    let ind2 = backs.indexOf("\\n");
-    if (ind2 < ind) {
+    ind = backs.indexOf("||")-1;
+    console.log(ind);
+    let ind2 = backs.trim().indexOf("\\n");
+    console.log(ind2);
+    if (ind2 < ind && ind2 >= 0) {
         ind = ind2;
     }
-    let projectid = backs.substring(0, ind).trim();
+    if (ind < 0 && ind2 >= 0) {
+        ind = ind2;
+    }
+    let projectid = backs.substring(0, ind+1).trim();
     console.log(" projectid " + projectid + "\n \n"); 
 
     downloadFile("https://projects.scratch.mit.edu/" + projectid, "/home/binyu/dev/tgameshare/scratchstorage/projects/"+projectid);
@@ -153,15 +158,19 @@ async function init() {
     
 
     var files=fs.readdirSync("./");
-    // console.log("files " + files.length + " " + files);
-    for (let i=0; i<10; i++) {
+    console.log("files " + files.length + " " + files);
+    for (let i=0; i<files.length; i++) {
         let fn = files[i];
+        // console.log("\n\n\n" + fn);
+        console.log("next file " + i + " " + fn + " " + fn.indexOf("flappybird"));
+        if (fn.indexOf("flappybird") < 0) {
+            continue;
+        }
         if (fn.indexOf("-") > 0) {
             fn = fn.substring(0, fn.indexOf("-"));
-            console.log(i + " " + fn);
-            await sleep(60000);
-            console.log("\n\n\n" + fn);
+            // console.log(i + " " + fn);
             grab(fn);
+            // await sleep(20000);
         }
     }
 
@@ -173,3 +182,5 @@ function sleep(ms) {
         setTimeout(resolve, ms);
     });
 }   
+
+init();
