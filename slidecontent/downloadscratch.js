@@ -156,7 +156,6 @@ function grab(idroot) {
 
 
 async function init() {
-    
 
     var files=fs.readdirSync("./");
     console.log("files " + files.length + " " + files);
