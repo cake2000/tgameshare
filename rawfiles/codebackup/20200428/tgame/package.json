@@ -85,7 +85,7 @@
     "flatpickr": "^3.1.5",
     "fs": "^0.0.1-security",
     "glamor": "^2.20.40",
-    "highcharts": "^6.2.0",
+    "highcharts": "^9.0.0",
     "history": "^4.6.3",
     "howler": "^2.0.7",
     "htmlparser2": "^3.9.2",
