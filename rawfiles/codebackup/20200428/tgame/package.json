@@ -155,7 +155,7 @@
     "react-youtube": "^7.6.0",
     "reactstrap": "4.6.2",
     "screenfull": "^4.2.0",
-    "simpl-schema": "^1.5.5",
+    "simpl-schema": "^1.10.2",
     "simple-peer": "^8.5.0",
     "stripe": "^5.10.0",
     "styled-components": "^2.1.0",
