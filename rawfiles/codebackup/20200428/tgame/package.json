@@ -71,7 +71,7 @@
     "bootstrap": "^4.2.1",
     "buffer": "^5.0.8",
     "classnames": "^2.2.5",
-    "codemirror": "^5.35.0",
+    "codemirror": "^5.58.2",
     "cors": "^2.8.4",
     "css-element-queries": "^1.0.2",
     "dialogflow": "^0.11.0",
