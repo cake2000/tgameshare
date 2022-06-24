@@ -189,7 +189,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-meteor": "^5.1.0",
     "eslint-plugin-react": "^7.19.0",
-    "jsdom": "^8.0.4",
+    "jsdom": "^16.5.0",
     "mocha": "2.x.x",
     "react-addons-test-utils": "^15.0.0",
     "sinon": "1.17.x"
